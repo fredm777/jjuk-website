@@ -175,13 +175,13 @@ function checkModalIntegrity() {
 
 // --- Theme Menu ---
 const STUDIO_PRO_THEMES = [
-    { id: 'morning-green', label: 'Morning Green' },
-    { id: 'solarized-light', label: 'Solarized Light' },
+    { id: 'morning-green', label: 'Studio Green' },
+    { id: 'solarized-light', label: 'Warm Paper' },
     { id: 'divider' },
-    { id: 'dark', label: 'Dark' },
-    { id: 'solarized-dark', label: 'Solarized Dark' },
-    { id: 'synthwave-84', label: "SynthWave '84" },
-    { id: 'tomorrow-night-blue', label: 'Tomorrow Night Blue' }
+    { id: 'dark', label: 'Ocean Blue' },
+    { id: 'solarized-dark', label: 'Jade Gold' },
+    { id: 'synthwave-84', label: 'Neon Plum' },
+    { id: 'tomorrow-night-blue', label: 'Dark Midnight' }
 ];
 
 const STUDIO_PRO_THEME_STORAGE_KEY = 'st_pro_theme';

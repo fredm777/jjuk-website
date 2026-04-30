@@ -3,32 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JJUK Visual Studio | Premium Design Portfolio</title>
-    <style>
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            text-align: center;
-        }
-        h1 {
-            font-weight: 300;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-    </style>
+    <title>JJUK Visual Studio | Premium Design & Development</title>
+    <meta name="description" content="JJUK Visual Studio - 致力於提供精品級的視覺設計與網頁開發解決方案。">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>JJUK Visual Studio</h1>
-        <p>系統初始化中 | Site Initializing...</p>
-    </div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="nav-logo">JJUK</a>
+            <ul class="nav-links">
+                <li><a href="works/index.html">Works</a></li>
+                <li><a href="solutions/index.html">Solutions</a></li>
+                <li><a href="studio-pro/index.html">Studio Pro</a></li>
+                <li><a href="journals/index.html">Journals</a></li>
+                <li><a href="we/index.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-background"></div>
+            <div class="container hero-content">
+                <span class="hero-tagline">Visual Excellence</span>
+                <h1 class="hero-title">
+                    <span>Elevate Your</span>
+                    <span>Digital Presence</span>
+                </h1>
+            </div>
+        </section>
+
+        <section class="grid-menu container">
+            <div class="grid-container">
+                <a href="works/index.html" class="menu-card glass">
+                    <div>
+                        <span class="card-label">01 / Portfolio</span>
+                        <h2 class="card-title">精選作品<br>Works</h2>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </a>
+                
+                <a href="solutions/index.html" class="menu-card glass">
+                    <div>
+                        <span class="card-label">02 / Service</span>
+                        <h2 class="card-title">解決方案<br>Solutions</h2>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </a>
+
+                <a href="studio-pro/index.html" class="menu-card glass">
+                    <div>
+                        <span class="card-label">03 / Platform</span>
+                        <h2 class="card-title">專業管理<br>Studio Pro</h2>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </a>
+
+                <a href="journals/index.html" class="menu-card glass">
+                    <div>
+                        <span class="card-label">04 / Blog</span>
+                        <h2 class="card-title">設計日誌<br>Journals</h2>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="latest-works container">
+            <div class="section-header">
+                <h2 class="section-title">Latest Projects</h2>
+                <a href="works/index.html" class="view-all">View All Works —</a>
+            </div>
+            <div class="works-grid">
+                <div class="work-item">
+                    <div class="work-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800" alt="Work 1">
+                    </div>
+                    <div class="work-info">
+                        <span class="work-category">Visual Identity</span>
+                        <h3 class="work-name">Abstract Forms 01</h3>
+                    </div>
+                </div>
+                <div class="work-item">
+                    <div class="work-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800" alt="Work 2">
+                    </div>
+                    <div class="work-info">
+                        <span class="work-category">Digital Art</span>
+                        <h3 class="work-name">Neon Genesis</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

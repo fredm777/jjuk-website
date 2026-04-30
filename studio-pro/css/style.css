@@ -517,6 +517,32 @@ body {
     color: var(--primary) !important;
 }
 
+:root[data-theme] .task-display-wrapper:hover,
+:root[data-theme] .task-row-cell:hover,
+:root[data-theme] .status-item:hover,
+:root[data-theme] .status-item.active,
+:root[data-theme] .sortable-row th:hover,
+:root[data-theme] .task-autocomplete-item:hover,
+:root[data-theme] .suggestion-item:hover {
+    background: var(--bg-hover) !important;
+    color: var(--text-dark);
+}
+
+:root[data-theme] .task-header-btn:hover,
+:root[data-theme] .filter-pill:hover,
+:root[data-theme] .compact-form-row input:hover,
+:root[data-theme] .compact-form-row textarea:hover,
+:root[data-theme] .task-inline-input:hover,
+:root[data-theme] .wf-label-input:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 1px var(--primary-glow) !important;
+}
+
+:root[data-theme] .task-inline-link:hover {
+    background: color-mix(in srgb, var(--field-highlight) 68%, var(--primary) 18%) !important;
+    color: var(--text-dark) !important;
+}
+
 :root[data-theme="dark"] .nav-search-icon,
 :root[data-theme="dark"] .card-search-icon,
 :root[data-theme="dark"] .user-nav-btn svg,
@@ -4358,7 +4384,7 @@ input[type="date"].task-inline-input {
 }
 
 .task-display-wrapper:hover {
-    background-color: rgba(0, 200, 0, 0.05);
+    background-color: var(--bg-hover);
 }
 
 .task-display-text {
@@ -4581,6 +4607,21 @@ input[type="date"].task-inline-input {
     :root[data-theme="tomorrow-night-blue"] .task-item:hover,
     :root[data-theme="tomorrow-night-blue"] #taskList.is-draggable .task-item:hover {
         background: var(--surface-soft) !important;
+    }
+
+    :root[data-theme="dark"] .task-display-wrapper:hover,
+    :root[data-theme="solarized-dark"] .task-display-wrapper:hover,
+    :root[data-theme="synthwave-84"] .task-display-wrapper:hover,
+    :root[data-theme="tomorrow-night-blue"] .task-display-wrapper:hover {
+        background: color-mix(in srgb, var(--surface-muted) 70%, var(--primary) 8%) !important;
+    }
+
+    :root[data-theme="dark"] .task-inline-link:hover,
+    :root[data-theme="solarized-dark"] .task-inline-link:hover,
+    :root[data-theme="synthwave-84"] .task-inline-link:hover,
+    :root[data-theme="tomorrow-night-blue"] .task-inline-link:hover {
+        background: color-mix(in srgb, var(--surface-muted) 62%, var(--primary) 18%) !important;
+        color: var(--text-dark) !important;
     }
 
     :root[data-theme="dark"] .task-item.is-completed .task-inline-input,

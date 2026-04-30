@@ -173,6 +173,103 @@ function checkModalIntegrity() {
     }
 }
 
+// --- Theme Menu ---
+const STUDIO_PRO_THEMES = [
+    { id: 'morning-green', label: 'Morning Green' },
+    { id: 'solarized-light', label: 'Solarized Light' },
+    { id: 'divider' },
+    { id: 'dark', label: 'Dark' },
+    { id: 'solarized-dark', label: 'Solarized Dark' },
+    { id: 'synthwave-84', label: "SynthWave '84" },
+    { id: 'tomorrow-night-blue', label: 'Tomorrow Night Blue' }
+];
+
+const STUDIO_PRO_THEME_STORAGE_KEY = 'st_pro_theme';
+let lastPointerPosition = { x: 24, y: 24 };
+
+function applyStudioProTheme(themeId) {
+    const theme = STUDIO_PRO_THEMES.find(item => item.id === themeId && item.label);
+    const nextTheme = theme ? theme.id : 'morning-green';
+
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem(STUDIO_PRO_THEME_STORAGE_KEY, nextTheme);
+
+    document.querySelectorAll('.theme-menu button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === nextTheme);
+    });
+}
+
+function initThemeMenu() {
+    if (document.getElementById('themeMenu')) {
+        applyStudioProTheme(localStorage.getItem(STUDIO_PRO_THEME_STORAGE_KEY));
+        return;
+    }
+
+    const menu = document.createElement('div');
+    menu.id = 'themeMenu';
+    menu.className = 'theme-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', 'Color theme');
+
+    STUDIO_PRO_THEMES.forEach(theme => {
+        if (theme.id === 'divider') {
+            const divider = document.createElement('div');
+            divider.className = 'theme-menu-divider';
+            menu.appendChild(divider);
+            return;
+        }
+
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.dataset.theme = theme.id;
+        item.textContent = theme.label;
+        item.setAttribute('role', 'menuitem');
+        item.addEventListener('click', () => {
+            applyStudioProTheme(theme.id);
+            window.toggleThemeMenu(false);
+        });
+        menu.appendChild(item);
+    });
+
+    document.body.appendChild(menu);
+    applyStudioProTheme(localStorage.getItem(STUDIO_PRO_THEME_STORAGE_KEY));
+
+    document.addEventListener('pointermove', (e) => {
+        lastPointerPosition = { x: e.clientX, y: e.clientY };
+    }, { passive: true });
+
+    document.addEventListener('mousedown', (e) => {
+        if (!menu.classList.contains('active')) return;
+        if (!menu.contains(e.target)) window.toggleThemeMenu(false);
+    });
+}
+
+window.toggleThemeMenu = function(forceOpen = null) {
+    const menu = document.getElementById('themeMenu');
+    if (!menu) return;
+
+    const shouldOpen = forceOpen === null ? !menu.classList.contains('active') : forceOpen;
+    menu.classList.toggle('active', shouldOpen);
+
+    if (shouldOpen) {
+        const gap = 10;
+        const menuRect = menu.getBoundingClientRect();
+        const left = Math.min(
+            Math.max(gap, lastPointerPosition.x + gap),
+            window.innerWidth - menuRect.width - gap
+        );
+        const top = Math.min(
+            Math.max(gap, lastPointerPosition.y + gap),
+            window.innerHeight - menuRect.height - gap
+        );
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+
+        const activeItem = menu.querySelector('button.active') || menu.querySelector('button');
+        if (activeItem) activeItem.focus({ preventScroll: true });
+    }
+};
+
 // --- Print Utilities ---
 window.addEventListener('beforeprint', () => {
     // Auto-expand all textareas inside the quotation print area so they don't get cropped
@@ -212,6 +309,7 @@ function handleInitialHash() {
 
 // Global initialization
 window.addEventListener('DOMContentLoaded', () => {
+    initThemeMenu();
     handleInitialHash();
 });
 

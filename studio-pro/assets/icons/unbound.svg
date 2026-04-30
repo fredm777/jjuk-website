@@ -5,7 +5,6 @@
 <style type="text/css">
 	.st0{fill:none;stroke:#667A8E;stroke-width:2.0874;stroke-miterlimit:10;}
 	.st1{fill:none;stroke:#667A8E;stroke-width:2.0874;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
-	.st2{fill:none;stroke:#667A8E;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
 </style>
 <g>
 	<g>
@@ -15,9 +14,5 @@
 			<line class="st1" x1="14.4" y1="9.6" x2="9.6" y2="14.4"/>
 		</g>
 	</g>
-</g>
-<g>
-	<rect x="-5.6" y="40.9" class="st2" width="9.2" height="9.2"/>
-	<polyline class="st2" points="4.2,46.3 7.4,46.3 7.4,37.1 -1.8,37.1 -1.8,40.3 	"/>
 </g>
 </svg>

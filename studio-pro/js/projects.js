@@ -10,24 +10,24 @@ window.projectSortField = 'date';
 window.projectSortOrder = 'desc';
 // Initialize from cache or default to All (Pending + Ongoing + Completed)
 const cachedProjFilters = typeof getCache === 'function' ? getCache('projectStatusFilters') : null;
-window.projectStatusFilters = cachedProjFilters || ['1', '2', '3']; 
+window.projectStatusFilters = cachedProjFilters || ['1', '2', '3'];
 window.projectSearchQuery = '';
 
 /**
  * Dynamic Print Configuration
  * Updates the @page size and orientation based on UI selection
  */
-window.updatePrintConfig = function() {
+window.updatePrintConfig = function () {
     const size = document.getElementById('printPaperSize')?.value || 'A4';
     const orientation = document.getElementById('printOrientation')?.value || 'portrait';
-    
+
     let styleEl = document.getElementById('dynamicPrintConfig');
     if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'dynamicPrintConfig';
         document.head.appendChild(styleEl);
     }
-    
+
     // Inject dynamic @page rule
     styleEl.innerHTML = `
         @media print {
@@ -43,9 +43,9 @@ window.updatePrintConfig = function() {
 /**
  * Project Filtering System
  */
-window.setProjectStatusFilter = function(status) {
+window.setProjectStatusFilter = function (status) {
     if (!window.projectStatusFilters) window.projectStatusFilters = [];
-    
+
     const idx = window.projectStatusFilters.indexOf(status);
     if (idx > -1) {
         // Toggle off
@@ -54,13 +54,13 @@ window.setProjectStatusFilter = function(status) {
         // Toggle on
         window.projectStatusFilters.push(status);
     }
-    
+
     // Save to cache
     if (typeof setCache === 'function') setCache('projectStatusFilters', window.projectStatusFilters);
-    
+
     // Update UI highlights for 3 pills based on inclusion
     window.updateProjectFilterUI();
-    
+
     window.projectPage = 1;
     window.renderProjects();
 };
@@ -68,7 +68,7 @@ window.setProjectStatusFilter = function(status) {
 /**
  * Toggle Project Sorting
  */
-window.toggleProjectSort = function(field) {
+window.toggleProjectSort = function (field) {
     if (window.projectSortField === field) {
         // Toggle order
         window.projectSortOrder = (window.projectSortOrder === 'asc') ? 'desc' : 'asc';
@@ -82,7 +82,7 @@ window.toggleProjectSort = function(field) {
             window.projectSortOrder = 'asc';
         }
     }
-    
+
     window.projectPage = 1;
     window.renderProjects();
 };
@@ -90,14 +90,14 @@ window.toggleProjectSort = function(field) {
 /**
  * Update Header Icons UI
  */
-window.updateProjectSortHeaderUI = function() {
+window.updateProjectSortHeaderUI = function () {
     // Clear all
     document.querySelectorAll('.sortable-header').forEach(th => {
         th.classList.remove('active', 'asc', 'desc');
         const icon = th.querySelector('.sort-icon');
         if (icon) icon.innerHTML = '';
     });
-    
+
     const activeTh = document.getElementById(`th-${window.projectSortField}`);
     if (activeTh) {
         activeTh.classList.add('active', window.projectSortOrder);
@@ -109,7 +109,7 @@ window.updateProjectSortHeaderUI = function() {
     }
 };
 
-window.updateProjectFilterUI = function() {
+window.updateProjectFilterUI = function () {
     const filters = window.projectStatusFilters || [];
     document.getElementById('projFilterPending')?.classList.toggle('active', filters.includes('1'));
     document.getElementById('projFilterOngoing')?.classList.toggle('active', filters.includes('2'));
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
 });
 
-window.fetchProjects = async function() {
+window.fetchProjects = async function () {
     if (!window.currentUser || !window.currentUser.sheetId) {
         console.warn(">> fetchProjects skipped: No valid user or sheetId found.");
         return;
@@ -163,10 +163,10 @@ window.fetchProjects = async function() {
     }
 }
 
-window.syncSingleProject = async function(projectId) {
+window.syncSingleProject = async function (projectId) {
     if (!projectId) return;
     console.log(`>> Syncing single project: ${projectId}`);
-    
+
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
@@ -175,10 +175,10 @@ window.syncSingleProject = async function(projectId) {
             body: JSON.stringify(window.buildApiPayload('get_project', { projectId }))
         });
         const json = await res.json();
-        
+
         if (json.success && json.project) {
             const newProj = json.project;
-            
+
             // 1. Update in-memory array
             if (!window.allProjects) window.allProjects = [];
             const idx = window.allProjects.findIndex(p => p.projectId === projectId);
@@ -187,12 +187,12 @@ window.syncSingleProject = async function(projectId) {
             } else {
                 window.allProjects.unshift(newProj);
             }
-            
+
             // 2. Trigger UI Render (List View)
             window.renderProjects();
-            
+
             console.log(`>> [SUCCESS] Single project sync completed: ${projectId}`);
-            
+
             // 4. If current editor is open for this project, consider refreshing it 
             // (Only if it's not currently being edited/dirty, though usually this runs after a save)
             const currentEditorId = document.getElementById('projId')?.value;
@@ -204,7 +204,7 @@ window.syncSingleProject = async function(projectId) {
                     document.getElementById('projRowIndex').value = newProj.rowIndex || '';
                 }
             }
-            
+
             return newProj;
         }
     } catch (err) {
@@ -212,7 +212,7 @@ window.syncSingleProject = async function(projectId) {
     }
 }
 
-window.renderProjects = function() {
+window.renderProjects = function () {
     const tbody = document.getElementById('projectTableBody');
     if (!tbody) return;
 
@@ -220,14 +220,14 @@ window.renderProjects = function() {
     if (loading) loading.style.display = 'none';
 
     const query = (document.getElementById('projectSearchInput')?.value || '').toLowerCase();
-    
+
     window.currentFilteredProjects = (window.allProjects || []).filter(p => {
         // Direct numeric comparison (Spreadsheet V column)
         const s = String(p.status || '');
 
         const filterArr = window.projectStatusFilters || ['1', '2'];
         const matchesStatus = (filterArr.length === 0) || filterArr.includes(s);
-        
+
         // Link with customer data for deeper search
         const cust = window.allCustomers ? window.allCustomers.find(c => String(c.customerId) === String(p.customerId)) : null;
         const custName = (cust ? (cust.companyName || cust.nickname || '') : '').toLowerCase();
@@ -235,8 +235,8 @@ window.renderProjects = function() {
         const contact = (cust?.contact || '').toLowerCase();
         const phone = (cust?.phone || '').toLowerCase();
         const email = (cust?.email || '').toLowerCase();
-        
-        const matchesQuery = !query || 
+
+        const matchesQuery = !query ||
             (p.projectName || '').toLowerCase().includes(query) ||
             (p.pic || '').toLowerCase().includes(query) ||
             custName.includes(query) ||
@@ -244,7 +244,7 @@ window.renderProjects = function() {
             contact.includes(query) ||
             phone.includes(query) ||
             email.includes(query);
-            
+
         return matchesStatus && matchesQuery;
     });
 
@@ -305,7 +305,7 @@ window.renderProjects = function() {
 
     const totalPages = Math.ceil(window.currentFilteredProjects.length / window.projectItemsPerPage);
     if (window.projectPage > totalPages) window.projectPage = totalPages || 1;
-    
+
     const start = (window.projectPage - 1) * window.projectItemsPerPage;
     const end = start + window.projectItemsPerPage;
     const pagedEntries = window.currentFilteredProjects.slice(start, end);
@@ -345,11 +345,11 @@ window.renderProjects = function() {
         };
         tbody.appendChild(tr);
     });
-    
+
     if (window.lucide) lucide.createIcons();
 }
 
-window.showQuotationEditor = async function(title, data = null) {
+window.showQuotationEditor = async function (title, data = null) {
     // Ensure settings are cached before opening so we can instantly read bank & remark data
     if (!window.sysSettingsCache && window.currentUser && window.currentUser.sheetId) {
         try {
@@ -362,7 +362,7 @@ window.showQuotationEditor = async function(title, data = null) {
             const json = await res.json();
             if (json.success) window.sysSettingsCache = json.settings;
             if (loading) loading.style.display = 'none';
-        } catch(e) {}
+        } catch (e) { }
     }
 
     // Mobile Reminder
@@ -381,7 +381,7 @@ window.showQuotationEditor = async function(title, data = null) {
     if (form) form.reset();
     if (document.getElementById('quotationTitle')) document.getElementById('quotationTitle').innerText = title;
     if (document.getElementById('quotationItemsBody')) document.getElementById('quotationItemsBody').innerHTML = '';
-    
+
     // Clear suggests & dataset
     const suggest = document.getElementById('autocompleteSuggestions');
     if (suggest) suggest.style.display = 'none';
@@ -395,7 +395,7 @@ window.showQuotationEditor = async function(title, data = null) {
         if (document.getElementById('qProjName')) document.getElementById('qProjName').value = data.projectName || '';
         if (document.getElementById('qPic')) document.getElementById('qPic').value = data.pic || '';
         if (document.getElementById('qDate')) document.getElementById('qDate').value = data.date || '';
-        
+
         if (document.getElementById('qWfDraft')) document.getElementById('qWfDraft').value = data.days || '';
         if (document.getElementById('qWfEdit')) document.getElementById('qWfEdit').value = data.revCount || '';
         if (document.getElementById('qWfOrder')) document.getElementById('qWfOrder').value = data.wfOrder || '';
@@ -404,18 +404,18 @@ window.showQuotationEditor = async function(title, data = null) {
         if (document.getElementById('qBankData')) document.getElementById('qBankData').value = data.bankData || '';
         if (document.getElementById('qWfRemark')) document.getElementById('qWfRemark').value = data.remark || '';
         if (document.getElementById('qDepositPaid')) document.getElementById('qDepositPaid').value = data.depositPaid || 0;
-        
+
         const finalStatus = String(data.status || '1');
         if (document.getElementById('projStatus')) document.getElementById('projStatus').value = finalStatus;
         if (typeof updateProjectStatusUI === 'function') updateProjectStatusUI(finalStatus);
-        
+
         if (typeof window.selectQuotationCustomer === 'function') window.selectQuotationCustomer(data.customerId, true);
-        
+
         if (window.currentUser) {
             if (window.currentUser.phone && document.getElementById('qStudioPhone')) document.getElementById('qStudioPhone').innerText = window.currentUser.phone;
             if (window.currentUser.email && document.getElementById('qStudioEmail')) document.getElementById('qStudioEmail').innerText = window.currentUser.email;
         }
-        
+
         fetchProjectItems(data.projectId);
     } else {
         // New Mode
@@ -426,7 +426,7 @@ window.showQuotationEditor = async function(title, data = null) {
         const userName = window.currentUser ? (window.currentUser.nickname || window.currentUser.username) : '';
         if (document.getElementById('qPic')) document.getElementById('qPic').value = userName;
         if (document.getElementById('qDate')) document.getElementById('qDate').value = new Date().toISOString().split('T')[0];
-        
+
         if (window.currentUser) {
             if (window.currentUser.phone && document.getElementById('qStudioPhone')) document.getElementById('qStudioPhone').innerText = window.currentUser.phone;
             if (window.currentUser.email && document.getElementById('qStudioEmail')) document.getElementById('qStudioEmail').innerText = window.currentUser.email;
@@ -452,8 +452,8 @@ window.showQuotationEditor = async function(title, data = null) {
             if (document.getElementById('qWfDelivery')) document.getElementById('qWfDelivery').value = s.wf_delivery || '';
             if (document.getElementById('qWfRemark')) document.getElementById('qWfRemark').value = s.wf_remark || '';
         }
-        
-        addQuotationRow(); 
+
+        addQuotationRow();
     }
 
     // --- GLOBAL: Sync Labels from System Settings (ALWAYS RUN) ---
@@ -466,10 +466,10 @@ window.showQuotationEditor = async function(title, data = null) {
         if (document.getElementById('qWfDeliveryLbl')) document.getElementById('qWfDeliveryLbl').innerText = s.wf_delivery_lbl || '交付內容';
         if (document.getElementById('qWfRemarkLbl')) document.getElementById('qWfRemarkLbl').innerText = s.wf_remark_lbl || '其他';
     }
-    
+
     if (window.lucide) lucide.createIcons();
     if (typeof initQuotationAutocomplete === 'function') initQuotationAutocomplete();
-    
+
     // Safety: Reset modification state after initialization to prevent ghost auto-saves
     if (quotationAutoSaveTimer) clearTimeout(quotationAutoSaveTimer);
     window.isQuotationModified = false;
@@ -501,10 +501,10 @@ window.showQuotationEditor = async function(title, data = null) {
     }, 150);
 }
 
-window.deleteProject = async function() {
+window.deleteProject = async function () {
     const projectId = document.getElementById('projId').value;
     const projName = document.getElementById('qProjName').value || '未命名專案';
-    
+
     if (!window.hasPermission('proj_d')) return Swal.fire('權限不足', '您的帳號級別無法執行刪除動作', 'error');
 
     const result = await Swal.fire({
@@ -550,7 +550,7 @@ window.deleteProject = async function() {
     }
 }
 
-window.duplicateProject = function() {
+window.duplicateProject = function () {
     // 1. Clear ID and Row Index to treat this as a NEW record
     if (document.getElementById('projRowIndex')) document.getElementById('projRowIndex').value = '';
     const newId = generateProjectId();
@@ -571,56 +571,56 @@ window.duplicateProject = function() {
     Toast.fire({ icon: 'success', title: '專案資料已複製至新表單，請點擊「儲存專案」以完成' });
 };
 
-window.updateProjectStatusUI = function(status) {
+window.updateProjectStatusUI = function (status) {
     const icon = document.getElementById('quoteStatusIcon');
     const text = document.getElementById('quoteStatusText');
     const select = document.getElementById('projStatusSelect');
     if (!text) return;
-    
+
     // Modernized configurations
     const configs = {
-        '1': { 
-            text: '待確認', 
-            icon: 'assets/icons/TBD.svg', 
+        '1': {
+            text: '待確認',
+            icon: 'assets/icons/TBD.svg',
             color: '#64748b',
             decoration: 'none'
         },
-        '2': { 
-            text: '進行中', 
-            icon: 'assets/icons/unchecked.svg', 
+        '2': {
+            text: '進行中',
+            icon: 'assets/icons/unchecked.svg',
             color: '#00C800',
             decoration: 'none'
         },
-        '3': { 
-            text: '已完成', 
-            icon: 'assets/icons/checked.svg', 
+        '3': {
+            text: '已完成',
+            icon: 'assets/icons/checked.svg',
             color: '#94a3b8',
             decoration: 'line-through'
         }
     };
 
     const cfg = configs[status] || configs['1'];
-    
+
     if (icon) icon.src = cfg.icon;
     text.innerText = cfg.text;
     text.style.color = cfg.color;
     text.style.textDecoration = cfg.decoration;
     text.style.fontWeight = (status === '3') ? '500' : '600';
-    
+
     if (select) select.value = status;
 }
 
-window.handleStatusChange = function(status) {
+window.handleStatusChange = function (status) {
     if (typeof updateProjectStatusUI === 'function') updateProjectStatusUI(status);
     window.isQuotationModified = true;
     console.log(">> Status changed to:", status, "- triggering instant sync...");
     window.handleQuotationSubmit(null, true); // Instant sync on status change
 }
 
-window.handleAddProjectTask = function() {
+window.handleAddProjectTask = function () {
     const projId = document.getElementById('projId').value;
     const rowIndex = document.getElementById('projRowIndex').value;
-    
+
     if (!rowIndex) {
         Swal.fire({
             title: '需先儲存報價單',
@@ -651,7 +651,7 @@ async function fetchProjectItems(projId) {
     const proj = (window.allProjects || []).find(p => p.projectId === projId);
     const tbody = document.getElementById('quotationItemsBody');
     if (tbody) tbody.innerHTML = '';
-    
+
     if (proj && proj.items && proj.items.length > 0) {
         proj.items.forEach(item => {
             addQuotationRow(item);
@@ -665,7 +665,7 @@ async function fetchProjectItems(projId) {
             addQuotationRow();
         }
     } else {
-        addQuotationRow(); 
+        addQuotationRow();
     }
 }
 
@@ -687,7 +687,7 @@ async function loadSettingsPreview() {
         const json = await res.json();
         if (json.success) {
             const s = json.settings;
-            
+
             // Utility to strip leading quote for UI display
             const clean = (val) => {
                 const str = String(val || '');
@@ -702,7 +702,7 @@ async function loadSettingsPreview() {
                 const brcode = clean(s.branch_code);
                 const aname = clean(s.account_name);
                 const anum = clean(s.account_num);
-                
+
                 const parts = [];
                 if (bname) parts.push(`銀行：${bname}${bcode ? ` (${bcode})` : ''}`);
                 if (bbranch) parts.push(`分行：${bbranch}${brcode ? ` (${brcode})` : ''}`);
@@ -724,16 +724,16 @@ async function loadSettingsPreview() {
                 if (vEl) vEl.value = clean(m.data);
                 if (lEl) lEl.innerText = clean(m.text) || m.def;
             });
-            
+
             if (document.getElementById('qWfDelivery')) document.getElementById('qWfDelivery').value = clean(s.wf_delivery);
             if (document.getElementById('qWfDeliveryLbl')) document.getElementById('qWfDeliveryLbl').innerText = clean(s.wf_delivery_lbl) || '交付內容說明';
-            
+
             if (document.getElementById('qWfRemark')) {
                 document.getElementById('qWfRemark').value = clean(s.wf_remark);
                 autoExpandTextarea(document.getElementById('qWfRemark'));
             }
             if (document.getElementById('qWfRemarkLbl')) document.getElementById('qWfRemarkLbl').innerText = clean(s.wf_remark_lbl) || '其他說明';
-            
+
             // Add listeners to workflow textareas
             ['qBankData', 'qWfOrder', 'qWfDeposit', 'qWfDraft', 'qWfEdit', 'qWfDelivery', 'qWfRemark'].forEach(id => {
                 const el = document.getElementById(id);
@@ -743,10 +743,10 @@ async function loadSettingsPreview() {
                 }
             });
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 
-window.autoExpandTextarea = function(el) {
+window.autoExpandTextarea = function (el) {
     if (!el) return;
     // Temporarily shrink to minimum to get true scrollHeight without previous height interference
     el.style.height = '1px';
@@ -795,7 +795,7 @@ function calcQuotation() {
     let subtotal = 0;
     const rows = document.querySelectorAll('#quotationItemsBody tr');
     rows.forEach((row, idx) => {
-        row.cells[0].innerText = idx + 1; 
+        row.cells[0].innerText = idx + 1;
         const priceField = row.querySelector('.i-price');
         const qtyField = row.querySelector('.i-qty');
         const price = priceField ? parseFloat(priceField.value) || 0 : 0;
@@ -820,7 +820,7 @@ let quotationAutoSaveTimer = null;
 /**
  * Triggers a background save with a 3-second debounce to prevent spamming GAS
  */
-window.triggerQuotationAutoSave = function() {
+window.triggerQuotationAutoSave = function () {
     window.isQuotationModified = true; // Mark as dirty
     if (quotationAutoSaveTimer) clearTimeout(quotationAutoSaveTimer);
     quotationAutoSaveTimer = setTimeout(() => {
@@ -829,7 +829,7 @@ window.triggerQuotationAutoSave = function() {
             console.log(">> Debounced Auto-save triggering...");
             window.handleQuotationSubmit(null, true);
         }
-    }, 3000); 
+    }, 3000);
 }
 
 let isSavingQuotation = false;
@@ -838,7 +838,7 @@ window.isQuotationModified = false; // Flag for unsaved changes
 
 window.handleQuotationSubmit = async function (e, isBackground = false) {
     if (e) e.preventDefault();
-    
+
     if (isSavingQuotation) {
         if (isBackground) {
             console.log(">> Save in progress, queueing next background save...");
@@ -911,12 +911,12 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     const items = Array.from(document.querySelectorAll('#quotationItemsBody tr')).map(row => {
         const getRowVal = (cls) => row.querySelector(cls)?.value || '';
         const iName = getRowVal('.i-name');
-        
+
         // --- DEBUG: Name Collision Check ---
         if (iName && iName === project.projectName) {
             console.warn(">> DEBUG WARNING: Item name is identical to project name! Possible auto-fill/leak detected.", { iName, projectName: project.projectName });
         }
-        
+
         return {
             index: row.cells[0].innerText,
             name: iName,
@@ -928,17 +928,17 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     });
 
     // --- DEBUG: Log full payload before sending ---
-    console.log(">> handleQuotationSubmit: Sending Payload", { 
-        project: project.projectName, 
-        pId: project.projectId, 
-        itemsCount: items.length, 
-        firstItem: items[0] 
+    console.log(">> handleQuotationSubmit: Sending Payload", {
+        project: project.projectName,
+        pId: project.projectId,
+        itemsCount: items.length,
+        firstItem: items[0]
     });
 
     try {
         const response = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
-            mode: 'cors', 
+            mode: 'cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(window.buildApiPayload('save_project', { project, items }))
         });
@@ -979,7 +979,7 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     } finally {
         isSavingQuotation = false;
         if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false);
-        
+
         // Handle Queued Save
         if (nextSavePending) {
             console.log(">> Triggering queued save...");
@@ -989,7 +989,7 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     }
 };
 
-window.filterProjects = function(val) {
+window.filterProjects = function (val) {
     const query = String(val).toLowerCase().trim();
     if (!query) {
         window.currentFilteredProjects = [...(window.allProjects || [])];
@@ -997,7 +997,7 @@ window.filterProjects = function(val) {
         window.currentFilteredProjects = (window.allProjects || []).filter(p => {
             const pCustId = String(p.customerId || '').trim();
             const cust = (window.allCustomers || []).find(c => String(c.customerId || '').trim() === pCustId);
-            
+
             if (val && val.length > 1 && !cust && query !== '') {
                 // Optional: log if we can't find a customer for a project during an active search
                 // console.warn(`>> Search: Project ${p.projectId} has no linked customer [${pCustId}]`);
@@ -1005,8 +1005,8 @@ window.filterProjects = function(val) {
 
             // 1. Basic Fields (Project Name, PIC)
             const matchBasic = (p.projectName || '').toLowerCase().includes(query) ||
-                               (p.pic || '').toLowerCase().includes(query);
-            
+                (p.pic || '').toLowerCase().includes(query);
+
             // 2. Customer Related Fields (Company Name, Nickname, Address, Tax ID)
             const matchCustomer = cust ? (
                 (cust.companyName || '').toLowerCase().includes(query) ||
@@ -1022,12 +1022,12 @@ window.filterProjects = function(val) {
     window.renderProjects();
 };
 
-window.preparePrint = function() {
+window.preparePrint = function () {
     const originalTitle = document.title;
-    const dateVal = document.getElementById('qDate') ? document.getElementById('qDate').value : ''; 
+    const dateVal = document.getElementById('qDate') ? document.getElementById('qDate').value : '';
     const custName = document.getElementById('qCustName') ? document.getElementById('qCustName').value : '客戶';
     const projName = document.getElementById('qProjName') ? document.getElementById('qProjName').value : '未命名專案';
-    
+
     // Sync Status to Print Area
     const statusSelect = document.getElementById('projStatusSelect');
     const statusVal = statusSelect ? statusSelect.value : '1';
@@ -1037,7 +1037,7 @@ window.preparePrint = function() {
         let color = '#64748b';
         if (statusVal === '2') { statusLabel = '進行中'; color = '#3b82f6'; }
         else if (statusVal === '3') { statusLabel = '已完成'; color = '#00C800'; }
-        
+
         statsEl.innerText = statusLabel;
         statsEl.style.color = color;
     }
@@ -1058,7 +1058,7 @@ window.preparePrint = function() {
 
     document.title = `${yymmdd}_${custName}_${projName}`;
     document.body.classList.add('printing');
-    
+
     // Automatically apply current size/orientation from header
     if (typeof window.updatePrintConfig === 'function') window.updatePrintConfig();
 
@@ -1069,7 +1069,7 @@ window.preparePrint = function() {
     }, 300);
 }
 
-window.initQuotationAutocomplete = function() {
+window.initQuotationAutocomplete = function () {
     console.log(">> Initializing Quotation Autocomplete (Downloads-logic-optimized)");
     const input = document.getElementById('qCustSearch');
     const suggest = document.getElementById('autocompleteSuggestions');
@@ -1114,9 +1114,9 @@ window.initQuotationAutocomplete = function() {
             const tx = (c.taxId || '').toLowerCase();
             const ph = (c.phone || '').toLowerCase();
             const em = (c.email || '').toLowerCase();
-            
-            return cn.includes(val) || nk.includes(val) || ct.includes(val) || 
-                   tx.includes(val) || ph.includes(val) || em.includes(val);
+
+            return cn.includes(val) || nk.includes(val) || ct.includes(val) ||
+                tx.includes(val) || ph.includes(val) || em.includes(val);
         }).slice(0, 10);
 
         if (matches.length === 0) {
@@ -1137,7 +1137,7 @@ window.initQuotationAutocomplete = function() {
                 const phoneDisp = cleanData(c.phone);
                 const nameDisp = c.companyName || c.nickname || '未命名';
                 const nickDisp = (c.nickname && c.companyName) ? `(${c.nickname})` : '';
-                
+
                 return `
                     <div class="suggestion-item" onmousedown="window.selectQuotationCustomer('${c.customerId}')" style="padding: 10px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer;">
                         <div class="s-name" style="font-weight: 700; color: #1e293b; margin-bottom: 3px; font-size: 0.9375rem; text-align: left;">
@@ -1173,7 +1173,7 @@ window.initQuotationAutocomplete = function() {
     });
 };
 
-window.selectQuotationCustomer = function(id, isInit = false) {
+window.selectQuotationCustomer = function (id, isInit = false) {
     if (!window.allCustomers) return;
     const cust = window.allCustomers.find(c => String(c.customerId) === String(id));
     if (!cust) return;
@@ -1181,7 +1181,7 @@ window.selectQuotationCustomer = function(id, isInit = false) {
     const input = document.getElementById('qCustSearch');
     const hiddenName = document.getElementById('qCustName');
     const suggest = document.getElementById('autocompleteSuggestions');
-    
+
     // Clean leading quotes from Excel/Sheets import
     const clean = (val) => String(val || '').replace(/^'/, '').trim();
 
@@ -1192,7 +1192,7 @@ window.selectQuotationCustomer = function(id, isInit = false) {
         input.dataset.selectedId = cust.customerId;
     }
     if (hiddenName) hiddenName.value = displayName;
-    
+
     // 2. Exact Field Filling (Restored from stable version)
     const qTaxId = document.getElementById('qTaxId');
     const qContact = document.getElementById('qContact');
@@ -1206,7 +1206,7 @@ window.selectQuotationCustomer = function(id, isInit = false) {
 
     // 3. Hide suggestions
     if (suggest) suggest.style.display = 'none';
-    
+
     // 4. State Updates
     if (!isInit) {
         window.isQuotationModified = true;
@@ -1214,7 +1214,7 @@ window.selectQuotationCustomer = function(id, isInit = false) {
             window.triggerQuotationAutoSave();
         }
     }
-    
+
     console.log(">> [SUCCESS] Imported Customer Info for:", displayName);
 };
 

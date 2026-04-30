@@ -10,7 +10,17 @@ function initEventListeners() {
         const isCmdOrCtrl = e.metaKey || e.ctrlKey;
         const key = e.key;
 
-        // A. Navigation Shortcuts (Cmd/Ctrl + 1-3)
+        // A. Theme Shortcut (Option/Alt + T)
+        if (e.altKey && e.code === 'KeyT') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof window.toggleThemeMenu === 'function') {
+                window.toggleThemeMenu();
+            }
+            return;
+        }
+
+        // B. Navigation Shortcuts (Cmd/Ctrl + 1-3)
         if (isCmdOrCtrl && ['1', '2', '3'].includes(key)) {
             e.preventDefault();
             e.stopPropagation();
@@ -21,7 +31,7 @@ function initEventListeners() {
             return;
         }
 
-        // B. Global Save Shortcut (Cmd/Ctrl + S)
+        // C. Global Save Shortcut (Cmd/Ctrl + S)
         if (isCmdOrCtrl && key.toLowerCase() === 's') {
             const activeView = document.querySelector('.sub-view-stack.active, .admin-sub-tab.active, .tab-content.active');
             if (!activeView) return;
@@ -56,8 +66,14 @@ function initEventListeners() {
             }
         }
 
-        // C. Escape Key (Clear Search or Close Modals/Views)
+        // D. Escape Key (Clear Search or Close Modals/Views)
         if (key === 'Escape') {
+            const themeMenu = document.getElementById('themeMenu');
+            if (themeMenu && themeMenu.classList.contains('active')) {
+                window.toggleThemeMenu(false);
+                return;
+            }
+
             // 1. Priority: Clear active search input
             const activeEl = document.activeElement;
             if (activeEl && activeEl.classList.contains('card-search-input')) {
@@ -108,7 +124,7 @@ function initEventListeners() {
             }
         }
 
-        // D. Pagination Navigation (ArrowLeft / ArrowRight)
+        // E. Pagination Navigation (ArrowLeft / ArrowRight)
         if (key === 'ArrowLeft' || key === 'ArrowRight') {
             const activeSubView = document.querySelector('.sub-view-stack.active');
             if (!activeSubView || !activeSubView.id.endsWith('ListView')) return;
@@ -449,4 +465,3 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackgroundParallax();
     setTimeout(checkModalIntegrity, 2000);
 });
-

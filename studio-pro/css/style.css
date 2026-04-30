@@ -432,6 +432,45 @@ body {
     color: var(--text-dark) !important;
 }
 
+:root[data-theme] #profileModal .bind-card {
+    border: 1px solid var(--border) !important;
+}
+
+:root[data-theme] #profileModal .bind-btn-blue,
+:root[data-theme] #profileModal .bind-btn-grey,
+:root[data-theme] #profileModal .primary-btn {
+    background: var(--action-bg) !important;
+    color: white !important;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--action-bg) 32%, transparent) !important;
+}
+
+:root[data-theme] #profileModal .bind-btn-blue:hover,
+:root[data-theme] #profileModal .bind-btn-grey:hover,
+:root[data-theme] #profileModal .primary-btn:hover {
+    background: var(--action-hover) !important;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--action-bg) 38%, transparent) !important;
+}
+
+:root[data-theme] #profileModal input:-webkit-autofill,
+:root[data-theme] #profileModal input:-webkit-autofill:hover,
+:root[data-theme] #profileModal input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-dark) !important;
+    box-shadow: 0 0 0 1000px var(--surface-muted) inset !important;
+    caret-color: var(--text-dark) !important;
+    border-color: var(--primary) !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+:root[data-theme] #authOverlay input:-webkit-autofill,
+:root[data-theme] #authOverlay input:-webkit-autofill:hover,
+:root[data-theme] #authOverlay input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-dark) !important;
+    box-shadow: 0 0 0 1000px var(--surface-muted) inset !important;
+    caret-color: var(--text-dark) !important;
+    border-color: var(--primary) !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
 :root[data-theme] #profileModal .nav-shortcut-card:hover {
     background: var(--surface) !important;
 }

@@ -75,30 +75,39 @@ document.addEventListener('keydown', (e) => {
 });
 
 window.handleTaskPaste = function(event, taskId) {
-    const paste = (event.clipboardData || window.clipboardData).getData('text');
+    const paste = (event.clipboardData || window.clipboardData).getData('text').trim();
     const input = event.target;
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
     
-    // URL Regex
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    // Flexible URL Detection
+    const isUrl = paste.match(/^https?:\/\/[^\s]+$/i) || paste.match(/^www\.[^\s]+$/i);
     
-    if (start !== end && urlPattern.test(paste.trim())) {
+    if (isUrl) {
         event.preventDefault();
         window.pushTaskHistory();
         
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
         const linkPattern = /\[https?:\/\/[^\]]+\]/g;
+        const finalPasteUrl = paste.startsWith('http') ? paste : 'https://' + paste;
         
-        // Split and clean segments separately to maintain position logic
-        const before = input.value.substring(0, start).replace(linkPattern, '').trim();
-        const selected = input.value.substring(start, end).replace(linkPattern, '').trim();
-        const after = input.value.substring(end).replace(linkPattern, '').trim();
-        
-        // Construct new value
-        const newVal = (before + " " + selected + " [" + paste.trim() + "] " + after).replace(/\s+/g, ' ').trim();
+        let newVal = "";
+        if (start !== end) {
+            // "Smart Paste" (Wrap selected text with link)
+            const before = input.value.substring(0, start).replace(linkPattern, '').trim();
+            const selected = input.value.substring(start, end).replace(linkPattern, '').trim();
+            const after = input.value.substring(end).replace(linkPattern, '').trim();
+            newVal = (before + " " + selected + " " + after).replace(/\s+/g, ' ').trim() + " [" + finalPasteUrl + "]";
+        } else {
+            // "Global Paste" (Wrap whole text with link)
+            const cleanText = input.value.replace(linkPattern, '').replace(/\s+/g, ' ').trim();
+            newVal = cleanText + " [" + finalPasteUrl + "]";
+        }
         
         input.value = newVal;
         window.updateTaskField(taskId, 'taskName', newVal);
+        
+        // Blur to exit edit mode and show link
+        setTimeout(() => input.blur(), 50);
     }
 }
 
@@ -236,6 +245,12 @@ window.enterTaskEditMode = function(wrapper) {
     display.classList.add('hidden');
     input.classList.remove('hidden');
     
+    // Clean input value for editing (strip [link] if it's a task content field)
+    if (input.classList.contains('task-edit-input')) {
+        const linkPattern = /\[https?:\/\/[^\]]+\]/g;
+        input.value = input.value.replace(linkPattern, '').replace(/\s+/g, ' ').trim();
+    }
+
     // Force focus and ensure cursor is visible
     setTimeout(() => {
         input.focus();
@@ -249,15 +264,26 @@ window.exitTaskEditMode = function(input, taskId) {
     const wrapper = input.closest('.task-display-wrapper');
     if (!wrapper) return;
     const display = wrapper.querySelector('.task-display-text');
-    const val = input.value;
+    let val = input.value;
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     
     if (input.classList.contains('task-edit-input')) {
+        // Re-attach link if it existed before editing AND current input doesn't have a new link
+        const linkPattern = /\[(https?:\/\/[^\]]+)\]/g;
+        const originalText = task ? (task.taskName || '') : '';
+        const match = originalText.match(linkPattern);
+        
+        // Only re-attach if the current value doesn't already have a link (e.g. from a paste action)
+        if (match && match.length > 0 && !val.match(linkPattern)) {
+            const linkStr = match[0]; 
+            val = val.trim() + " " + linkStr;
+            input.value = val; 
+        }
+
         display.innerHTML = window.parseTaskLinks(val, task ? task.isCompleted : false);
         window.updateTaskField(taskId, 'taskName', val);
     } else if (input.classList.contains('customer-search')) {
         display.innerText = val || '請輸入對象';
-        // saveTaskCustomTarget is already called onblur in the HTML
     } else if (input.type === 'date') {
         const displayDate = val ? val.substring(5).replace('-', '/') : '00/00';
         display.innerText = displayDate;

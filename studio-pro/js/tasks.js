@@ -8,6 +8,99 @@ window.taskStatusFilters = cachedTaskFilters || ['uncompleted', 'completed'];
 window.taskSort = { column: 'drag', direction: 'asc' }; // Initialize sorting state
 
 if (!window.saveLocks) window.saveLocks = new Map();
+window.taskHistory = { undo: [], redo: [] };
+
+// Helper to push state for Undo
+window.pushTaskHistory = function() {
+    // Save a deep copy of the current state
+    const state = JSON.stringify(window.allTasks);
+    // Limit stack size to 50
+    if (window.taskHistory.undo.length > 50) window.taskHistory.undo.shift();
+    window.taskHistory.undo.push(state);
+    window.taskHistory.redo = []; // Clear redo on new action
+}
+
+window.undoTask = async function() {
+    if (window.taskHistory.undo.length === 0) return;
+    const currentState = JSON.stringify(window.allTasks);
+    window.taskHistory.redo.push(currentState);
+    
+    const prevState = JSON.parse(window.taskHistory.undo.pop());
+    window.allTasks = prevState;
+    window.filterTasksByProject();
+    
+    // Sync all to backend (Batch mode would be better, but we'll trigger a full re-fetch after sync)
+    setSyncStatus(true);
+    try {
+        await window.apiPost('sync_all_tasks', {
+            username: (window.currentUser ? window.currentUser.username : ''),
+            tasks: window.allTasks
+        });
+    } catch(e) { console.error("Undo Sync Error:", e); }
+    finally { setSyncStatus(false); }
+}
+
+window.redoTask = async function() {
+    if (window.taskHistory.redo.length === 0) return;
+    const currentState = JSON.stringify(window.allTasks);
+    window.taskHistory.undo.push(currentState);
+    
+    const nextState = JSON.parse(window.taskHistory.redo.pop());
+    window.allTasks = nextState;
+    window.filterTasksByProject();
+    
+    setSyncStatus(true);
+    try {
+        await window.apiPost('sync_all_tasks', {
+            username: (window.currentUser ? window.currentUser.username : ''),
+            tasks: window.allTasks
+        });
+    } catch(e) { console.error("Redo Sync Error:", e); }
+    finally { setSyncStatus(false); }
+}
+
+// Global Keyboard Listener
+document.addEventListener('keydown', (e) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const cmdKey = isMac ? e.metaKey : e.ctrlKey;
+    
+    if (cmdKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+            window.redoTask();
+        } else {
+            window.undoTask();
+        }
+    }
+});
+
+window.handleTaskPaste = function(event, taskId) {
+    const paste = (event.clipboardData || window.clipboardData).getData('text');
+    const input = event.target;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    
+    // URL Regex
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    
+    if (start !== end && urlPattern.test(paste.trim())) {
+        event.preventDefault();
+        window.pushTaskHistory();
+        
+        const linkPattern = /\[https?:\/\/[^\]]+\]/g;
+        
+        // Split and clean segments separately to maintain position logic
+        const before = input.value.substring(0, start).replace(linkPattern, '').trim();
+        const selected = input.value.substring(start, end).replace(linkPattern, '').trim();
+        const after = input.value.substring(end).replace(linkPattern, '').trim();
+        
+        // Construct new value
+        const newVal = (before + " " + selected + " [" + paste.trim() + "] " + after).replace(/\s+/g, ' ').trim();
+        
+        input.value = newVal;
+        window.updateTaskField(taskId, 'taskName', newVal);
+    }
+}
 
 window.fetchTasks = async function () {
     const filters = window.taskStatusFilters || [];
@@ -116,6 +209,65 @@ window.setTaskSort = function (col) {
     window.renderTasks();
 }
 
+window.parseTaskLinks = function(text, isCompleted) {
+    if (!text) return '<span style="opacity:0.5;">任務內容...</span>';
+    const urlPattern = /\[(https?:\/\/[^\]]+)\]/g;
+    let url = null;
+    const cleanText = text.replace(urlPattern, (match, foundUrl) => {
+        url = foundUrl;
+        return '';
+    }).trim() || text;
+
+    const escapedText = escapeHtml(cleanText);
+    
+    if (url) {
+        return `<a href="${url}" target="_blank" class="task-main-link ${isCompleted ? 'text-strikethrough' : ''}" onclick="event.stopPropagation()">
+            ${escapedText}
+        </a>`;
+    }
+    return `<span class="${isCompleted ? 'text-strikethrough' : ''}">${escapedText}</span>`;
+}
+
+window.enterTaskEditMode = function(wrapper) {
+    const display = wrapper.querySelector('.task-display-text');
+    const input = wrapper.querySelector('input, textarea');
+    if (!input) return;
+
+    display.classList.add('hidden');
+    input.classList.remove('hidden');
+    
+    // Force focus and ensure cursor is visible
+    setTimeout(() => {
+        input.focus();
+        if (input.select && !input.classList.contains('task-edit-input')) {
+            input.select();
+        }
+    }, 10);
+}
+
+window.exitTaskEditMode = function(input, taskId) {
+    const wrapper = input.closest('.task-display-wrapper');
+    if (!wrapper) return;
+    const display = wrapper.querySelector('.task-display-text');
+    const val = input.value;
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    
+    if (input.classList.contains('task-edit-input')) {
+        display.innerHTML = window.parseTaskLinks(val, task ? task.isCompleted : false);
+        window.updateTaskField(taskId, 'taskName', val);
+    } else if (input.classList.contains('customer-search')) {
+        display.innerText = val || '請輸入對象';
+        // saveTaskCustomTarget is already called onblur in the HTML
+    } else if (input.type === 'date') {
+        const displayDate = val ? val.substring(5).replace('-', '/') : '00/00';
+        display.innerText = displayDate;
+        window.updateTaskField(taskId, 'taskDate', val);
+    }
+
+    display.classList.remove('hidden');
+    input.classList.add('hidden');
+}
+
 window.renderTasks = function() {
     console.log(">> renderTasks called. allTasks size:", (window.allTasks || []).length);
     const list = document.getElementById('taskList');
@@ -222,12 +374,15 @@ window.renderTasks = function() {
             <div class="task-drag-handle task-col-drag">
                 <img src="assets/icons/drag.svg" style="width: 16px; height: 16px; ${iconStyle}">
             </div>
-            <div class="autocomplete-container task-col-project">
-                <input class="task-inline-input customer-search" value="${escapeHtml(displayValue)}" 
-                       onfocus="this.select(); showTaskCustomerSearch(this, '${t.taskId}')" 
-                       oninput="filterTaskCustomerSearch(this)"
-                       onblur="window.saveTaskCustomTarget('${t.taskId}', this.value)"
-                       placeholder="請輸入對象">
+            <div class="task-col-project">
+                <div class="task-display-wrapper autocomplete-container" onclick="window.enterTaskEditMode(this)">
+                    <div class="task-display-text">${escapeHtml(displayValue)}</div>
+                    <input class="task-inline-input customer-search hidden" value="${escapeHtml(displayValue)}" 
+                           onfocus="this.select(); showTaskCustomerSearch(this, '${t.taskId}')" 
+                           oninput="filterTaskCustomerSearch(this)"
+                           onblur="const inp=this; setTimeout(() => { window.saveTaskCustomTarget('${t.taskId}', inp.value); window.exitTaskEditMode(inp, '${t.taskId}') }, 200)"
+                           placeholder="請輸入對象">
+                </div>
             </div>
             <div class="task-col-date" style="position: relative;">
                 <div class="task-date-display" style="
@@ -250,9 +405,17 @@ window.renderTasks = function() {
                        onchange="window.updateTaskField('${t.taskId}', 'taskDate', this.value)">
             </div>
             <div class="task-col-content">
-                <input class="task-inline-input" value="${escapeHtml(t.taskName || '')}" 
-                       onblur="window.updateTaskField('${t.taskId}', 'taskName', this.value)" 
-                       placeholder="任務內容...">
+                <div class="task-display-wrapper" ondblclick="window.enterTaskEditMode(this)">
+                    <div class="task-display-text">
+                        ${window.parseTaskLinks(t.taskName, t.isCompleted)}
+                    </div>
+                    <input class="task-inline-input task-edit-input hidden" 
+                           value="${escapeHtml(t.taskName || '')}" 
+                           onblur="window.exitTaskEditMode(this, '${t.taskId}')" 
+                           onpaste="window.handleTaskPaste(event, '${t.taskId}')"
+                           onkeydown="if(event.key==='Enter') this.blur()"
+                           placeholder="任務內容...">
+                </div>
             </div>
             <div class="task-actions task-col-actions">
                 <button class="action-btn-icon btn-toggle-status" onclick="window.toggleTaskStatus('${t.taskId}')" title="完成/取消">
@@ -336,6 +499,8 @@ window.updateTaskField = async function(taskId, field, value) {
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     if (!task || task[field] === value) return;
 
+    window.pushTaskHistory();
+
     if (window.saveLocks.get(taskId)) {
         setTimeout(() => window.updateTaskField(taskId, field, value), 500);
         return;
@@ -379,6 +544,7 @@ window.toggleTaskStatus = function(taskId) {
 window.deleteTask = function(taskId) {
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     if (!task) return;
+    window.pushTaskHistory();
     Swal.fire({
         title: '確定要刪除？',
         icon: 'warning',
@@ -451,6 +617,7 @@ window.duplicateTask = async function(taskId) {
 
 window.addTaskInline = function() {
     if (!window.hasPermission('task_c')) return Toast.fire({ icon: 'warning', title: '無新增任務權限' });
+    window.pushTaskHistory();
     const newTask = {
         taskId: 'T-' + Date.now(),
         projectId: '',

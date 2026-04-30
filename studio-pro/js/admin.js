@@ -292,6 +292,11 @@ const PERM_DEFINITIONS = [
         { key: 'task_u', label: '編輯' },
         { key: 'task_d', label: '刪除' }
     ]},
+    { group: '系統通知', icon: 'notify.svg', perms: [
+        { key: 'notify_cust', label: '客戶異動通知' },
+        { key: 'notify_proj', label: '專案異動通知' },
+        { key: 'notify_task', label: '任務異動通知' }
+    ]},
     { group: '系統設定', icon: 'settings.svg', perms: [
         { key: 'set_v', label: '進入分頁' },
         { key: 'set_u', label: '修改設定' },
@@ -342,9 +347,9 @@ function renderPermissionMatrix() {
                 const isChecked = (perms[role] && perms[role][p.key]) ? 'checked' : '';
                 
                 // 權限鎖定邏輯：
-                // 1. 「管理者」欄位永遠不可改 (系統固定)
+                // 1. 「管理者」欄位預設不可改 (系統固定)，但「系統通知」除外
                 // 2. 如果是「系統設定」群組，且目前登入者不是「管理者」，則全部設為不可改 (唯讀)
-                let isDisabled = (role === '管理者'); 
+                let isDisabled = (role === '管理者' && group.group !== '系統通知'); 
                 const userLevel = (window.currentUser.level || '').trim();
                 if (group.group === '系統設定' && userLevel !== '管理者') {
                     isDisabled = true;
@@ -370,8 +375,12 @@ window.saveRolePermissions = async function() {
         if (!matrix[role]) matrix[role] = {}; 
     });
 
-    // 強制設定：管理者 (Super Admin) 永遠擁有所有權限
-    PERM_DEFINITIONS.forEach(g => g.perms.forEach(p => { matrix['管理者'][p.key] = true; }));
+    // 強制設定：管理者 (Super Admin) 永遠擁有所有業務與設定權限 (通知類除外，由畫面決定)
+    PERM_DEFINITIONS.forEach(g => g.perms.forEach(p => { 
+        if (g.group !== '系統通知') {
+            matrix['管理者'][p.key] = true; 
+        }
+    }));
 
     // 讀取畫面上「未被禁用」的勾選框來更新矩陣 (包含主帳號與副帳號的業務權限)
     const checkboxes = document.querySelectorAll('.perm-checkbox:not(:disabled)');

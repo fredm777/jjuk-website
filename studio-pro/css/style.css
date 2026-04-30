@@ -3764,3 +3764,97 @@ input[type="date"].task-inline-input {
         display: none !important;
     }
 }
+
+/* Notion-style Task Interaction */
+.task-display-wrapper {
+    cursor: text;
+    padding: 8px 12px;
+    border-radius: 8px;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.task-display-wrapper:hover {
+    background-color: rgba(0, 200, 0, 0.05);
+}
+
+.task-display-text {
+    width: 100%;
+    font-size: 0.9375rem;
+    color: var(--text-dark);
+    word-break: break-all;
+}
+
+.task-display-text:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--primary);
+    text-underline-offset: 4px;
+}
+
+.task-inline-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+    padding: 2px 6px;
+    background: var(--primary-soft);
+    border-radius: 4px;
+    margin-left: 4px;
+    transition: all 0.2s;
+}
+
+.task-inline-link:hover {
+    background: var(--primary-30);
+    transform: translateY(-1px);
+}
+
+.text-strikethrough {
+    text-decoration: line-through !important;
+    opacity: 0.6;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.task-edit-input {
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Full-text Link & Hover Edit */
+.task-main-link {
+    color: #3b82f6; /* Classic link blue, or use var(--primary) if preferred */
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.2s;
+}
+
+.task-main-link:hover {
+    color: var(--primary);
+}
+
+.task-edit-trigger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-display-wrapper:hover .task-edit-trigger {
+    opacity: 0.6;
+}
+
+.task-edit-trigger:hover {
+    opacity: 1 !important;
+    color: var(--primary);
+    transform: scale(1.1);
+}

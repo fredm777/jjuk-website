@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;stroke:#667A8E;stroke-width:2.0874;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#667A8E;stroke-width:2.0874;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#667A8E;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+</style>
+<g>
+	<g>
+		<g>
+			<ellipse class="st0" cx="12" cy="12" rx="7.2" ry="7.2"/>
+			<line class="st1" x1="9.6" y1="9.6" x2="14.4" y2="14.4"/>
+			<line class="st1" x1="14.4" y1="9.6" x2="9.6" y2="14.4"/>
+		</g>
+	</g>
+</g>
+<g>
+	<rect x="-5.6" y="40.9" class="st2" width="9.2" height="9.2"/>
+	<polyline class="st2" points="4.2,46.3 7.4,46.3 7.4,37.1 -1.8,37.1 -1.8,40.3 	"/>
+</g>
+</svg>

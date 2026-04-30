@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Pro</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg?v=3">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="css/style.css?v=2.3.0">
+</head>
+
+<body>
+    <div id="syncProgressBar"></div>
+
+    <!-- Personal Profile Modal (Unified Premium Design) -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="binding-container">
+                <!-- LINE Binding -->
+                <div class="bind-card bind-card-line">
+                    <div class="icon-box"
+                        style="background: #06C755; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px;">
+                        <svg viewBox="0 0 320 320" style="width:24px;height:24px;">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="LINE_LOGO" data-name="LINE LOGO">
+                                    <path style="fill:#fff;"
+                                        d="M266.66,144.92c0-47.74-47.86-86.58-106.69-86.58S53.28,97.18,53.28,144.92c0,42.8,38,78.65,89.22,85.42,3.48.75,8.21,2.29,9.4,5.26,1.08,2.7.71,6.93.35,9.65,0,0-1.25,7.53-1.52,9.13-.47,2.7-2.15,10.55,9.24,5.76s61.44-36.18,83.82-61.95h0C259.25,181.24,266.66,164,266.66,144.92Z" />
+                                    <path
+                                        d="M231.16,172.49h-30a2,2,0,0,1-2-2v0h0V123.94h0v0a2,2,0,0,1,2-2h30a2,2,0,0,1,2,2v7.57a2,2,0,0,1-2,2H210.79v7.85h20.37a2,2,0,0,1,2,2V151a2,2,0,0,1-2,2H210.79v7.86h20.37a2,2,0,0,1,2,2v7.56A2,2,0,0,1,231.16,172.49Z"
+                                        style="fill:#06C755" />
+                                    <path
+                                        d="M120.29,172.49a2,2,0,0,0,2-2v-7.56a2,2,0,0,0-2-2H99.92v-37a2,2,0,0,0-2-2H90.32a2,2,0,0,0-2,2v46.53h0v0a2,2,0,0,0,2,2h30Z"
+                                        style="fill:#06C755" />
+                                    <rect x="128.73" y="121.85" width="11.64" height="50.64" rx="2.04"
+                                        style="fill:#06C755" />
+                                    <path
+                                        d="M189.84,121.85h-7.56a2,2,0,0,0-2,2v27.66l-21.3-28.77a1.2,1.2,0,0,0-.17-.21v0l-.12-.12,0,0-.11-.09-.06,0-.11-.08-.06,0-.11-.06-.07,0-.11,0-.07,0-.12,0-.08,0-.12,0h-.08l-.11,0h-7.71a2,2,0,0,0-2,2v46.56a2,2,0,0,0,2,2h7.57a2,2,0,0,0,2-2V142.81l21.33,28.8a2,2,0,0,0,.52.52h0l.12.08.06,0,.1.05.1,0,.07,0,.14,0h0a2.42,2.42,0,0,0,.54.07h7.52a2,2,0,0,0,2-2V123.89A2,2,0,0,0,189.84,121.85Z"
+                                        style="fill:#06C755" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div style="flex: 1; margin-left: 16px; display: flex; flex-direction: column; gap: 2px;">
+                        <div style="font-weight: 700; font-size: 0.9375rem; color: #6A798F;">LINE 快速登入</div>
+                        <div id="lineStatusText"
+                            style="font-size: 0.8125rem; font-weight: 500; color: #C0C6CF; display:flex; align-items:center; gap:4px;">
+                            尚未綁定</div>
+                    </div>
+                    <button type="button" id="bindLineBtn" class="bind-btn-blue">綁定帳號</button>
+                </div>
+
+                <!-- Google Binding -->
+                <div class="bind-card bind-card-google">
+                    <div class="icon-box"
+                        style="background: white; border: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px;">
+                        <svg viewBox="0 0 65.7 65.8" style="width:24px;height:24px;">
+                            <circle style="fill:#ffffff;" cx="32.8" cy="32.8" r="32.8" />
+                            <path style="fill:#4285f4;"
+                                d="M55.3,32.8c0,6.5-2.9,12.8-7.7,17l-6.3-7.3c1.7-1.5,3-3.4,3.7-5.6H33.3v-8.1h21.6C55.2,30.1,55.3,31.4,55.3,32.8z" />
+                            <path style="fill:#ea4335;"
+                                d="M47.8,16l-6.4,7.2c-6.2-5.7-16.8-3.6-20.2,4L12.5,23C18.6,9.7,36.9,6,47.8,16z" />
+                            <path style="fill:#fbbc05;"
+                                d="M19.9,32.8c0,2,0.5,3.9,1.3,5.6l-8.7,4.2c-2.9-5.8-2.9-13.7,0-19.6l8.7,4.2C20.4,28.9,19.9,30.8,19.9,32.8z" />
+                            <path style="fill:#34a853;"
+                                d="M47.6,49.8c-10.9,9.8-29,6-35.1-7.2l8.7-4.2c3.4,7.5,13.9,9.7,20.1,4.1L47.6,49.8z" />
+                        </svg>
+                    </div>
+                    <div style="flex: 1; margin-left: 16px; display: flex; flex-direction: column; gap: 2px;">
+                        <div style="font-weight: 700; font-size: 0.9375rem; color: #6A798F;">Google 快速登入</div>
+                        <div id="googleStatusText"
+                            style="font-size: 0.8125rem; font-weight: 500; color: #C0C6CF; display:flex; align-items:center; gap:4px;">
+                            尚未綁定</div>
+                    </div>
+                    <button type="button" id="bindGoogleBtn" class="bind-btn-blue">綁定帳號</button>
+                </div>
+            </div>
+
+            <form id="profileForm" style="margin-top: 24px;">
+                <div class="profile-form-grid-row">
+                    <div class="compact-form-row"><label>帳號</label><input type="text" id="profUser" readonly></div>
+                    <div class="compact-form-row"><label>暱稱</label><input type="text" id="profNick" placeholder="您的稱呼"></div>
+                </div>
+
+                <div class="profile-form-grid-row">
+                    <div class="compact-form-row"><label>電子郵件</label><input type="text" id="profEmail" placeholder="example@mail.com"></div>
+                    <div class="compact-form-row"><label>手機號碼</label><input type="text" id="profPhone" placeholder="09XX-XXXXXX"></div>
+                </div>
+
+                <div class="profile-form-grid-row">
+                    <div class="compact-form-row"><label>修改密碼</label>
+                        <div class="password-wrapper" style="flex: 1;">
+                            <input type="password" id="profPass1">
+                            <span class="toggle-password visible" onclick="togglePassword('profPass1')">
+                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            </span>
+                        </div>
+                    </div>
+                    <div class="compact-form-row"><label>再次輸入</label>
+                        <div class="password-wrapper" style="flex: 1;">
+                            <input type="password" id="profPass2">
+                            <span class="toggle-password visible" onclick="togglePassword('profPass2')">
+                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-form-grid-row">
+                    <div class="compact-form-row" style="grid-column: span 1;">
+                        <label>試算表 ID</label>
+                        <input type="text" id="profSheetId" placeholder="輸入您的 Google Sheet ID">
+                    </div>
+                    <div class="compact-form-row" style="visibility: hidden;"></div>
+                </div>
+
+                <div id="profPassError" class="auth-error-inline" style="margin-bottom: 12px; margin-top: 0;"></div>
+
+                <div id="profAdminSection">
+                    <div class="compact-nav-grid"
+                        style="margin-top: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                        <div id="cardBankSettings" class="nav-shortcut-card"
+                            onclick="routeFromProfile('settings', 'bankSettingsView')">
+                            <img src="assets/icons/credit-card.svg" alt="card">
+                            <span>帳號</span>
+                        </div>
+                        <div id="cardNoteSettings" class="nav-shortcut-card"
+                            onclick="routeFromProfile('settings', 'workflowSettingsView')">
+                            <img src="assets/icons/process.svg" alt="process">
+                            <span>報價單</span>
+                        </div>
+                        <div id="cardUserAdmin" class="nav-shortcut-card"
+                            onclick="routeFromProfile('permissions', 'permissionsListView')">
+                            <img src="assets/icons/users.svg" alt="users">
+                            <span>使用者</span>
+                        </div>
+                        <div id="cardPermAdmin" class="nav-shortcut-card"
+                            onclick="routeFromProfile('permissions', 'permissionsMatrixView')">
+                            <img src="assets/icons/star.svg" alt="star">
+                            <span>權限</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 24px;">
+                    <button type="submit" class="primary-btn" style="flex: 1;">儲存修改</button>
+                    <button type="button" class="secondary-btn" onclick="closeModal('profileModal')"
+                        style="flex: 1;">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="authOverlay">
+        <div class="auth-card">
+            <!-- Login -->
+            <div id="loginStage" class="auth-stage">
+                <div class="auth-header" style="margin-bottom: 1.5rem;">
+                    <div class="logo-big">Studio Pro</div>
+                </div>
+                <form id="loginForm">
+                    <div class="form-group"><label>帳號</label><input type="text" id="loginUser" required></div>
+                    <div class="form-group">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+                            <label style="margin:0;">密碼</label>
+                            <a href="#" onclick="switchAuthStage('forgot')"
+                                style="font-size: 0.75rem; color: var(--primary); font-weight: 600; text-decoration: none;">忘記密碼？</a>
+                        </div>
+                        <div class="password-wrapper">
+                            <input type="password" id="loginPass" required>
+                            <span class="toggle-password visible" onclick="togglePassword('loginPass')">
+                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            </span>
+                        </div>
+                    </div>
+                    <div id="loginMainError" class="auth-error-inline" style="margin-bottom: 1rem; margin-top: 0.5rem;">
+                    </div>
+                    <button type="submit" class="primary-btn">登入</button>
+                    <div class="auth-footer" style="margin: 1.5rem 0 0 0;">還沒有帳號？ <a href="#"
+                            onclick="switchAuthStage('register')">點此註冊</a></div>
+
+                    <div id="socialToggle" class="social-auth-divider" style="cursor: pointer; margin-top: 1.5rem;">
+                        或使用其他方式登入</div>
+
+                    <div id="socialOptions" style="display: none; width: 100%; flex-direction: column; gap: 0.75rem;">
+                        <button type="button" class="line-btn" id="lineLoginBtn">
+                            <svg viewBox="0 0 320 320" style="width:20px;height:20px;">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="LINE_LOGO" data-name="LINE LOGO">
+                                        <rect style="fill:#06c755;" width="320" height="320" rx="72.14" />
+                                        <path style="fill:#fff;"
+                                            d="M266.66,144.92c0-47.74-47.86-86.58-106.69-86.58S53.28,97.18,53.28,144.92c0,42.8,38,78.65,89.22,85.42,3.48.75,8.21,2.29,9.4,5.26,1.08,2.7.71,6.93.35,9.65,0,0-1.25,7.53-1.52,9.13-.47,2.7-2.15,10.55,9.24,5.76s61.44-36.18,83.82-61.95h0C259.25,181.24,266.66,164,266.66,144.92Z" />
+                                        <path style="fill:#06c755;"
+                                            d="M231.16,172.49h-30a2,2,0,0,1-2-2v0h0V123.94h0v0a2,2,0,0,1,2-2h30a2,2,0,0,1,2,2v7.57a2,2,0,0,1-2,2H210.79v7.85h20.37a2,2,0,0,1,2,2V151a2,2,0,0,1-2,2H210.79v7.86h20.37a2,2,0,0,1,2,2v7.56A2,2,0,0,1,231.16,172.49Z" />
+                                        <path style="fill:#06c755;"
+                                            d="M120.29,172.49a2,2,0,0,0,2-2v-7.56a2,2,0,0,0-2-2H99.92v-37a2,2,0,0,0-2-2H90.32a2,2,0,0,0-2,2v46.53h0v0a2,2,0,0,0,2,2h30Z" />
+                                        <rect style="fill:#06c755;" x="128.73" y="121.85" width="11.64" height="50.64"
+                                            rx="2.04" />
+                                        <path style="fill:#06c755;"
+                                            d="M189.84,121.85h-7.56a2,2,0,0,0-2,2v27.66l-21.3-28.77a1.2,1.2,0,0,0-.17-.21v0l-.12-.12,0,0-.11-.09-.06,0-.11-.08-.06,0-.11-.06-.07,0-.11,0-.07,0-.12,0-.08,0-.12,0h-.08l-.11,0h-7.71a2,2,0,0,0-2,2v46.56a2,2,0,0,0,2,2h7.57a2,2,0,0,0,2-2V142.81l21.33,28.8a2,2,0,0,0,.52.52h0l.12.08.06,0,.1.05.1,0,.07,0,.14,0h0a2.42,2.42,0,0,0,.54.07h7.52a2,2,0,0,0,2-2V123.89A2,2,0,0,0,189.84,121.85Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            LINE 登入
+                        </button>
+                        <button type="button" class="google-auth-btn" id="googleLoginBtn">
+                            <svg viewBox="0 0 65.7 65.8" style="width:20px;height:20px;">
+                                <circle style="fill:#ffffff;" cx="32.8" cy="32.8" r="32.8" />
+                                <path style="fill:#4285f4;"
+                                    d="M55.3,32.8c0,6.5-2.9,12.8-7.7,17l-6.3-7.3c1.7-1.5,3-3.4,3.7-5.6H33.3v-8.1h21.6C55.2,30.1,55.3,31.4,55.3,32.8z" />
+                                <path style="fill:#ea4335;"
+                                    d="M47.8,16l-6.4,7.2c-6.2-5.7-16.8-3.6-20.2,4L12.5,23C18.6,9.7,36.9,6,47.8,16z" />
+                                <path style="fill:#fbbc05;"
+                                    d="M19.9,32.8c0,2,0.5,3.9,1.3,5.6l-8.7,4.2c-2.9-5.8-2.9-13.7,0-19.6l8.7,4.2C20.4,28.9,19.9,30.8,19.9,32.8z" />
+                                <path style="fill:#34a853;"
+                                    d="M47.6,49.8c-10.9,9.8-29,6-35.1-7.2l8.7-4.2c3.4,7.5,13.9,9.7,20.1,4.1L47.6,49.8z" />
+                            </svg>
+                            Google 登入
+                        </button>
+                    </div>
+                    <div id="lineAuthError" class="auth-error-inline"></div>
+                </form>
+            </div>
+
+            <!-- Register -->
+            <div id="registerStage" class="auth-stage">
+                <div class="auth-header" style="margin-bottom: 1.5rem;">
+                    <div class="logo-big">Studio Pro</div>
+                    <p style="font-weight:700; color:var(--text-dark); font-size:0.875rem;">建立帳號</p>
+                </div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>帳號</label>
+                        <input type="text" id="regUser" required>
+                        <span id="regUserError" class="input-error-msg"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="regEmail" required>
+                        <span id="regEmailError" class="input-error-msg"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>密碼</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="regPass" required>
+                            <span class="toggle-password visible" onclick="togglePassword('regPass')">
+                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            </span>
+                        </div>
+                    </div>
+                    <div id="registerMainError" class="auth-error-inline"
+                        style="margin-bottom: 1rem; margin-top: 0.5rem;"></div>
+                    <button type="submit" class="primary-btn">註冊</button>
+                    <div class="auth-footer">已有帳號？ <a href="#" onclick="switchAuthStage('login')">返回登入</a></div>
+                </form>
+            </div>
+
+            <!-- Forgot Password -->
+            <div id="forgotStage" class="auth-stage">
+                <div class="auth-header" style="margin-bottom: 1.5rem;">
+                    <div class="logo-big">Studio Pro</div>
+                    <p style="font-weight:700; color:var(--text-dark); font-size:0.875rem;">忘記密碼</p>
+                </div>
+                <form id="forgotForm">
+                    <div class="form-group"><label>註冊 Email</label><input type="email" id="forgotEmail" required></div>
+                    <div id="forgotError" class="auth-error-inline" style="margin-bottom: 1rem; margin-top: 0.5rem;">
+                    </div>
+                    <button type="submit" class="primary-btn">
+                        <img src="assets/icons/send.svg" alt="send"
+                            style="width:18px;height:18px;filter:brightness(0) invert(1);margin-right:8px;">
+                        <span>發送驗證碼</span>
+                    </button>
+                    <div class="auth-footer">想起來了？ <a href="#" onclick="switchAuthStage('login')">返回登入</a></div>
+                </form>
+            </div>
+
+            <!-- Verify -->
+            <div id="verifyStage" class="auth-stage">
+                <div class="auth-header" style="margin-bottom: 1.5rem;">
+                    <div class="logo-big">Studio Pro</div>
+                    <p style="font-weight:700; color:var(--text-dark); font-size:0.875rem;">身分驗證</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">請輸入發送至信箱的 6 位數代碼</p>
+                </div>
+                <form id="verifyForm">
+                    <div class="form-group">
+                        <input type="text" id="vCodeInput" required maxlength="6"
+                            oninput="if(this.value.length === 6) document.getElementById('verifyForm').requestSubmit()"
+                            style="text-align: center; font-size: 2.5rem; letter-spacing: 0.5rem; height: 80px;">
+                    </div>
+                    <div id="verifyError" class="auth-error-inline" style="margin-bottom: 1rem; margin-top: 0.5rem;">
+                    </div>
+                    <button type="submit" class="primary-btn">完成驗證</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View (Initially Hidden) -->
+    <div id="app" class="hidden">
+        <div class="sticky-nav-container">
+            <header>
+                <div class="header-content">
+                    <div class="brand">
+                        <h1>Studio Pro</h1>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-link active" data-tab="customers" onclick="switchToTab('customers')">
+                            <span>客戶</span>
+                        </button>
+                        <button class="tab-link" data-tab="projects" onclick="switchToTab('projects')">
+                            <span>專案</span>
+                        </button>
+                        <button class="tab-link" data-tab="tasks" onclick="switchToTab('tasks')">
+                            <span>任務</span>
+                        </button>
+                        <div class="tabs-slider"></div>
+                    </div>
+
+                    <div class="user-nav-segmented">
+                        <button id="userInfoTrigger" class="user-nav-btn" title="使用者資訊">
+                            <img src="assets/icons/settings.svg" alt="settings">
+                        </button>
+                        <button id="logoutBtn" class="user-nav-btn" title="登出系統">
+                            <img src="assets/icons/logout.svg" alt="logout">
+                        </button>
+                        <div class="user-nav-slider"></div>
+                    </div>
+                </div>
+            </header>
+        </div>
+
+        <main>
+            <section id="customers" class="tab-content active sub-view-container">
+                <!-- List View -->
+                <div id="customersListView" class="sub-view-stack active">
+                    <div class="card-wrapper">
+                        <!-- Floating centered actions -->
+                        <div class="card-actions-row">
+                            <button id="addCustomerBtn" class="card-add-btn" title="新增客戶資料">
+                                <img src="assets/icons/plus.svg" alt="add">
+                            </button>
+                            <div class="card-search-wrapper">
+                                <input type="text" id="customerSearchInput" class="card-search-input"
+                                    placeholder="搜尋客戶...">
+                                <div class="card-search-icon">
+                                    <img src="assets/icons/search.svg" alt="search">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-container">
+                            <table id="customerTable">
+                                <thead>
+                                    <tr class="sortable-row">
+                                        <th onclick="toggleCustomerSort('companyName')" class="sortable-header" id="th-cust-companyName">客戶名稱 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('taxId')" class="sortable-header" id="th-cust-taxId">統編 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('contact')" class="sortable-header" id="th-cust-contact">聯絡人 <span class="sort-icon"></span></th>
+                                        <th>聯絡電話</th>
+                                         <th onclick="toggleCustomerSort('invoiceInfo')" class="sortable-header" id="th-cust-invoiceInfo" style="text-align:center;">電子發票 <span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customerTableBody"></tbody>
+                            </table>
+                            <div id="tableLoading"
+                                style="padding:4rem; text-align:center; color:var(--text-muted); font-weight:600;">
+                                正在與資料庫建立連線...</div>
+                            <div id="paginationContainer"
+                                style="display: none; justify-content: space-between; align-items: center; padding: 1rem;">
+                                <div style="display:flex; align-items:center;">
+                                    <label
+                                        style="color: var(--text-muted); font-size: 0.9rem; margin-right: 0.5rem;">每頁顯示：</label>
+                                    <input type="number" id="itemsPerPageInput" value="7" min="1" max="200"
+                                        style="width: 70px; padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); font-size:0.9rem;">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <button id="prevPageBtn" class="logout-btn"
+                                        style="padding: 0.3rem 0.8rem; height: auto; margin:0;">上一頁</button>
+                                    <span id="pageInfo"
+                                        style="font-size: 0.9rem; color: var(--text-main); font-weight: 500;">第 1 /
+                                        1
+                                        頁</span>
+                                    <button id="nextPageBtn" class="logout-btn"
+                                        style="padding: 0.3rem 0.8rem; height: auto; margin:0;">下一頁</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit/Add View -->
+                <div id="customersEditView" class="sub-view-stack">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="switchSubView('customers', 'list')">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回列表</span>
+                        </button>
+                        <h2 id="viewTitleCustomer">客戶詳細資料</h2>
+                    </div>
+
+                    <div class="edit-card compact-edit-card">
+                        <form id="customerForm">
+                            <input type="hidden" id="rowIndex">
+                            <input type="hidden" id="customerId">
+
+                            <div class="compact-form-row">
+                                <div class="form-group-inline flex-1">
+                                    <label>客戶名稱</label>
+                                    <input id="companyName" required placeholder="公司全名">
+                                </div>
+                                <div class="form-group-inline flex-1">
+                                    <label>統編</label>
+                                    <input id="taxId" placeholder="8位數字">
+                                </div>
+                            </div>
+
+                            <div class="compact-form-row">
+                                <div class="form-group-inline flex-1">
+                                    <label>客戶簡稱</label>
+                                    <input id="nickname" placeholder="JJUK">
+                                </div>
+                                <div class="form-group-inline flex-1">
+                                    <label>聯絡窗口</label>
+                                    <input id="contact" placeholder="姓名">
+                                </div>
+                            </div>
+
+                            <div class="compact-form-row">
+                                <div class="form-group-inline flex-1">
+                                    <label>聯絡電話</label>
+                                    <input id="phone" placeholder="09XX...">
+                                </div>
+                                <div class="form-group-inline flex-1">
+                                    <label>電子信箱</label>
+                                    <input id="email" type="email" placeholder="Email">
+                                </div>
+                            </div>
+
+                            <div class="compact-form-row">
+                                <div class="form-group-inline flex-1">
+                                    <label>通訊地址</label>
+                                    <input id="address" placeholder="公司地址">
+                                </div>
+                            </div>
+
+                            <div class="invoice-box">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <input type="checkbox" id="invoiceInfo" style="width: 18px; height: 18px;">
+                                    <label for="invoiceInfo">關網電子發票資料建立</label>
+                                </div>
+                            </div>
+
+                            <div id="customerError" class="auth-error-inline" style="margin-bottom: 1.5rem;"></div>
+                            <div style="display: flex; gap: 12px; margin-top: 1.5rem;">
+                                <button type="submit" class="action-btn save-btn" style="flex: 1;">
+                                    <img src="assets/icons/bound.svg" alt="save"><span>儲存變更</span>
+                                </button>
+                                <button type="button" id="deleteCustomerBtn" class="action-btn delete-btn"
+                                    onclick="deleteCustomer()" style="flex: 1; display: none;">
+                                    <img src="assets/icons/trash.svg" alt="delete"><span>刪除客戶</span>
+                                </button>
+                                <button type="button" class="action-btn btn-outline"
+                                    onclick="switchSubView('customers', 'list')" style="flex: 1;">
+                                    <img src="assets/icons/close.svg" alt="cancel"><span>取消</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tasks" class="tab-content sub-view-container">
+                <div id="tasksListView" class="sub-view-stack active">
+                    <div class="card-wrapper">
+                        <div class="card-actions-row">
+                            <button id="addTaskBtn" class="card-add-btn" title="新增任務">
+                                <img src="assets/icons/plus.svg" alt="add">
+                            </button>
+
+                            <div id="taskFilters" style="display: flex; align-items: center; gap: 12px;">
+                                <div class="status-filter-group">
+                                    <button type="button" class="filter-pill active" id="uncompletedFilterBtn"
+                                        onclick="toggleTaskStatusFilter('uncompleted')" title="未完成任務">
+                                        <img src="assets/icons/unchecked.svg" alt="uncompleted">
+                                    </button>
+                                    <button type="button" class="filter-pill active" id="completedFilterBtn"
+                                        onclick="toggleTaskStatusFilter('completed')" title="已完成任務">
+                                        <img src="assets/icons/checked.svg" style="width: 20px; height: 20px;">
+                                    </button>
+                                </div>
+                                <select id="taskProjectFilter" onchange="filterTasksByProject()"
+                                    class="card-search-input"
+                                    style="width: 140px; min-width: 140px; padding-left: 12px; height: 48px; border-radius: 10px;">
+                                    <option value="">所有專案</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tasks-container">
+                            <div class="task-header-row">
+                                <div class="task-header-btn task-drag-handle-header task-col-drag active" id="sort-drag" onclick="window.setTaskSort('drag')" title="原始排序">
+                                    <img src="assets/icons/drag.svg" style="width: 14px; height: 14px; filter: brightness(0.5);">
+                                </div>
+                                <div class="task-header-btn task-project-header task-col-project" id="sort-project" onclick="window.setTaskSort('project')">
+                                    <img src="assets/icons/projects.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                </div>
+                                <div class="task-header-btn task-date-header task-col-date" id="sort-date" onclick="window.setTaskSort('date')">
+                                    <img src="assets/icons/calendar.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                </div>
+                                <div class="task-header-btn task-content-header task-col-content" id="sort-content" onclick="window.setTaskSort('content')">
+                                    <img src="assets/icons/tasks.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                </div>
+                                <div class="task-header-btn task-actions-header task-col-actions"></div>
+                            </div>
+                            <ul id="taskList" style="list-style: none; padding: 0; margin: 0;">
+                                <!-- Tasks inject here -->
+                            </ul>
+                        </div>
+                    </div> <!-- end tasksListView -->
+
+                    <!-- Tasks Edit View -->
+                    <div id="tasksEditView" class="sub-view-stack">
+                        <div class="view-header">
+                            <button class="back-btn" onclick="switchSubView('tasks', 'list')">
+                                <img src="assets/icons/chevron-left.svg" alt="back"
+                                    style="width: 18px; height: 18px; margin-right: 4px;"> 返回任務列表
+                            </button>
+                            <h2 id="taskEditorTitle">+ 新增</h2>
+                        </div>
+
+                        <div class="edit-card">
+                            <form id="taskEditorForm" onsubmit="submitTaskEditor(event)">
+                                <input type="hidden" id="taskRowIndex">
+                                <input type="hidden" id="taskIdField">
+                                <input type="hidden" id="taskIsCompleted">
+                                <input type="hidden" id="taskOrderWeight">
+
+                                <div class="form-group">
+                                    <label>所屬專案</label>
+                                    <select id="taskProjectId"></select>
+                                </div>
+
+                                <div class="form-group" style="margin-top: 1.5rem;">
+                                    <label>任務內容</label>
+                                    <input type="date" id="taskDate">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>時間</label>
+                                    <input type="time" id="taskTime">
+                                </div>
+
+                                <div id="taskError" class="auth-error-inline"></div>
+
+                                <div class="task-status-container">
+                                    <div id="statusIncomplete" class="status-item active"
+                                        onclick="setTaskEditorStatus(false)">
+                                        <img src="assets/icons/square.svg" alt="unchecked">
+                                        <span>未完成</span>
+                                    </div>
+                                    <div id="statusComplete" class="status-item" onclick="setTaskEditorStatus(true)">
+                                        <img src="assets/icons/square-check.svg" alt="checked">
+                                        <span>已完成</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                                    <button type="submit" class="save-btn" style="flex: 2;">儲存任務</button>
+                                    <button type="button" class="back-btn" onclick="switchSubView('tasks', 'list')"
+                                        style="flex: 1; justify-content: center;">取消</button>
+                                </div>
+                            </form>
+                        </div> <!-- end edit-card -->
+                    </div> <!-- end tasksEditView -->
+            </section> <!-- end tasks section -->
+
+            <section id="permissions" class="tab-content sub-view-container">
+                <!-- Member Management Sub-view: List -->
+                <div id="permissionsListView" class="sub-view-stack active">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="openProfileModal()">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                        </button>
+                        <h2>使用者管理</h2>
+                    </div>
+                    <div class="card-wrapper">
+                        <div class="grid-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>系統帳號</th>
+                                        <th>使用者暱稱</th>
+                                        <th>目前的級別</th>
+                                        <th>郵件地址</th>
+                                        <th>帳號狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memberTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Granular Permission Matrix View -->
+                <div id="permissionsMatrixView" class="sub-view-stack">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="openProfileModal()">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                        </button>
+                        <h2 style="margin: 0;">權限設定</h2>
+                    </div>
+                    <div class="card-wrapper" style="padding: 1rem 2rem 2rem 2rem;">
+                        <div
+                            style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 1.5rem;">
+                            <button class="primary-btn" onclick="saveRolePermissions()"
+                                style="width: auto; padding: 0.6rem 1.5rem;">儲存設定</button>
+                        </div>
+                        <div class="grid-container" style="overflow-x: auto;">
+                            <table class="permission-matrix-table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; background: #f8fafc;"></th>
+                                        <th style="text-align: center; color: var(--primary);">管理者</th>
+                                        <th style="text-align: center; color: #64748b;">主帳號</th>
+                                        <th style="text-align: center; color: #6366f1;">副帳號</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="permissionMatrixBody">
+                                    <!-- Rows will be injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member Management Sub-view: Edit -->
+                <div id="permissionsEditView" class="sub-view-stack">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="switchSubView('permissions', 'list')">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回列表</span>
+                        </button>
+                        <h2 style="margin: 0;">權限編輯</h2>
+                    </div>
+
+                    <div class="edit-card">
+                        <form onsubmit="handleMemberUpdateSubmit(event)">
+                            <input type="hidden" id="memberTargetRow">
+                            <div class="form-group"><label>使用者帳號</label><input type="text" id="memberUser" readonly
+                                    style="background: #f8fafc; color: var(--text-muted);"></div>
+                            <div style="display: flex; gap: 1.5rem; margin-top: 1rem;">
+                                <div class="form-group" style="flex: 1;"><label>設定級別</label>
+                                    <select id="memberLevel" onchange="toggleSuperiorField()">
+                                        <option value="管理者">管理者</option>
+                                        <option value="主帳號">主帳號</option>
+                                        <option value="副帳號">副帳號</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;"><label>帳號狀態</label>
+                                    <select id="memberStatus">
+                                        <option value="啟用">啟用</option>
+                                        <option value="待審核">待審核</option>
+                                        <option value="暫停使用">暫停使用</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="superiorGroup" style="display: none; margin-top: 1rem;">
+                                <label>上級主帳號 (所屬工作區)</label>
+                                <select id="memberSuperior">
+                                    <option value="">-- 請選擇主帳號 --</option>
+                                </select>
+                            </div>
+                            <div id="memberError" class="auth-error-inline" style="margin-bottom: 1.5rem;"></div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="submit" class="save-btn" style="flex: 2;">儲存變更</button>
+                                <button type="button" class="back-btn" onclick="switchSubView('permissions', 'list')"
+                                    style="flex: 1; justify-content: center;">取消</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="settings" class="tab-content sub-view-container">
+                <!-- Collection Account Settings View -->
+                <div id="bankSettingsView" class="admin-sub-tab active" style="min-height: 400px;">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="openProfileModal()">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                        </button>
+                        <h2>收款帳號設定</h2>
+                    </div>
+                    <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
+                        <form onsubmit="handleGlobalSettingsSubmit(event)">
+                            <div class="compact-form-row">
+                                <label>銀行名稱</label>
+                                <input id="setBankName" placeholder="例如：台灣銀行">
+                            </div>
+                            <div class="compact-form-row">
+                                <label>銀行代碼</label>
+                                <input id="setBankCode" placeholder="例如：004">
+                            </div>
+                            <div class="compact-form-row">
+                                <label>分行名稱</label>
+                                <input id="setBankBranch" placeholder="例如：公館分行">
+                            </div>
+                            <div class="compact-form-row">
+                                <label>分行代碼</label>
+                                <input id="setBranchCode" placeholder="例如：1611">
+                            </div>
+                            <div class="compact-form-row">
+                                <label>帳戶名稱</label>
+                                <input id="setAccountName" placeholder="輸入戶名">
+                            </div>
+                            <div class="compact-form-row">
+                                <label>銀行帳號</label>
+                                <input id="setAccountNum" placeholder="輸入帳號">
+                            </div>
+
+                            <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                                <button type="submit" class="save-btn"
+                                    style="width: auto; padding: 0.75rem 2rem;">儲存變更</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Workflow Settings View -->
+                <div id="workflowSettingsView" class="admin-sub-tab" style="min-height: 400px;">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="openProfileModal()">
+                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                        </button>
+                        <h2>報價單細項備註</h2>
+                    </div>
+                    <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
+                        <form onsubmit="handleGlobalSettingsSubmit(event)">
+                            <div class="compact-form-row">
+                                <input id="setWfOrderLbl" class="wf-label-input" value="訂購單說明">
+                                <textarea id="setWfOrder" rows="2"></textarea>
+                            </div>
+                            <div class="compact-form-row">
+                                <input id="setWfDepositLbl" class="wf-label-input" value="訂金規則">
+                                <textarea id="setWfDeposit" rows="2"></textarea>
+                            </div>
+                            <div class="compact-form-row">
+                                <input id="setWfDraftLbl" class="wf-label-input" value="初稿天數">
+                                <textarea id="setWfDraft" rows="2"></textarea>
+                            </div>
+                            <div class="compact-form-row">
+                                <input id="setWfEditLbl" class="wf-label-input" value="修改次數說明">
+                                <textarea id="setWfEdit" rows="2"></textarea>
+                            </div>
+                            <div class="compact-form-row">
+                                <input id="setWfDeliveryLbl" class="wf-label-input" value="交付內容說明">
+                                <textarea id="setWfDelivery" rows="2"></textarea>
+                            </div>
+                            <div class="compact-form-row">
+                                <input id="setWfRemarkLbl" class="wf-label-input" value="其他說明">
+                                <textarea id="setWfRemark" rows="2"></textarea>
+                            </div>
+                            <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                                <button type="submit" class="save-btn"
+                                    style="width: auto; padding: 0.75rem 2rem;">儲存變更</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="tab-content sub-view-container">
+                <div id="projectsListView" class="sub-view-stack active">
+                    <div class="card-wrapper">
+                        <div class="card-actions-row">
+                            <button id="addProjectBtn" class="card-add-btn" title="建立新報價單">
+                                <img src="assets/icons/plus.svg" alt="add">
+                            </button>
+                            <!-- Project Status Filter -->
+                            <div class="status-filter-group">
+                                <button class="filter-pill" id="projFilterPending" title="待確認專案"
+                                    onclick="setProjectStatusFilter('1')">
+                                    <img src="assets/icons/TBD.svg" alt="pending">
+                                </button>
+                                <button class="filter-pill" id="projFilterOngoing" title="進行中專案"
+                                    onclick="setProjectStatusFilter('2')">
+                                    <img src="assets/icons/unchecked.svg" alt="ongoing">
+                                </button>
+                                <button class="filter-pill" id="projFilterCompleted" title="已完成專案"
+                                    onclick="setProjectStatusFilter('3')">
+                                    <img src="assets/icons/checked.svg" alt="completed">
+                                </button>
+                            </div>
+                            <div class="card-search-wrapper">
+                                <input type="text" id="projectSearchInput" class="card-search-input"
+                                    placeholder="搜尋專案...">
+                                <div class="card-search-icon">
+                                    <img src="assets/icons/search.svg" alt="search">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-container">
+                            <table id="projectTable">
+                                <thead>
+                                    <tr class="sortable-row">
+                                        <th onclick="toggleProjectSort('customer')" class="sortable-header"
+                                            id="th-customer">客戶名稱 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('date')" class="sortable-header" id="th-date">日期
+                                            <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('projectName')" class="sortable-header"
+                                            id="th-projectName">專案名稱 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('pic')" class="sortable-header" id="th-pic">承辦人員
+                                            <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('depositPaid')" class="sortable-header"
+                                            id="th-depositPaid" style="min-width: 100px;">已收款項 <span
+                                                class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('balanceDue')" class="sortable-header"
+                                            id="th-balanceDue" style="min-width: 100px;">應收尾款 <span
+                                                class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('total')" class="sortable-header" id="th-total">
+                                            總計 (含稅) <span class="sort-icon"></span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projectTableBody"></tbody>
+                            </table>
+                            <div id="projectLoading"
+                                style="padding:4rem; text-align:center; color:var(--text-muted); font-weight:600;">
+                                載入專案列表中...</div>
+                            <div id="projectPaginationContainer"
+                                style="display: none; justify-content: space-between; align-items: center; padding: 1rem;">
+                                <div style="display:flex; align-items:center;">
+                                    <label
+                                        style="color: var(--text-muted); font-size: 0.9rem; margin-right: 0.5rem;">每頁顯示：</label>
+                                    <input type="number" id="projItemsPerPageInput" class="pagination-input" value="7"
+                                        min="1" max="200">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <button id="projPrevPageBtn" class="logout-btn"
+                                        style="padding: 0.3rem 0.8rem; height: auto; margin:0;">上一頁</button>
+                                    <span id="projPageInfo"
+                                        style="font-size: 0.9rem; color: var(--text-main); font-weight: 500;">第
+                                        1 / 1
+                                        頁</span>
+                                    <button id="projNextPageBtn" class="logout-btn"
+                                        style="padding: 0.3rem 0.8rem; height: auto; margin:0;">下一頁</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quotation Editor View -->
+                <div id="projectsEditView" class="sub-view-stack">
+                    <div class="view-header">
+                        <button class="back-btn" onclick="switchSubView('projects', 'list')">
+                            <img src="assets/icons/chevron-left.svg" alt="back"
+                                style="width: 18px; height: 18px; margin-right: 4px;"> 返回專案列表
+                        </button>
+                        <h2 id="quotationTitle">專案報價單</h2>
+                        <div class="print-controls no-print"
+                            style="display: flex; gap: 15px; align-items: center; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-left:10px;">
+                            <div class="control-group" style="display: flex; align-items: center;">
+                                <span
+                                    style="font-size: 0.75rem; font-weight: 700; color: #475569; margin-right: 8px;">紙張</span>
+                                <select id="printPaperSize" onchange="updatePrintConfig()"
+                                    style="padding: 4px 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.8125rem; background: white; cursor: pointer;">
+                                    <option value="A4">A4</option>
+                                    <option value="A5">A5</option>
+                                    <option value="B5">B5</option>
+                                </select>
+                            </div>
+                            <div class="control-group" style="display: flex; align-items: center;">
+                                <span
+                                    style="font-size: 0.75rem; font-weight: 700; color: #475569; margin-right: 8px;">方向</span>
+                                <select id="printOrientation" onchange="updatePrintConfig()"
+                                    style="padding: 4px 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.8125rem; background: white; cursor: pointer;">
+                                    <option value="portrait">直</option>
+                                    <option value="landscape">橫</option>
+                                </select>
+                            </div>
+                            <button type="button" onclick="preparePrint()"
+                                style="padding: 4px 12px; border-radius: 6px; border: 1px solid var(--primary); font-size: 0.8125rem; background: var(--primary); color: white; cursor: pointer; font-weight: 700; margin-left: 5px;">
+                                列印 / 存為 PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="quotation-card">
+                        <form id="quotationForm">
+                            <input type="hidden" id="projRowIndex">
+                            <input type="hidden" id="projId">
+                            <input type="hidden" id="projStatus" value="pending">
+
+                            <style>
+                                .quote-sheet-wrapper {
+                                    background: #fdfdfd;
+                                    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+                                    color: var(--text-dark);
+                                    margin: 0 auto;
+                                    font-size: 13px;
+                                    margin-bottom: 2rem;
+                                    position: relative;
+                                }
+
+                                .quote-sheet-table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                    table-layout: fixed;
+                                    border: 1px solid var(--text-dark);
+                                    margin-bottom: 15px;
+                                    background: #fff;
+                                }
+
+                                .quote-sheet-table th,
+                                .quote-sheet-table td {
+                                    border: 1px solid var(--text-dark);
+                                    padding: 4px 6px; /* Reduced padding */
+                                    vertical-align: middle !important;
+                                    text-align: center !important;
+                                }
+
+                                .quote-sheet-table th {
+                                    background-color: #f3f3f3;
+                                    font-weight: 600;
+                                    text-align: center;
+                                }
+
+                                .quote-sheet-table input,
+                                .quote-sheet-table textarea {
+                                    width: 100%;
+                                    border: none;
+                                    background: transparent;
+                                    padding: 2px;
+                                    margin: 0;
+                                    font-size: inherit;
+                                    font-family: inherit;
+                                    color: inherit;
+                                    outline: none;
+                                    text-align: center;
+                                }
+
+                                .quote-sheet-table .i-content {
+                                    text-align: left !important;
+                                    padding: 8px 10px !important;
+                                }
+
+                                .quote-sheet-table input:focus,
+                                .quote-sheet-table textarea:focus {
+                                    background-color: #eef2ff;
+                                }
+
+                                .text-center {
+                                    text-align: center;
+                                }
+
+                                .text-right {
+                                    text-align: right;
+                                }
+
+                                .bg-light {
+                                    background-color: #f3f3f3;
+                                }
+
+                                .fw-bold {
+                                    font-weight: bold;
+                                }
+
+                                .remove-btn-dense {
+                                    cursor: pointer;
+                                    color: #ef4444;
+                                    font-weight: bold;
+                                    opacity: 0.5;
+                                    padding: 0 5px;
+                                }
+
+                                .remove-btn-dense:hover {
+                                    opacity: 1;
+                                }
+
+                                th {
+                                    position: relative;
+                                }
+
+                                .resizer {
+                                    position: absolute;
+                                    right: -3px;
+                                    top: 0;
+                                    bottom: 0;
+                                    width: 6px;
+                                    cursor: col-resize;
+                                    user-select: none;
+                                    z-index: 10;
+                                    transition: background 0.2s;
+                                }
+
+                                .resizer:hover,
+                                .resizing .resizer {
+                                    background: var(--primary);
+                                }
+
+                                .thick-border {
+                                    border: 3px solid var(--text-dark) !important;
+                                }
+                            </style>
+
+                                                 <!-- Top Header Grid (Split into two separate boxes) -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <!-- Left: Customer Info -->
+                                    <table class="quote-sheet-table quote-header-info thick-border" style="margin-bottom: 0;">
+
+                                        <colgroup>
+                                            <col width="30%">
+                                            <col width="70%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light text-center">客戶名稱</td>
+                                                <td style="position:relative;">
+                                                    <input id="qCustSearch" placeholder="選擇或輸入客戶..." autocomplete="off"
+                                                        onclick="event.stopPropagation()">
+                                                    <div id="autocompleteSuggestions" class="suggestions-list"></div>
+                                                    <input type="hidden" id="qCustName">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">統一編號</td>
+                                                <td><input id="qTaxId" class="text-center" placeholder="客戶統編"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">聯絡人</td>
+                                                <td><input id="qContact" class="text-center" placeholder="客戶窗口"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">聯絡電話</td>
+                                                <td><input id="qPhone" class="text-center" placeholder="客戶電話"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">電子信箱</td>
+                                                <td><input id="qEmail" class="text-center" placeholder="客戶信箱"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">專案名稱</td>
+                                                <td><input id="qProjName" required placeholder="專案名稱"
+                                                        style="font-weight:bold;"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Right: Studio Info -->
+                                    <table class="quote-sheet-table quote-header-info thick-border" style="margin-bottom: 0;">
+
+                                        <colgroup>
+                                            <col width="30%">
+                                            <col width="70%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light text-center">公司名稱</td>
+                                                <td class="text-center fw-bold">日日有桔設計工作室</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">統一編號</td>
+                                                <td class="text-center fw-bold">80076603</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">承辦人員</td>
+                                                <td><input id="qPic" class="text-center fw-bold"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">聯絡電話</td>
+                                                <td id="qStudioPhone" class="text-center">0911-773-181</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">電子信箱</td>
+                                                <td id="qStudioEmail" class="text-center">jjukvs@gmail.com</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center">報價日期</td>
+                                                <td><input id="qDate" type="date" class="text-center fw-bold"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <table class="quote-sheet-table quote-body-table thick-border">
+                                    <colgroup>
+
+                                        <col width="8%">
+                                        <col width="22%">
+                                        <col width="35%">
+                                        <col width="12%">
+                                        <col width="10%">
+                                        <col width="13%">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>項次</th>
+                                            <th>項目</th>
+                                            <th>內容</th>
+                                            <th>單價</th>
+                                            <th>數量</th>
+                                            <th>金額</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="quotationItemsBody">
+                                        <!-- JS Injected Row Example -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6" style="padding: 0; background: #fafafa;">
+                                                <button type="button" onclick="addQuotationRow()"
+                                                    style="width:100%; border:none; background:transparent; padding: 8px; cursor:pointer; color: #2563eb; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                                    <img src="assets/icons/plus.svg" alt="add"
+                                                        style="width:16px;height:16px; margin-right: 4px;"> 新增
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <!-- Summary Footer (Split) -->
+                                <div
+                                    style="display: grid; grid-template-columns: 65% minmax(0, 1fr); gap: 15px; margin-bottom: 15px;">
+                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+                                        <colgroup>
+
+                                            <col width="20%">
+                                            <col width="80%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2" class="bg-light text-center fw-bold">備註說明</td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfOrderLbl" class="bg-light text-center">訂購單</td>
+                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfOrder"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        rows="1" placeholder="報價單承蒙認可簽署後..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfDepositLbl" class="bg-light text-center">訂金</td>
+                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDeposit"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        rows="1" placeholder="總額50%..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center" style="vertical-align: middle;">匯款帳號
+                                                </td>
+                                                <td style="padding: 0; vertical-align: middle;">
+                                                    <textarea id="qBankData" rows="1"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        placeholder="銀行：...\n戶名：...\n帳號：..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfDraftLbl" class="bg-light text-center">初稿</td>
+                                                <td style="padding: 0; vertical-align: middle;"><input id="qWfDraft"
+                                                        style="border:none; background:transparent; outline:none; width:100%; padding:4px 8px; font-family:inherit; font-size:inherit; text-align: center;"
+                                                        placeholder="3 至 5 個工作天..."
+                                                        oninput="triggerQuotationAutoSave()"></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfEditLbl" class="bg-light text-center">修改次數</td>
+                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfEdit"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        rows="1" placeholder="2次免費整體調整..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfDeliveryLbl" class="bg-light text-center">交付內容</td>
+                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDelivery"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        rows="1" placeholder="定稿後，支付尾款..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="qWfRemarkLbl" class="bg-light text-center">其他</td>
+                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        rows="1" placeholder="其他補充說明..."
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+
+                                        <colgroup>
+
+                                            <col width="60%">
+                                            <col width="40%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light text-center fw-bold">稅前合計</td>
+                                                <td class="text-right"><span id="qSubtotal">0</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center fw-bold">5%營業稅</td>
+                                                <td class="text-right"><span id="qTax">0</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center fw-bold">總額</td>
+                                                <td class="text-right fw-bold" style="font-size: 1.1em;"><span
+                                                        id="qTotal">0</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center fw-bold">已收款項</td>
+                                                <td class="text-right">
+                                                    <input type="number" id="qDepositPaid" class="text-right" value="0"
+                                                        style="font-weight:bold; color:var(--primary); width:100%;"
+                                                        oninput="calcQuotation(); triggerQuotationAutoSave();">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light text-center fw-bold">尾款</td>
+                                                <td class="text-right fw-bold" style="color: #ef4444;"><span
+                                                        id="qBalanceDue">0</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Stamp / Signature block (Split) -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+
+
+                                        <colgroup>
+                                            <col width="20%">
+                                            <col width="80%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light text-center"
+                                                    style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
+                                                    客戶代表簽章</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+
+                                        <colgroup>
+
+                                            <col width="20%">
+                                            <col width="80%">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light text-center"
+                                                    style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
+                                                    報價簽章</td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <img src="assets/invoice_stamp.svg" alt="Company Stamp"
+                                                        class="stamp-image" style="max-height: 140px;">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="quotationError" class="auth-error-inline"></div>
+                                <div class="form-actions flex-row mt-2"
+                                    style="max-width: 1000px; margin: 2rem auto 0; gap: 12px; justify-content: space-between;">
+
+                                    <div style="display: flex; gap: 12px; flex: 1;">
+                                        <div class="action-btn btn-outline"
+                                            style="flex: 1; position: relative; cursor: pointer;">
+                                            <img id="quoteStatusIcon" src="assets/icons/TBD.svg" alt="status">
+                                            <span id="quoteStatusText" style="font-size: 0.875rem;">待確認</span>
+                                            <img src="assets/icons/chevron-down.svg" alt="chevron"
+                                                style="width: 14px; height: 14px; margin-left: auto;">
+                                            <select id="projStatusSelect" onchange="handleStatusChange(this.value)"
+                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                                                <option value="1">待確認</option>
+                                                <option value="2">進行中</option>
+                                                <option value="3">已完成</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="action-btn btn-outline no-print" onclick="preparePrint()"
+                                            title="列印或轉存 PDF" style="flex: 1;">
+                                            <img src="assets/icons/printer.svg" alt="print"><span>另存PDF</span>
+                                        </button>
+                                        <button type="button" class="action-btn btn-outline"
+                                            onclick="handleAddProjectTask()" style="flex: 1;">
+                                            <img src="assets/icons/tasks.svg" alt="add"><span>新增任務</span>
+                                        </button>
+                                    </div>
+
+                                    <div style="display: flex; gap: 12px; flex: 1; justify-content: flex-end;">
+                                        <button type="button" class="action-btn save-btn"
+                                            onclick="handleQuotationSubmit(event)" style="flex: 1;">
+                                            <img src="assets/icons/bound.svg" alt="save"><span>儲存專案</span>
+                                        </button>
+                                        <button type="button" id="duplicateProjectBtn" class="action-btn btn-outline"
+                                            onclick="duplicateProject()" style="flex: 1; display: none;">
+                                            <img src="assets/icons/duplicate.svg" alt="duplicate"><span>複製專案</span>
+                                        </button>
+                                        <button type="button" id="deleteProjectBtn" class="action-btn delete-btn"
+                                            onclick="deleteProject()" style="flex: 1; display: none;">
+                                            <img src="assets/icons/trash.svg" alt="delete"><span>刪除專案</span>
+                                        </button>
+                                    </div>
+                                </div>
+                        </form>
+                    </div> <!-- end projectsEditView -->
+            </section> <!-- end projects section -->
+        </main>
+
+
+
+        <!-- Scripts -->
+        <script src="js/config.js?v=2.2.0"></script>
+        <script src="js/auth.js?v=2.2.0"></script>
+        <script src="js/ui.js?v=2.2.0"></script>
+        <script src="js/customers.js?v=2.2.0"></script>
+        <script src="js/projects.js?v=2.2.0"></script>
+        <script src="js/tasks.js?v=2.2.0"></script>
+        <script src="js/admin.js?v=2.2.0"></script>
+        <script src="js/main.js?v=2.2.0"></script>
+</body>
+
+</html>

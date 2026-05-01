@@ -409,6 +409,7 @@ window.openProfileModal = function () {
     if (phone.startsWith("'")) phone = phone.slice(1);
     if (document.getElementById('profPhone')) document.getElementById('profPhone').value = phone;
     if (document.getElementById('profSheetId')) document.getElementById('profSheetId').value = window.currentUser.sheetId || '';
+    if (document.getElementById('profSuperior')) document.getElementById('profSuperior').value = window.currentUser.superior || '';
 
     const p1 = document.getElementById('profPass1');
     const p2 = document.getElementById('profPass2');
@@ -457,8 +458,10 @@ window.handleProfileUpdateSubmit = async function (e) {
     const body = {
         action: 'update_profile',
         sessionToken: window.currentUser.sessionToken,
-        nickname: document.getElementById('profNick').value, email: document.getElementById('profEmail').value,
+        nickname: document.getElementById('profNick').value, 
+        email: document.getElementById('profEmail').value,
         phone: document.getElementById('profPhone').value.startsWith("'") ? document.getElementById('profPhone').value : "'" + document.getElementById('profPhone').value,
+        superior: document.getElementById('profSuperior').value.trim(),
         sheetId: document.getElementById('profSheetId').value.trim(),
         newPassword: pass1 || null
     };

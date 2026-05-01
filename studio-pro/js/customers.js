@@ -24,7 +24,19 @@ window.fetchCustomers = async function() {
             window.renderCustomers(); 
             if (typeof window.filterTasksByProject === 'function') window.filterTasksByProject();
         } else {
-            // Display backend error (e.g. "Please fill in Spreadsheet ID")
+            // --- Optimized Popup Logic ---
+            const isAuthError = json.error && (json.error.includes('重新登入') || json.error.includes('登入已失效'));
+            if (isAuthError) return window.logout();
+
+            const isSheetIdError = json.error && json.error.includes('試算表 ID');
+            const isAdmin = (window.currentUser.level === '管理者' || window.currentUser.level === '管理員');
+
+            // Admins don't get blocked by missing sheetId popups on initial fetch
+            if (isSheetIdError && isAdmin) {
+                console.warn(">> Admin has no sheetId linked, skipping blocking popup.");
+                return;
+            }
+
             Swal.fire({
                 title: '資料讀取受阻',
                 text: json.error || '請確認個人設定中的試算表 ID 是否正確。',

@@ -367,28 +367,34 @@ function renderPermissionMatrix() {
 }
 
 window.saveRolePermissions = async function() {
-    // 從快取開始建立新的矩陣，確保沒被修改到的 (例如 disabled 的系統設定) 數值能被保留
-    const matrix = JSON.parse(JSON.stringify(window.rolePermissionsCache || {}));
-    
-    // 確保所有角色都有初始化物件
-    ROLES.forEach(role => { 
-        if (!matrix[role]) matrix[role] = {}; 
+    // 1. Initialize matrix from cache or empty object
+    const matrix = {};
+    ROLES.forEach(role => {
+        matrix[role] = {};
     });
 
-    // 強制設定：管理者 (Super Admin) 永遠擁有所有業務與設定權限 (通知類除外，由畫面決定)
-    PERM_DEFINITIONS.forEach(g => g.perms.forEach(p => { 
-        if (g.group !== '系統通知') {
-            matrix['管理者'][p.key] = true; 
-        }
-    }));
-
-    // 讀取畫面上「未被禁用」的勾選框來更新矩陣 (包含主帳號與副帳號的業務權限)
-    const checkboxes = document.querySelectorAll('.perm-checkbox:not(:disabled)');
+    // 2. Read all checkboxes from the matrix UI
+    const checkboxes = document.querySelectorAll('.perm-checkbox');
+    console.log(`>> Found ${checkboxes.length} permission checkboxes.`);
+    
     checkboxes.forEach(cb => {
         const role = cb.getAttribute('data-role');
         const key = cb.getAttribute('data-key');
-        matrix[role][key] = cb.checked;
+        if (role && key) {
+            matrix[role][key] = cb.checked;
+        }
     });
+
+    // 3. System Enforcement: Admins must have all core perms (except notifications)
+    PERM_DEFINITIONS.forEach(g => {
+        if (g.group !== '系統通知') {
+            g.perms.forEach(p => {
+                matrix['管理者'][p.key] = true;
+            });
+        }
+    });
+
+    console.log(">> Saving matrix payload:", matrix);
 
     setSyncStatus(true);
     try {
@@ -399,12 +405,16 @@ window.saveRolePermissions = async function() {
         const json = await res.json();
         if (json.success) {
             window.rolePermissionsCache = matrix;
-            // Swal.fire success removed as per user request
+            Toast.fire({ title: '權限設定已更新', icon: 'success' });
         } else {
-            Swal.fire('錯誤', '存檔失敗', 'error');
+            Swal.fire('錯誤', '存檔失敗: ' + json.error, 'error');
         }
-    } catch (e) { Swal.fire('錯誤', '網路連線失敗', 'error'); }
-    finally { setSyncStatus(false); }
+    } catch (e) { 
+        console.error("Save Permissions Error:", e);
+        Swal.fire('錯誤', '網路連線失敗', 'error'); 
+    } finally { 
+        setSyncStatus(false); 
+    }
 }
 
 /**

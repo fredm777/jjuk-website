@@ -238,14 +238,15 @@ window.parseTaskLinks = function(text, isCompleted) {
         return '';
     }).trim() || text;
 
-    const escapedText = escapeHtml(cleanText);
+    const escapedText = escapeHtml(cleanText).replace(/\n/g, '<br>');
+    
+    // Use a wrapper span for strikethrough to avoid extending it across the whole container width
+    const strikethroughClass = isCompleted ? 'text-strikethrough' : '';
     
     if (url) {
-        return `<a href="${url}" target="_blank" class="task-main-link ${isCompleted ? 'text-strikethrough' : ''}" onclick="event.stopPropagation()">
-            ${escapedText}
-        </a>`;
+        return `<a href="${url}" target="_blank" class="task-main-link ${strikethroughClass}" onclick="event.stopPropagation()">${escapedText}</a>`;
     }
-    return `<span class="${isCompleted ? 'text-strikethrough' : ''}">${escapedText}</span>`;
+    return `<span class="${strikethroughClass}">${escapedText}</span>`;
 }
 
 window.enterTaskEditMode = function(wrapper) {
@@ -265,6 +266,10 @@ window.enterTaskEditMode = function(wrapper) {
     // Force focus and ensure cursor is visible
     setTimeout(() => {
         input.focus();
+        if (input.tagName === 'TEXTAREA') {
+            input.style.height = '';
+            input.style.height = input.scrollHeight + 'px';
+        }
         if (input.select && !input.classList.contains('task-edit-input')) {
             input.select();
         }
@@ -275,7 +280,7 @@ window.exitTaskEditMode = function(input, taskId) {
     const wrapper = input.closest('.task-display-wrapper');
     if (!wrapper) return;
     const display = wrapper.querySelector('.task-display-text');
-    let val = input.value;
+    let val = input.value.trim();
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     
     if (input.classList.contains('task-edit-input')) {
@@ -443,27 +448,45 @@ window.renderTasks = function() {
             </div>
             <div class="task-col-content">
                 <div class="task-display-wrapper" ondblclick="window.enterTaskEditMode(this)">
-                    <div class="task-display-text">
-                        ${window.parseTaskLinks(t.taskName, t.isCompleted)}
-                    </div>
-                    <input class="task-inline-input task-edit-input hidden" 
-                           value="${escapeHtml(t.taskName || '')}" 
+                    <div class="task-display-text">${window.parseTaskLinks(t.taskName, t.isCompleted)}</div>
+                    <textarea class="task-inline-input task-edit-input hidden" 
                            onblur="window.exitTaskEditMode(this, '${t.taskId}')" 
                            onpaste="window.handleTaskPaste(event, '${t.taskId}')"
-                           onkeydown="if(event.key==='Enter') this.blur()"
-                           placeholder="任務內容...">
+                           onkeydown="if(event.key==='Escape') this.blur(); if(event.key==='Enter' && (event.ctrlKey || event.metaKey)) this.blur();"
+                           oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+                           placeholder="任務內容..." rows="1">${escapeHtml(t.taskName || '')}</textarea>
                 </div>
             </div>
             <div class="task-actions task-col-actions">
-                <button class="action-btn-icon btn-toggle-status" onclick="window.toggleTaskStatus('${t.taskId}')" title="完成/取消">
-                    <img src="${checkIcon}" style="${iconStyle}">
-                </button>
-                <button class="action-btn-icon btn-duplicate-task" onclick="window.duplicateTask('${t.taskId}')" title="複製項目">
-                    <img src="assets/icons/duplicate.svg" style="${iconStyle}">
-                </button>
-                <button class="action-btn-icon btn-delete-task" onclick="window.deleteTask('${t.taskId}')" title="刪除任務">
-                    <img src="assets/icons/trash.svg" style="${iconStyle}">
-                </button>
+                <!-- Desktop View: Visible Icons -->
+                <div class="task-desktop-actions">
+                    <button class="task-icon-btn" onclick="window.toggleTaskStatus('${t.taskId}')" title="切換狀態">
+                        <img src="${checkIcon}" style="width:18px; height:18px;">
+                    </button>
+                    <button class="task-icon-btn" onclick="window.duplicateTask('${t.taskId}')" title="複製任務">
+                        <img src="assets/icons/duplicate.svg" style="width:18px; height:18px;">
+                    </button>
+                    <button class="task-icon-btn text-danger" onclick="window.deleteTask('${t.taskId}')" title="刪除任務">
+                        <img src="assets/icons/trash.svg" style="width:18px; height:18px; filter: invert(27%) sepia(91%) saturate(2352%) hue-rotate(345deg) brightness(94%) contrast(90%);">
+                    </button>
+                </div>
+                <!-- Mobile View: Dropdown -->
+                <div class="task-mobile-dropdown">
+                    <button class="action-btn-icon" onclick="window.toggleTaskDropdown(event, '${t.taskId}')" style="width: 100%; height: 100%;">
+                        <img src="assets/icons/chevron-down.svg" style="width: 18px; height: 18px; opacity: 0.6;">
+                    </button>
+                    <div id="dropdown-${t.taskId}" class="task-dropdown-menu">
+                        <div class="dropdown-item" onclick="window.toggleTaskStatus('${t.taskId}')">
+                            <img src="${checkIcon}" style="width:16px; height:16px; margin-right:8px;"> ${t.isCompleted ? '標記為未完成' : '標記為已完成'}
+                        </div>
+                        <div class="dropdown-item" onclick="window.duplicateTask('${t.taskId}')">
+                            <img src="assets/icons/duplicate.svg" style="width:16px; height:16px; margin-right:8px;"> 複製任務
+                        </div>
+                        <div class="dropdown-item btn-delete-task text-danger" onclick="window.deleteTask('${t.taskId}')">
+                            <img src="assets/icons/trash.svg" style="width:16px; height:16px; margin-right:8px; filter: invert(27%) sepia(91%) saturate(2352%) hue-rotate(345deg) brightness(94%) contrast(90%);"> 刪除任務
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         
@@ -487,8 +510,10 @@ window.renderTasks = function() {
         window.taskSortable = new Sortable(list, {
             animation: 150,
             disabled: !isDragSort,
-            filter: 'input, button, .action-btn-icon', // Prevent drag when clicking inputs or buttons
-            preventOnFilter: false, // Allow interaction with filtered elements
+            handle: '.task-drag-handle', // Strictly limit to the icon
+            draggable: '.task-item',    // Explicitly target the row
+            filter: 'input, button, .action-btn-icon, .autocomplete-container, .task-display-wrapper', 
+            preventOnFilter: false, 
             onStart: () => {
                 if (!isDragSort) return false;
             },
@@ -779,3 +804,25 @@ window.saveTaskCustomTarget = function(taskId, value) {
         window.updateTaskField(taskId, 'projectId', normalizedValue);
     }
 }
+
+// --- Mobile Dropdown Logic ---
+window.toggleTaskDropdown = function(event, taskId) {
+    event.stopPropagation();
+    const allMenus = document.querySelectorAll('.task-dropdown-menu');
+    const targetMenu = document.getElementById(`dropdown-${taskId}`);
+    
+    // Close others
+    allMenus.forEach(menu => {
+        if (menu !== targetMenu) menu.classList.remove('active');
+    });
+    
+    // Toggle target
+    if (targetMenu) targetMenu.classList.toggle('active');
+}
+
+// Global listener to close dropdowns when clicking outside
+document.addEventListener('click', () => {
+    document.querySelectorAll('.task-dropdown-menu.active').forEach(menu => {
+        menu.classList.remove('active');
+    });
+});

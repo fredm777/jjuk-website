@@ -212,7 +212,7 @@ function initEventListeners() {
     safeBind('userInfoTrigger', 'onclick', window.openProfileModal);
     safeBind('profileForm', 'onsubmit', window.handleProfileUpdateSubmit);
     safeBind('memberForm', 'onsubmit', window.handleMemberUpdateSubmit);
-    safeBind('globalSettingsForm', 'onsubmit', window.handleSettingsSubmit);
+    safeBind('globalSettingsForm', 'onsubmit', window.handleGlobalSettingsSubmit);
     const qForm = document.getElementById('quotationForm');
     if (qForm) {
         qForm.onsubmit = (e) => { e.preventDefault(); window.handleQuotationSubmit(e); };

@@ -1,25 +1,26 @@
 window.switchAdminSubTab = function(target) {
     console.log(">> Switching Admin Sub-Tab to:", target);
     document.querySelectorAll('.admin-sub-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('#admin .sub-nav .tab-link').forEach(l => l.classList.remove('active'));
     
     if (target === 'members') {
-        const listEl = document.getElementById('adminListView');
-        const tabEl = document.getElementById('adminMembersTab');
+        const listEl = document.getElementById('adminMembersTab'); // Fixed ID
         if (listEl) listEl.classList.add('active');
-        if (tabEl) tabEl.classList.add('active');
         fetchMembers();
-        fetchRolePermissions(); // New: Fetch matrix data
+        fetchRolePermissions();
     } else if (target === 'settings') {
-        const settingsEl = document.getElementById('adminSettingsView');
-        const tabEl = document.getElementById('adminSettingsTab');
-        if (settingsEl) settingsEl.classList.add('active');
-        if (tabEl) tabEl.classList.add('active');
+        const bankEl = document.getElementById('bankSettingsView'); // Correct target
+        if (bankEl) bankEl.classList.add('active');
         fetchSettings();
     }
 }
 
-async function fetchSettings() {
+async function fetchSettings(force = false) {
+    // Prevent washing away unsaved changes unless forced
+    if (!force && window.sysSettingsCache && window.isSettingsModified) {
+        console.log(">> fetchSettings skipped: local changes exist.");
+        return;
+    }
+
     setSyncStatus(true);
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
@@ -31,38 +32,46 @@ async function fetchSettings() {
         const json = await res.json();
         if (json.success && json.settings) {
             window.sysSettingsCache = json.settings;
+            window.isSettingsModified = false; // Reset modification flag on fresh load
             const s = json.settings;
-            if (document.getElementById('setBankName')) document.getElementById('setBankName').value = s.bank_name || '';
-            if (document.getElementById('setBankCode')) document.getElementById('setBankCode').value = s.bank_code || '';
-            if (document.getElementById('setBankBranch')) document.getElementById('setBankBranch').value = s.bank_branch || '';
-            if (document.getElementById('setBranchCode')) document.getElementById('setBranchCode').value = s.branch_code || '';
-            if (document.getElementById('setAccountName')) document.getElementById('setAccountName').value = s.account_name || '';
-            if (document.getElementById('setAccountNum')) document.getElementById('setAccountNum').value = s.account_num || '';
             
-            if (document.getElementById('setWfOrder')) document.getElementById('setWfOrder').value = s.wf_order || '';
-            if (document.getElementById('setWfOrderLbl')) document.getElementById('setWfOrderLbl').value = s.wf_order_lbl || '訂購單說明';
+            const setVal = (id, val, def = '') => {
+                const el = document.getElementById(id);
+                if (el) el.value = val || def;
+            };
+
+            setVal('setBankName', s.bank_name);
+            setVal('setBankCode', s.bank_code);
+            setVal('setBankBranch', s.bank_branch);
+            setVal('setBranchCode', s.branch_code);
+            setVal('setAccountName', s.account_name);
+            setVal('setAccountNum', s.account_num);
             
-            if (document.getElementById('setWfDeposit')) document.getElementById('setWfDeposit').value = s.wf_deposit || '';
-            if (document.getElementById('setWfDepositLbl')) document.getElementById('setWfDepositLbl').value = s.wf_deposit_lbl || '訂金規則';
-            
-            if (document.getElementById('setWfDraft')) document.getElementById('setWfDraft').value = s.wf_draft || '';
-            if (document.getElementById('setWfDraftLbl')) document.getElementById('setWfDraftLbl').value = s.wf_draft_lbl || '初稿天數';
-            
-            if (document.getElementById('setWfEdit')) document.getElementById('setWfEdit').value = s.wf_edit || '';
-            if (document.getElementById('setWfEditLbl')) document.getElementById('setWfEditLbl').value = s.wf_edit_lbl || '修改次數說明';
-            
-            if (document.getElementById('setWfDelivery')) document.getElementById('setWfDelivery').value = s.wf_delivery || '';
-            if (document.getElementById('setWfDeliveryLbl')) document.getElementById('setWfDeliveryLbl').value = s.wf_delivery_lbl || '交付內容說明';
-            
-            if (document.getElementById('setWfRemark')) document.getElementById('setWfRemark').value = s.wf_remark || '';
-            if (document.getElementById('setWfRemarkLbl')) document.getElementById('setWfRemarkLbl').value = s.wf_remark_lbl || '其他說明';
+            setVal('setWfOrder', s.wf_order);
+            setVal('setWfOrderLbl', s.wf_order_lbl, '訂購單說明');
+            setVal('setWfDeposit', s.wf_deposit);
+            setVal('setWfDepositLbl', s.wf_deposit_lbl, '訂金規則');
+            setVal('setWfDraft', s.wf_draft);
+            setVal('setWfDraftLbl', s.wf_draft_lbl, '初稿天數');
+            setVal('setWfEdit', s.wf_edit);
+            setVal('setWfEditLbl', s.wf_edit_lbl, '修改次數說明');
+            setVal('setWfDelivery', s.wf_delivery);
+            setVal('setWfDeliveryLbl', s.wf_delivery_lbl, '交付內容說明');
+            setVal('setWfRemark', s.wf_remark);
+            setVal('setWfRemarkLbl', s.wf_remark_lbl, '其他說明');
+
+            // Add change tracking
+            const settingsForm = document.getElementById('globalSettingsForm');
+            if (settingsForm) {
+                settingsForm.oninput = () => { window.isSettingsModified = true; };
+            }
         }
     } catch(e) { console.error("Fetch Settings Error:", e); }
     finally { setSyncStatus(false); }
 }
 
 window.handleGlobalSettingsSubmit = async function(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSyncStatus(true);
     
     const settings = {
@@ -89,7 +98,6 @@ window.handleGlobalSettingsSubmit = async function(e) {
 
     function ensureStringLiteral(val) {
         if (!val) return '';
-        // If starts with 0 and is numeric, prepend ' for Google Sheets
         if (val.startsWith('0')) return "'" + val;
         return val;
     }
@@ -103,7 +111,9 @@ window.handleGlobalSettingsSubmit = async function(e) {
         });
         const json = await res.json();
         if (json.success) {
-            // Swal.fire success removed as per user request
+            window.isSettingsModified = false;
+            window.sysSettingsCache = settings; // Update cache
+            Toast.fire({ icon: 'success', title: '系統設定已更新' });
         } else {
             Swal.fire('錯誤', '儲存設定失敗', 'error');
         }

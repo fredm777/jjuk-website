@@ -457,16 +457,16 @@
                             </div>
 
                             <div id="customerError" class="auth-error-inline" style="margin-bottom: 1.5rem;"></div>
-                            <div style="display: flex; gap: 12px; margin-top: 1.5rem;">
-                                <button type="submit" class="action-btn save-btn" style="flex: 1;">
+                            <div class="form-actions-row" style="margin-top: 1.5rem;">
+                                <button type="submit" class="action-btn save-btn">
                                     <img src="assets/icons/bound.svg" alt="save"><span>儲存變更</span>
                                 </button>
                                 <button type="button" id="deleteCustomerBtn" class="action-btn delete-btn"
-                                    onclick="deleteCustomer()" style="flex: 1; display: none;">
+                                    onclick="deleteCustomer()" style="display: none;">
                                     <img src="assets/icons/trash.svg" alt="delete"><span>刪除客戶</span>
                                 </button>
                                 <button type="button" class="action-btn btn-outline"
-                                    onclick="switchSubView('customers', 'list')" style="flex: 1;">
+                                    onclick="switchSubView('customers', 'list')">
                                     <img src="assets/icons/close.svg" alt="cancel"><span>取消</span>
                                 </button>
                             </div>
@@ -507,13 +507,13 @@
                                     <img src="assets/icons/drag.svg" style="width: 14px; height: 14px; filter: brightness(0.5);">
                                 </div>
                                 <div class="task-header-btn task-project-header task-col-project" id="sort-project" onclick="window.setTaskSort('project')">
-                                    <img src="assets/icons/projects.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                    <img src="assets/icons/projects.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-date-header task-col-date" id="sort-date" onclick="window.setTaskSort('date')">
-                                    <img src="assets/icons/calendar.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                    <img src="assets/icons/calendar.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-content-header task-col-content" id="sort-content" onclick="window.setTaskSort('content')">
-                                    <img src="assets/icons/tasks.svg" style="width: 16px; height: 16px; margin-right: 4px;"> <span class="sort-arrow"></span>
+                                    <img src="assets/icons/tasks.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-actions-header task-col-actions"></div>
                             </div>
@@ -686,16 +686,16 @@
             </section>
 
             <section id="settings" class="tab-content sub-view-container">
-                <!-- Collection Account Settings View -->
-                <div id="bankSettingsView" class="admin-sub-tab active" style="min-height: 400px;">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="openProfileModal()">
-                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
-                        </button>
-                        <h2>收款帳號設定</h2>
-                    </div>
-                    <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
-                        <form onsubmit="handleGlobalSettingsSubmit(event)">
+                <form id="globalSettingsForm" onsubmit="handleGlobalSettingsSubmit(event)">
+                    <!-- Collection Account Settings View -->
+                    <div id="bankSettingsView" class="admin-sub-tab active" style="min-height: 400px;">
+                        <div class="view-header">
+                            <button type="button" class="back-btn" onclick="openProfileModal()">
+                                <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                            </button>
+                            <h2>收款帳號設定</h2>
+                        </div>
+                        <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
                             <div class="compact-form-row">
                                 <label>銀行名稱</label>
                                 <input id="setBankName" placeholder="例如：台灣銀行">
@@ -725,20 +725,18 @@
                                 <button type="submit" class="save-btn"
                                     style="width: auto; padding: 0.75rem 2rem;">儲存變更</button>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Workflow Settings View -->
-                <div id="workflowSettingsView" class="admin-sub-tab" style="min-height: 400px;">
-                    <div class="view-header">
-                        <button class="back-btn" onclick="openProfileModal()">
-                            <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
-                        </button>
-                        <h2>報價單細項備註</h2>
-                    </div>
-                    <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
-                        <form onsubmit="handleGlobalSettingsSubmit(event)">
+                    <!-- Workflow Settings View -->
+                    <div id="workflowSettingsView" class="admin-sub-tab" style="min-height: 400px;">
+                        <div class="view-header">
+                            <button type="button" class="back-btn" onclick="openProfileModal()">
+                                <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
+                            </button>
+                            <h2>報價單細項備註</h2>
+                        </div>
+                        <div class="edit-card" style="margin-top: 0; padding-top: 1.25rem;">
                             <div class="compact-form-row">
                                 <input id="setWfOrderLbl" class="wf-label-input" value="訂購單說明">
                                 <textarea id="setWfOrder" rows="2"></textarea>
@@ -767,9 +765,9 @@
                                 <button type="submit" class="save-btn"
                                     style="width: auto; padding: 0.75rem 2rem;">儲存變更</button>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </form>
             </section>
 
             <section id="projects" class="tab-content sub-view-container">
@@ -826,7 +824,7 @@
                                 </thead>
                                 <tbody id="projectTableBody"></tbody>
                             </table>
-                            <div id="projectLoading"
+                            <div id="projectLoading" class="hidden"
                                 style="padding:4rem; text-align:center; color:var(--text-muted); font-weight:600;">
                                 載入專案列表中...</div>
                             <div id="projectPaginationContainer"
@@ -1007,7 +1005,7 @@
                             </style>
 
                                                  <!-- Top Header Grid (Split into two separate boxes) -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div class="quotation-header-grid">
                                     <!-- Left: Customer Info -->
                                     <table class="quote-sheet-table quote-header-info thick-border" style="margin-bottom: 0;">
 
@@ -1087,17 +1085,14 @@
 
                                 <table class="quote-sheet-table quote-body-table thick-border">
                                     <colgroup>
-
-                                        <col width="8%">
-                                        <col width="22%">
-                                        <col width="35%">
+                                        <col width="25%">
+                                        <col width="40%">
                                         <col width="12%">
                                         <col width="10%">
                                         <col width="13%">
                                     </colgroup>
                                     <thead>
                                         <tr>
-                                            <th>項次</th>
                                             <th>項目</th>
                                             <th>內容</th>
                                             <th>單價</th>
@@ -1110,7 +1105,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="6" style="padding: 0; background: #fafafa;">
+                                            <td colspan="5" style="padding: 0; background: #fafafa;">
                                                 <button type="button" onclick="addQuotationRow()"
                                                     style="width:100%; border:none; background:transparent; padding: 8px; cursor:pointer; color: #2563eb; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 6px;">
                                                     <img src="assets/icons/plus.svg" alt="add"
@@ -1122,8 +1117,7 @@
                                 </table>
 
                                 <!-- Summary Footer (Split) -->
-                                <div
-                                    style="display: grid; grid-template-columns: 65% minmax(0, 1fr); gap: 15px; margin-bottom: 15px;">
+                                <div class="quotation-summary-grid">
                                     <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
                                         <colgroup>
 
@@ -1228,7 +1222,7 @@
                                 </div>
 
                                 <!-- Stamp / Signature block (Split) -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="quotation-stamp-grid">
                                     <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
 
 
@@ -1295,17 +1289,17 @@
                                         </button>
                                     </div>
 
-                                    <div style="display: flex; gap: 12px; flex: 1; justify-content: flex-end;">
+                                    <div class="form-actions-row" style="flex: 1; justify-content: flex-end;">
                                         <button type="button" class="action-btn save-btn"
-                                            onclick="handleQuotationSubmit(event)" style="flex: 1;">
+                                            onclick="handleQuotationSubmit(event)">
                                             <img src="assets/icons/bound.svg" alt="save"><span>儲存專案</span>
                                         </button>
                                         <button type="button" id="duplicateProjectBtn" class="action-btn btn-outline"
-                                            onclick="duplicateProject()" style="flex: 1; display: none;">
+                                            onclick="duplicateProject()" style="display: none;">
                                             <img src="assets/icons/duplicate.svg" alt="duplicate"><span>複製專案</span>
                                         </button>
                                         <button type="button" id="deleteProjectBtn" class="action-btn delete-btn"
-                                            onclick="deleteProject()" style="flex: 1; display: none;">
+                                            onclick="deleteProject()" style="display: none;">
                                             <img src="assets/icons/trash.svg" alt="delete"><span>刪除專案</span>
                                         </button>
                                     </div>

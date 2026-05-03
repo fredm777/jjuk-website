@@ -14,10 +14,51 @@ window.switchAdminSubTab = function(target) {
     }
 }
 
+function populateSettingsUI(s) {
+    if (!s) return;
+    const setVal = (id, val, def = '') => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || def;
+    };
+
+    setVal('setBankName', s.bank_name);
+    setVal('setBankCode', s.bank_code);
+    setVal('setBankBranch', s.bank_branch);
+    setVal('setBranchCode', s.branch_code);
+    setVal('setAccountName', s.account_name);
+    setVal('setAccountNum', s.account_num);
+    
+    setVal('setWfOrder', s.wf_order);
+    setVal('setWfOrderLbl', s.wf_order_lbl, '訂購單說明');
+    setVal('setWfDeposit', s.wf_deposit);
+    setVal('setWfDepositLbl', s.wf_deposit_lbl, '訂金規則');
+    setVal('setWfDraft', s.wf_draft);
+    setVal('setWfDraftLbl', s.wf_draft_lbl, '初稿天數');
+    setVal('setWfEdit', s.wf_edit);
+    setVal('setWfEditLbl', s.wf_edit_lbl, '修改次數說明');
+    setVal('setWfDelivery', s.wf_delivery);
+    setVal('setWfDeliveryLbl', s.wf_delivery_lbl, '交付內容說明');
+    setVal('setWfRemark', s.wf_remark);
+    setVal('setWfRemarkLbl', s.wf_remark_lbl, '其他說明');
+
+    // Add change tracking
+    const settingsForm = document.getElementById('globalSettingsForm');
+    if (settingsForm) {
+        settingsForm.oninput = () => { window.isSettingsModified = true; };
+    }
+}
+
 async function fetchSettings(force = false) {
-    // Prevent washing away unsaved changes unless forced
+    // If we have a cache and local changes, don't overwrite unless forced
     if (!force && window.sysSettingsCache && window.isSettingsModified) {
         console.log(">> fetchSettings skipped: local changes exist.");
+        return;
+    }
+
+    // If we have a cache and NO local changes, just populate from cache to be fast
+    if (!force && window.sysSettingsCache && !window.isSettingsModified) {
+        console.log(">> fetchSettings: populating from cache.");
+        populateSettingsUI(window.sysSettingsCache);
         return;
     }
 
@@ -33,44 +74,14 @@ async function fetchSettings(force = false) {
         const json = await res.json();
         if (json.success && json.settings) {
             window.sysSettingsCache = json.settings;
-            window.isSettingsModified = false; // Reset modification flag on fresh load
-            const s = json.settings;
-            
-            const setVal = (id, val, def = '') => {
-                const el = document.getElementById(id);
-                if (el) el.value = val || def;
-            };
-
-            setVal('setBankName', s.bank_name);
-            setVal('setBankCode', s.bank_code);
-            setVal('setBankBranch', s.bank_branch);
-            setVal('setBranchCode', s.branch_code);
-            setVal('setAccountName', s.account_name);
-            setVal('setAccountNum', s.account_num);
-            
-            setVal('setWfOrder', s.wf_order);
-            setVal('setWfOrderLbl', s.wf_order_lbl, '訂購單說明');
-            setVal('setWfDeposit', s.wf_deposit);
-            setVal('setWfDepositLbl', s.wf_deposit_lbl, '訂金規則');
-            setVal('setWfDraft', s.wf_draft);
-            setVal('setWfDraftLbl', s.wf_draft_lbl, '初稿天數');
-            setVal('setWfEdit', s.wf_edit);
-            setVal('setWfEditLbl', s.wf_edit_lbl, '修改次數說明');
-            setVal('setWfDelivery', s.wf_delivery);
-            setVal('setWfDeliveryLbl', s.wf_delivery_lbl, '交付內容說明');
-            setVal('setWfRemark', s.wf_remark);
-            setVal('setWfRemarkLbl', s.wf_remark_lbl, '其他說明');
-
-            // Add change tracking
-            const settingsForm = document.getElementById('globalSettingsForm');
-            if (settingsForm) {
-                settingsForm.oninput = () => { window.isSettingsModified = true; };
-            }
+            window.isSettingsModified = false;
+            populateSettingsUI(json.settings);
         }
-    } catch(e) { console.error("Fetch Settings Error:", e); }
-    finally { 
+    } catch(e) { 
+        console.error("Fetch Settings Error:", e); 
+    } finally { 
         if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false); 
-        window.isSettingsLoading = false; // Clear loading flag
+        window.isSettingsLoading = false;
     }
 }
 
@@ -209,7 +220,7 @@ function renderMembers(list) {
         tr.innerHTML = `
             <td>${escapeHtml(m.username)}</td>
             <td>${escapeHtml(m.nickname || '')}</td>
-            <td><span class="status-badge" style="background:#f1f5f9; color:var(--text-dark); border:1px solid var(--border);">${escapeHtml(m.level || '未知')}</span></td>
+            <td><span class="status-badge plain-level-badge">${escapeHtml(m.level || '未知')}</span></td>
             <td>${escapeHtml(m.email || '')}</td>
             <td>${escapeHtml(displayStatus)}</td>
         `;
@@ -381,8 +392,8 @@ function renderPermissionMatrix() {
         const groupTr = document.createElement('tr');
         groupTr.className = 'perm-row-group';
         groupTr.innerHTML = `
-            <td colspan="4" style="background: #f1f5f9; font-weight: bold; color: #475569; padding: 12px 16px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
+            <td colspan="4">
+                <div class="perm-group-title">
                     <img src="assets/icons/${group.icon}" data-lucide="${group.icon.replace('.svg','')}" style="width: 18px; height: 18px;">
                     ${group.group}
                 </div>

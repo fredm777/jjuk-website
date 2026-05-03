@@ -46,8 +46,20 @@
     --task-col-drag-width: 100px;
     --task-col-project-width: 180px;
     --task-col-date-width: 100px;
-    --task-col-content-min-width: 100px;
+    --task-col-content-width: 320px;
+    --task-col-content-min-width: var(--task-col-content-width);
     --task-col-actions-width: 100px;
+    --task-row-gap: 12px;
+    --task-row-padding-x: 24px;
+    --task-row-width: calc(
+        var(--task-col-drag-width) +
+        var(--task-col-project-width) +
+        var(--task-col-date-width) +
+        var(--task-col-content-width) +
+        var(--task-col-actions-width) +
+        (var(--task-row-gap) * 4) +
+        var(--task-row-padding-x)
+    );
 }
 
 /* --- Base Utility Classes --- */
@@ -702,8 +714,34 @@ body {
     white-space: nowrap;
 }
 
-.quote-body-table tbody td:nth-child(1) {
-    display: none !important;
+.quote-body-table {
+    table-layout: fixed;
+}
+
+.quote-body-table .quote-col-index {
+    width: 40px;
+}
+
+.quote-body-table .quote-col-item {
+    width: 18%;
+}
+
+.quote-body-table .quote-col-content {
+    width: 34%;
+}
+
+.quote-body-table .quote-col-price,
+.quote-body-table .quote-col-total {
+    width: 16%;
+}
+
+.quote-body-table .quote-col-qty {
+    width: 10%;
+}
+
+.quote-body-table th,
+.quote-body-table td {
+    min-width: 0;
 }
 
 /* Layout Utilities */
@@ -3990,6 +4028,7 @@ input[type="date"].task-inline-input {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     border-right: 1px solid var(--border);
+    text-align: center;
 }
 
 .permission-matrix-table th:last-child,
@@ -4009,16 +4048,34 @@ input[type="date"].task-inline-input {
     background: #f1f5f9;
 }
 
-.permission-matrix-table td {
-    text-align: center;
-}
-
 .permission-matrix-table td:first-child {
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     color: var(--text-dark);
     background: #f8fafc;
     width: 250px;
+}
+
+.permission-matrix-table .perm-row-group td,
+:root[data-theme] .permission-matrix-table .perm-row-group td:first-child {
+    background: color-mix(in srgb, var(--surface-muted) 76%, var(--primary) 8%) !important;
+    color: var(--text-muted);
+    font-weight: 800;
+    text-align: center !important;
+}
+
+.permission-matrix-table .perm-group-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.permission-matrix-table .perm-group-title img,
+.permission-matrix-table .perm-group-title svg {
+    width: 18px;
+    height: 18px;
 }
 
 .perm-checkbox {
@@ -4142,24 +4199,24 @@ input[type="date"].task-inline-input {
     }
 
     /* Quotation Items: Restore Table Format (No Cards) */
-    .quotation-items-table {
+    .quote-body-table {
         display: table !important;
     }
 
-    .quotation-items-table thead {
+    .quote-body-table thead {
         display: table-header-group !important;
     }
 
-    .quotation-items-table tr {
+    .quote-body-table tr {
         display: table-row !important;
     }
 
-    .quotation-items-table td,
-    .quotation-items-table th {
+    .quote-body-table td,
+    .quote-body-table th {
         display: table-cell !important;
     }
 
-    .quotation-items-table td::before {
+    .quote-body-table td::before {
         content: none !important;
     }
 
@@ -5592,6 +5649,7 @@ input[type="date"].task-inline-input {
             justify-content: center !important;
         }
     }
+}
 /* --- Global Container Style Rules (User Request) --- */
 .grid-container, 
 .table-container, 
@@ -5653,6 +5711,61 @@ td:first-child,
     z-index: 10;
 }
 
+.resizer:hover,
+.resizer.is-resizing {
+    background: var(--primary) !important;
+}
+
+.resizing .resizer:not(.is-resizing) {
+    background: transparent !important;
+}
+
+@media (max-width: 768px) {
+    .quote-body-table {
+        table-layout: fixed !important;
+    }
+
+    .quote-body-table .quote-col-index,
+    .quote-body-table th:nth-child(1),
+    .quote-body-table td:nth-child(1) {
+        display: none !important;
+    }
+
+    .quote-body-table .quote-col-index {
+        width: 0 !important;
+        visibility: collapse !important;
+    }
+
+    .quote-body-table .quote-col-item {
+        width: 24% !important;
+    }
+
+    .quote-body-table .quote-col-content {
+        width: 34% !important;
+    }
+
+    .quote-body-table .quote-col-price,
+    .quote-body-table .quote-col-total {
+        width: 16% !important;
+    }
+
+    .quote-body-table .quote-col-qty {
+        width: 10% !important;
+    }
+
+    .quote-body-table th,
+    .quote-body-table td {
+        min-width: 0 !important;
+        padding: 6px 4px !important;
+    }
+
+    .quote-body-table input,
+    .quote-body-table textarea {
+        min-width: 0 !important;
+        padding: 4px 2px !important;
+    }
+}
+
 /* Local Path Links Styling */
 .local-path-tag {
     color: #2563eb;
@@ -5681,4 +5794,1022 @@ td:first-child,
 [data-theme="dark"] .local-path-tag:hover {
     background: #334155;
     color: #93c5fd;
+}
+
+/* --- Balanced detail polish for quote, customer and task surfaces --- */
+.quote-sheet-table textarea {
+    box-sizing: border-box;
+    display: block;
+    min-height: 34px;
+    overflow: hidden !important;
+    resize: none !important;
+    line-height: 1.45;
+}
+
+.quote-body-table td {
+    vertical-align: middle !important;
+}
+
+.quote-body-table .i-name,
+.quote-body-table .i-content {
+    min-height: 42px;
+    max-height: none;
+}
+
+.quote-header-info td,
+.quote-header-info input,
+.quotation-stamp-grid td {
+    text-align: center !important;
+}
+
+.quote-header-info input {
+    margin: 0 auto;
+}
+
+.quotation-stamp-grid td {
+    vertical-align: middle !important;
+}
+
+.quotation-stamp-grid td:last-child {
+    text-align: center !important;
+}
+
+.quotation-stamp-grid .stamp-image {
+    display: block;
+    margin: 0 auto;
+}
+
+#customersListView .card-wrapper,
+#projectsListView .card-wrapper,
+.tasks-container {
+    max-width: none;
+    margin-inline: auto !important;
+}
+
+#customersListView .grid-container {
+    width: fit-content;
+    max-width: none;
+    padding: clamp(14px, 2vw, 24px);
+}
+
+#customerTable {
+    width: max-content !important;
+    min-width: 100% !important;
+    table-layout: auto !important;
+}
+
+#customerTable th,
+#customerTable td {
+    min-width: 0 !important;
+}
+
+#customerTable th:nth-child(1),
+#customerTable td:nth-child(1) {
+    width: 36%;
+    text-align: left;
+}
+
+#customerTable th:nth-child(2),
+#customerTable td:nth-child(2) {
+    width: 16%;
+    text-align: center;
+}
+
+#customerTable th:nth-child(3),
+#customerTable td:nth-child(3) {
+    width: 18%;
+    text-align: center;
+}
+
+#customerTable th:nth-child(4),
+#customerTable td:nth-child(4) {
+    width: 18%;
+    text-align: center;
+}
+
+#customerTable th:nth-child(5),
+#customerTable td:nth-child(5) {
+    width: 12%;
+    text-align: center;
+}
+
+:root[data-theme] .task-item {
+    border-radius: 8px !important;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+:root[data-theme] .task-item:hover,
+:root[data-theme] #taskList.is-draggable .task-item:hover {
+    background: color-mix(in srgb, var(--surface-muted) 82%, var(--primary) 8%) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 78%, var(--primary) 22%) !important;
+}
+
+:root[data-theme] .task-display-wrapper:hover,
+:root[data-theme] .task-inline-input:hover,
+:root[data-theme] .compact-form-row input:hover,
+:root[data-theme] .compact-form-row textarea:hover {
+    background: color-mix(in srgb, var(--surface-muted) 88%, var(--primary) 7%) !important;
+    border-color: color-mix(in srgb, var(--border) 62%, var(--primary) 38%) !important;
+}
+
+@media (max-width: 768px) {
+    #customers,
+    #projects,
+    #tasks {
+        padding-inline: 12px !important;
+    }
+
+    #customersListView .card-wrapper,
+    #projectsListView .card-wrapper,
+    #taskList,
+    .tasks-container {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    #customersListView .grid-container {
+        padding: 0 !important;
+        overflow-x: hidden;
+    }
+
+    #customerTable {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed !important;
+    }
+
+    #customerTable th,
+    #customerTable td {
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+        white-space: normal !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #customerTable th:nth-child(1),
+    #customerTable td:nth-child(1) {
+        width: 62% !important;
+    }
+
+    #customerTable th:nth-child(2),
+    #customerTable td:nth-child(2) {
+        width: 38% !important;
+        text-align: center !important;
+    }
+
+    .quotation-card {
+        padding-inline: 0 !important;
+    }
+
+    .quotation-header-grid,
+    .quotation-summary-grid,
+    .quotation-stamp-grid {
+        gap: 14px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .quote-sheet-table {
+        margin-bottom: 14px !important;
+    }
+
+    .quote-sheet-table:last-child,
+    .quotation-header-grid .quote-sheet-table,
+    .quotation-summary-grid .quote-sheet-table,
+    .quotation-stamp-grid .quote-sheet-table {
+        margin-bottom: 0 !important;
+    }
+
+    .quote-body-table {
+        margin-block: 14px !important;
+    }
+
+    .quote-body-table textarea {
+        min-height: 42px;
+        line-height: 1.45;
+    }
+
+    .quote-header-info td,
+    .quote-footer-grid td {
+        padding-block: 10px !important;
+    }
+
+    .quotation-stamp-grid td {
+        height: auto !important;
+        min-height: 132px;
+    }
+
+    .quotation-stamp-grid .stamp-image {
+        max-width: 70%;
+        height: auto;
+    }
+
+    .task-item {
+        border-radius: 8px !important;
+        margin-block: 2px !important;
+    }
+}
+
+/* --- Slim rounded scrollbars --- */
+html,
+body,
+* {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--text-muted) 48%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text-muted) 48%, transparent);
+    border: none;
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--primary) 58%, var(--text-muted) 24%);
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+textarea {
+    scrollbar-width: none;
+}
+
+textarea::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    .tab-content {
+        max-width: none;
+        overflow-x: auto;
+    }
+
+    #customersListView .card-wrapper,
+    #projectsListView .card-wrapper,
+    #permissions .card-wrapper,
+    #settings .card-wrapper,
+    .tasks-container {
+        width: fit-content !important;
+        max-width: none !important;
+        min-width: min(100%, var(--max-width-list));
+        align-items: center;
+    }
+
+    #customersListView .grid-container,
+    #projectsListView .grid-container,
+    #permissions .grid-container,
+    #settings .grid-container,
+    .table-container,
+    .tasks-container {
+        width: fit-content !important;
+        max-width: none !important;
+        overflow-x: visible;
+    }
+
+    #customerTable,
+    #projectTable,
+    .permission-matrix-table,
+    #memberTable,
+    .table-container table {
+        width: max-content !important;
+        min-width: 100% !important;
+        table-layout: auto !important;
+    }
+
+    #customerTable th,
+    #customerTable td,
+    #projectTable th,
+    #projectTable td,
+    .permission-matrix-table th,
+    .permission-matrix-table td,
+    #memberTable th,
+    #memberTable td {
+        width: auto;
+    }
+
+    #customersListView .card-actions-row,
+    #projectsListView .card-actions-row {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --- Center admin sub-pages while preserving content-driven tables --- */
+#permissions .sub-view-stack.active,
+#settings .admin-sub-tab.active {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+}
+
+#permissions .view-header,
+#settings .view-header {
+    width: fit-content;
+    max-width: none;
+    margin-inline: auto !important;
+}
+
+#permissions .card-wrapper,
+#settings .edit-card {
+    width: fit-content !important;
+    max-width: none !important;
+    margin-inline: auto !important;
+}
+
+#permissions .grid-container {
+    width: fit-content !important;
+    max-width: calc(100vw - 48px);
+    margin-inline: auto !important;
+}
+
+#permissionsMatrixView .card-wrapper {
+    display: grid;
+    justify-items: center;
+}
+
+#permissionsMatrixView .card-wrapper > div:first-child {
+    width: 100%;
+    max-width: max-content;
+    justify-content: center !important;
+}
+
+#permissionsListView table,
+#permissionsMatrixView .permission-matrix-table {
+    margin-inline: auto;
+}
+
+#permissionsMatrixView .permission-matrix-table {
+    width: max-content !important;
+    min-width: 0 !important;
+}
+
+#permissionsListView .grid-container table {
+    width: max-content !important;
+    min-width: 0 !important;
+}
+
+.plain-level-badge {
+    background: transparent !important;
+    border: none !important;
+    color: inherit !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font: inherit !important;
+}
+
+@media (max-width: 768px) {
+    #permissions,
+    #settings {
+        padding-inline: 12px !important;
+    }
+
+    #permissions .sub-view-stack.active,
+    #settings .admin-sub-tab.active {
+        display: block;
+    }
+
+    #permissions .view-header,
+    #settings .view-header,
+    #permissions .card-wrapper,
+    #settings .edit-card,
+    #permissions .grid-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #permissions .grid-container {
+        overflow-x: auto !important;
+    }
+
+    #permissionsMatrixView .card-wrapper > div:first-child {
+        justify-content: center !important;
+    }
+}
+
+/* --- Full-page themed backgrounds without stray mobile divider blocks --- */
+html,
+body,
+main,
+.tab-content {
+    min-height: 100%;
+    background: var(--bg-main);
+}
+
+.tab-content.active {
+    min-height: calc(100vh - 96px);
+}
+
+@media (max-width: 768px) {
+    body,
+    main,
+    .tab-content,
+    .sub-view-stack,
+    .card-wrapper {
+        background: var(--bg-main) !important;
+    }
+
+    #customersListView .card-wrapper,
+    #customersListView .grid-container,
+    #customersListView table,
+    #customersListView .sub-view-stack,
+    #customersListView,
+    #paginationContainer,
+    #projectsListView .card-wrapper,
+    #projectsListView .grid-container,
+    #projectsListView table,
+    #projectsListView,
+    #projectPaginationContainer,
+    #tasksListView .card-wrapper,
+    #tasksListView,
+    .tasks-container {
+        border-bottom: none !important;
+    }
+
+    #customersListView .card-wrapper,
+    #customersListView .grid-container,
+    #paginationContainer,
+    #projectsListView .card-wrapper,
+    #projectsListView .grid-container,
+    #projectPaginationContainer,
+    #tasksListView .card-wrapper,
+    .tasks-container {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    #customersListView .grid-container,
+    #projectsListView .grid-container,
+    .tasks-container {
+        background: var(--surface) !important;
+    }
+}
+
+/* --- Mobile readable, no-horizontal-scroll layout --- */
+@media (max-width: 768px) {
+    html,
+    body {
+        overflow-x: hidden !important;
+    }
+
+    main,
+    .tab-content,
+    .sub-view-container,
+    .sub-view-stack,
+    .card-wrapper,
+    .grid-container,
+    .table-container,
+    .tasks-container {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .sub-view-stack.active > .view-header,
+    .admin-sub-tab.active > .view-header {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 0 18px 0 !important;
+        padding: 14px 0 4px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
+
+    .sub-view-stack.active > .view-header .back-btn,
+    .admin-sub-tab.active > .view-header .back-btn {
+        width: auto !important;
+        height: 32px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        color: var(--primary) !important;
+        font-size: 0.9375rem !important;
+        font-weight: 700 !important;
+    }
+
+    .sub-view-stack.active > .view-header .back-btn img,
+    .admin-sub-tab.active > .view-header .back-btn img {
+        width: 18px !important;
+        height: 18px !important;
+        margin: 0 !important;
+    }
+
+    .sub-view-stack.active > .view-header h2,
+    .admin-sub-tab.active > .view-header h2 {
+        width: 100% !important;
+        margin: 0 !important;
+        text-align: left !important;
+        font-size: 1.35rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .grid-container table,
+    .table-container table,
+    #customerTable,
+    #projectTable,
+    .permission-matrix-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed !important;
+    }
+
+    th,
+    td {
+        min-width: 0 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    th,
+    td,
+    .task-display-text,
+    .task-date-display,
+    .task-header-btn {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #customerTable th,
+    #customerTable td {
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+
+    #customerTable th:nth-child(1),
+    #customerTable td:nth-child(1) {
+        width: 60% !important;
+    }
+
+    #customerTable th:nth-child(2),
+    #customerTable td:nth-child(2) {
+        width: 40% !important;
+    }
+
+    #customersEditView {
+        background: var(--bg-main) !important;
+        min-height: calc(100vh - 96px) !important;
+    }
+
+    #customersEditView .view-header,
+    #customersEditView .edit-card {
+        border-bottom: none !important;
+        background: transparent !important;
+    }
+
+    #customersEditView .compact-form-row,
+    #customersEditView .invoice-box,
+    #customersEditView .form-actions {
+        border-bottom: none !important;
+    }
+
+    #customersEditView,
+    #customersEditView *,
+    :root[data-theme] #customersEditView,
+    :root[data-theme] #customersEditView * {
+        outline: none !important;
+    }
+
+    #customersEditView .view-header,
+    #customersEditView .back-btn,
+    #customersEditView .edit-card,
+    #customersEditView form,
+    #customersEditView .compact-form-row,
+    #customersEditView .invoice-box,
+    #customersEditView .form-actions,
+    :root[data-theme] #customersEditView .view-header,
+    :root[data-theme] #customersEditView .back-btn,
+    :root[data-theme] #customersEditView .edit-card,
+    :root[data-theme] #customersEditView form,
+    :root[data-theme] #customersEditView .compact-form-row,
+    :root[data-theme] #customersEditView .invoice-box,
+    :root[data-theme] #customersEditView .form-actions {
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
+
+    #customersEditView .edit-card,
+    :root[data-theme] #customersEditView .edit-card {
+        background: var(--bg-main) !important;
+    }
+
+    #customersEditView,
+    #customersEditView .edit-card,
+    #customersEditView form,
+    :root[data-theme] #customersEditView,
+    :root[data-theme] #customersEditView .edit-card,
+    :root[data-theme] #customersEditView form {
+        min-height: calc(100vh - 96px) !important;
+    }
+
+    #customersEditView .edit-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #customersEditView form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #customersEditView .form-actions {
+        margin-bottom: auto;
+    }
+
+    #tasks .card-actions-row {
+        justify-content: center !important;
+        padding-inline: 0 !important;
+    }
+
+    #tasks .card-search-wrapper {
+        display: none !important;
+    }
+
+    .task-header-row,
+    .task-item {
+        display: grid !important;
+        grid-template-columns: 40px minmax(74px, 0.28fr) minmax(0, 1fr) 34px;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        align-items: center !important;
+    }
+
+    .task-header-btn.task-project-header,
+    .task-col-project {
+        display: none !important;
+    }
+
+    .task-header-btn.task-actions-header {
+        display: none !important;
+    }
+
+    .task-header-btn,
+    .task-col-drag,
+    .task-col-date,
+    .task-col-content,
+    .task-col-actions,
+    .task-actions {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    .task-col-drag,
+    .task-drag-handle-header {
+        grid-column: 1;
+    }
+
+    .task-col-date,
+    .task-date-header {
+        grid-column: 2;
+    }
+
+    .task-item .task-col-content {
+        grid-column: 3;
+    }
+
+    .task-header-row .task-content-header {
+        grid-column: 3 / 5;
+    }
+
+    .task-actions {
+        grid-column: 4;
+    }
+
+    .task-content-header {
+        justify-content: center !important;
+    }
+
+    .task-display-wrapper,
+    .task-display-text {
+        width: 100% !important;
+        max-width: 100% !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+
+    .task-actions .action-btn-icon {
+        width: 34px !important;
+        height: 34px !important;
+        padding: 6px !important;
+    }
+
+    #permissionsListView th:nth-child(4),
+    #permissionsListView td:nth-child(4) {
+        display: none !important;
+    }
+
+    #permissionsListView .grid-container,
+    #permissionsMatrixView .grid-container {
+        margin-inline: auto !important;
+    }
+
+    #permissionsListView table,
+    #permissionsMatrixView .permission-matrix-table {
+        margin-inline: auto !important;
+    }
+
+    #permissionsListView th,
+    #permissionsListView td,
+    .permission-matrix-table th,
+    .permission-matrix-table td {
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+}
+
+/* --- Unified visual language for nav, profile and white surfaces --- */
+:root {
+    --surface-radius: 12px;
+    --surface-padding: 24px;
+    --control-radius: 10px;
+    --control-height: 44px;
+    --profile-action-width: 112px;
+}
+
+.sticky-nav-container,
+.sticky-nav-container::before,
+.tabs,
+.user-nav-segmented,
+.tab-link,
+.user-nav-btn,
+#profileModal .modal-card,
+#profileModal .binding-container,
+#profileModal .bind-card,
+#profileModal .nav-shortcut-card,
+#settings .card-wrapper,
+#settings .edit-card,
+#permissions .card-wrapper,
+#permissions .grid-container {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+:root[data-theme] .sticky-nav-container,
+:root[data-theme] .sticky-nav-container::before,
+:root[data-theme] .tabs,
+:root[data-theme] .user-nav-segmented,
+:root[data-theme] .tab-link,
+:root[data-theme] .user-nav-btn,
+:root[data-theme] #profileModal .modal-card,
+:root[data-theme] #profileModal .binding-container,
+:root[data-theme] #profileModal .bind-card,
+:root[data-theme] #profileModal .nav-shortcut-card,
+:root[data-theme] #settings .card-wrapper,
+:root[data-theme] #settings .edit-card,
+:root[data-theme] #permissions .card-wrapper,
+:root[data-theme] #permissions .grid-container {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.tabs,
+.user-nav-segmented,
+#profileModal .modal-card,
+#profileModal .bind-card,
+#profileModal .nav-shortcut-card,
+.card-wrapper,
+.grid-container,
+.table-container,
+.tasks-container,
+.edit-card,
+.quotation-card {
+    border-radius: var(--surface-radius) !important;
+}
+
+.card-wrapper,
+.grid-container,
+.table-container,
+.tasks-container,
+.edit-card,
+.quotation-card,
+#profileModal .modal-card {
+    background: var(--bg-card) !important;
+}
+
+#profileModal .bind-card,
+#profileModal .nav-shortcut-card {
+    min-height: 72px;
+    padding: 14px 16px !important;
+    gap: 14px;
+    background: var(--bg-input) !important;
+}
+
+#profileModal .bind-card .icon-box {
+    width: var(--control-height) !important;
+    height: var(--control-height) !important;
+    min-width: var(--control-height) !important;
+    border-radius: var(--control-radius) !important;
+}
+
+#profileModal .bind-card-google .icon-box {
+    border: none !important;
+}
+
+#profileModal .bind-btn-blue,
+#profileModal .bind-btn-grey {
+    width: var(--profile-action-width) !important;
+    min-width: var(--profile-action-width) !important;
+    height: var(--control-height) !important;
+    min-height: var(--control-height) !important;
+    padding: 0 16px !important;
+    border: none !important;
+    border-radius: var(--control-radius) !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+:root[data-theme] #profileModal .bind-btn-blue,
+:root[data-theme] #profileModal .bind-btn-grey,
+:root[data-theme] #profileModal .primary-btn {
+    box-shadow: none !important;
+}
+
+#profileModal .bind-btn-blue:hover,
+#profileModal .bind-btn-grey:hover {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+:root[data-theme] #profileModal .bind-btn-blue:hover,
+:root[data-theme] #profileModal .bind-btn-grey:hover,
+:root[data-theme] #profileModal .primary-btn:hover {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#profileModal .nav-shortcut-card {
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .sticky-nav-container,
+    .sticky-nav-container::before,
+    .tabs,
+    .user-nav-segmented,
+    .tab-link,
+    .user-nav-btn,
+    #profileModal .modal-card,
+    #profileModal .binding-container,
+    #profileModal .bind-card,
+    #profileModal .nav-shortcut-card,
+    #settings .card-wrapper,
+    #settings .edit-card,
+    #permissions .card-wrapper,
+    #permissions .grid-container {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    :root[data-theme] .sticky-nav-container,
+    :root[data-theme] .sticky-nav-container::before,
+    :root[data-theme] .tabs,
+    :root[data-theme] .user-nav-segmented,
+    :root[data-theme] .tab-link,
+    :root[data-theme] .user-nav-btn,
+    :root[data-theme] #profileModal .modal-card,
+    :root[data-theme] #profileModal .binding-container,
+    :root[data-theme] #profileModal .bind-card,
+    :root[data-theme] #profileModal .nav-shortcut-card,
+    :root[data-theme] #settings .card-wrapper,
+    :root[data-theme] #settings .edit-card,
+    :root[data-theme] #permissions .card-wrapper,
+    :root[data-theme] #permissions .grid-container {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .tabs,
+    .user-nav-segmented,
+    #profileModal .modal-card,
+    #profileModal .bind-card,
+    #profileModal .nav-shortcut-card,
+    .card-wrapper,
+    .grid-container,
+    .table-container,
+    .tasks-container,
+    .edit-card,
+    .quotation-card {
+        border-radius: var(--surface-radius) !important;
+    }
+
+    #profileModal .modal-card {
+        width: calc(100% - 24px) !important;
+        margin: 12px !important;
+    }
+
+    #profileModal .bind-card,
+    #profileModal .nav-shortcut-card {
+        min-height: 72px;
+        padding: 14px 16px !important;
+    }
+
+    #profileModal .bind-btn-blue,
+    #profileModal .bind-btn-grey {
+        width: var(--profile-action-width) !important;
+        min-width: var(--profile-action-width) !important;
+        height: var(--control-height) !important;
+        min-height: var(--control-height) !important;
+        border-radius: var(--control-radius) !important;
+    }
+}
+
+/* --- Desktop task list width follows its column widths --- */
+@media (min-width: 769px) {
+    #tasksListView .tasks-container,
+    .tasks-container {
+        width: var(--task-row-width) !important;
+        min-width: var(--task-row-width) !important;
+        max-width: none !important;
+        overflow-x: visible !important;
+    }
+
+    .task-header-row,
+    .task-item {
+        width: var(--task-row-width) !important;
+        min-width: var(--task-row-width) !important;
+        max-width: none !important;
+        gap: var(--task-row-gap) !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .task-header-btn.task-drag-handle-header,
+    .task-col-drag {
+        width: var(--task-col-drag-width) !important;
+        min-width: var(--task-col-drag-width) !important;
+        flex: 0 0 var(--task-col-drag-width) !important;
+    }
+
+    .task-header-btn.task-project-header,
+    .task-col-project {
+        width: var(--task-col-project-width) !important;
+        min-width: var(--task-col-project-width) !important;
+        flex: 0 0 var(--task-col-project-width) !important;
+    }
+
+    .task-header-btn.task-date-header,
+    .task-col-date {
+        width: var(--task-col-date-width) !important;
+        min-width: var(--task-col-date-width) !important;
+        flex: 0 0 var(--task-col-date-width) !important;
+    }
+
+    .task-header-btn.task-content-header,
+    .task-col-content {
+        width: var(--task-col-content-width) !important;
+        min-width: var(--task-col-content-width) !important;
+        flex: 0 0 var(--task-col-content-width) !important;
+    }
+
+    .task-header-btn.task-actions-header,
+    .task-col-actions,
+    .task-actions {
+        width: var(--task-col-actions-width) !important;
+        min-width: var(--task-col-actions-width) !important;
+        flex: 0 0 var(--task-col-actions-width) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #tasksListView .tasks-container,
+    .tasks-container {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
 }

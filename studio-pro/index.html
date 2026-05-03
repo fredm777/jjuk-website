@@ -305,7 +305,6 @@
 
     <!-- Dashboard View (Initially Hidden) -->
     <div id="app" class="hidden">
-        <div id="syncProgressBar"></div>
         <div class="sticky-nav-container">
             <header>
                 <div class="header-content">
@@ -1019,7 +1018,7 @@
                                 }
 
                                 .resizer:hover,
-                                .resizing .resizer {
+                                .resizer.is-resizing {
                                     background: var(--primary);
                                 }
 
@@ -1109,7 +1108,12 @@
 
                                 <table class="quote-sheet-table quote-body-table thick-border">
                                     <colgroup>
-                                        <col><col><col><col><col><col>
+                                        <col class="quote-col-index">
+                                        <col class="quote-col-item">
+                                        <col class="quote-col-content">
+                                        <col class="quote-col-price">
+                                        <col class="quote-col-qty">
+                                        <col class="quote-col-total">
                                     </colgroup>
                                     <thead>
                                         <tr>
@@ -1170,7 +1174,7 @@
                                                     <textarea id="qBankData" rows="1"
                                                         style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         placeholder="銀行：...\n戶名：...\n帳號：..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                                        oninput="autoExpandTextarea(this)"></textarea>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -1199,7 +1203,7 @@
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
                                                         style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="其他補充說明..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
+                                                        oninput="autoExpandTextarea(this)"></textarea></td>
                                             </tr>
                                         </tbody>
                                     </table>

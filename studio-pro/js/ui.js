@@ -76,8 +76,181 @@ window.routeFromProfile = function(tabId, sectionId) {
     window.switchToTab(tabId, sectionId);
 };
 
+// Input-level undo / redo for form controls across the app.
+(function initInputHistory() {
+    if (window.__inputHistoryBound) return;
+
+    const histories = new WeakMap();
+    let activeControl = null;
+    let isApplyingHistory = false;
+    const MAX_HISTORY = 80;
+
+    const isHistoryControl = (el) => {
+        if (!el || !['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return false;
+        if (el.disabled || el.readOnly) return false;
+        if (el.type && ['hidden', 'file', 'button', 'submit', 'reset'].includes(el.type)) return false;
+        return true;
+    };
+
+    const snapshot = (el) => ({
+        value: el.value,
+        checked: !!el.checked,
+        selectionStart: typeof el.selectionStart === 'number' ? el.selectionStart : null,
+        selectionEnd: typeof el.selectionEnd === 'number' ? el.selectionEnd : null
+    });
+
+    const sameSnapshot = (a, b) => {
+        if (!a || !b) return false;
+        return a.value === b.value && a.checked === b.checked;
+    };
+
+    const getHistory = (el) => {
+        if (!histories.has(el)) {
+            histories.set(el, { undo: [snapshot(el)], redo: [] });
+        }
+        return histories.get(el);
+    };
+
+    const pushHistory = (el) => {
+        if (!isHistoryControl(el) || isApplyingHistory) return;
+        const history = getHistory(el);
+        const next = snapshot(el);
+        const last = history.undo[history.undo.length - 1];
+        if (sameSnapshot(last, next)) return;
+        history.undo.push(next);
+        if (history.undo.length > MAX_HISTORY) history.undo.shift();
+        history.redo = [];
+    };
+
+    const applySnapshot = (el, state) => {
+        isApplyingHistory = true;
+        el.value = state.value;
+        if ('checked' in el) el.checked = state.checked;
+
+        if (typeof el.setSelectionRange === 'function' && state.selectionStart !== null && state.selectionEnd !== null) {
+            try {
+                el.setSelectionRange(state.selectionStart, state.selectionEnd);
+            } catch (err) {
+                // Some input types, like date/number, do not support text selection.
+            }
+        }
+
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        isApplyingHistory = false;
+    };
+
+    const stepHistory = (el, direction) => {
+        if (!isHistoryControl(el)) return false;
+        const history = getHistory(el);
+        const current = snapshot(el);
+
+        if (direction === 'undo') {
+            if (history.undo.length <= 1) return false;
+            if (!sameSnapshot(history.undo[history.undo.length - 1], current)) {
+                history.undo.push(current);
+            }
+            const latest = history.undo.pop();
+            history.redo.push(latest);
+            applySnapshot(el, history.undo[history.undo.length - 1]);
+            return true;
+        }
+
+        if (history.redo.length === 0) return false;
+        const next = history.redo.pop();
+        const lastUndo = history.undo[history.undo.length - 1];
+        if (!sameSnapshot(lastUndo, current)) history.undo.push(current);
+        if (!sameSnapshot(history.undo[history.undo.length - 1], next)) history.undo.push(next);
+        applySnapshot(el, next);
+        return true;
+    };
+
+    document.addEventListener('focusin', (e) => {
+        if (!isHistoryControl(e.target)) return;
+        activeControl = e.target;
+        getHistory(activeControl);
+    });
+
+    document.addEventListener('focusout', (e) => {
+        if (e.target === activeControl) activeControl = null;
+    });
+
+    document.addEventListener('input', (e) => pushHistory(e.target), true);
+    document.addEventListener('change', (e) => pushHistory(e.target), true);
+
+    document.addEventListener('keydown', (e) => {
+        const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+        if (!isCmdOrCtrl || e.key.toLowerCase() !== 'z') return;
+
+        const focusedControl = isHistoryControl(document.activeElement) ? document.activeElement : null;
+        const control = isHistoryControl(e.target) ? e.target : focusedControl;
+        if (!isHistoryControl(control)) return;
+
+        const handled = stepHistory(control, e.shiftKey ? 'redo' : 'undo');
+        if (!handled) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    }, true);
+
+    window.__inputHistoryBound = true;
+})();
+
 
 function initResizableTable() {
+    const taskColumnVars = new Map([
+        ['task-drag-handle-header', '--task-col-drag-width'],
+        ['task-project-header', '--task-col-project-width'],
+        ['task-date-header', '--task-col-date-width'],
+        ['task-content-header', '--task-col-content-width'],
+        ['task-actions-header', '--task-col-actions-width']
+    ]);
+
+    const getTaskColumnVar = (header) => {
+        for (const [className, varName] of taskColumnVars) {
+            if (header.classList.contains(className)) return varName;
+        }
+        return null;
+    };
+
+    const getCssPx = (name) => {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const parsed = parseFloat(raw);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    window.updateTaskContainerWidth = function () {
+        const container = document.querySelector('#tasksListView .tasks-container, .tasks-container');
+        if (!container || window.matchMedia('(max-width: 768px)').matches) {
+            if (container) {
+                container.style.removeProperty('width');
+                container.style.removeProperty('min-width');
+            }
+            return;
+        }
+
+        const total =
+            getCssPx('--task-col-drag-width') +
+            getCssPx('--task-col-project-width') +
+            getCssPx('--task-col-date-width') +
+            getCssPx('--task-col-content-width') +
+            getCssPx('--task-col-actions-width') +
+            (getCssPx('--task-row-gap') * 4) +
+            getCssPx('--task-row-padding-x');
+
+        if (total > 0) {
+            container.style.setProperty('width', `${total}px`, 'important');
+            container.style.setProperty('min-width', `${total}px`, 'important');
+        }
+    };
+
+    if (!window.__taskContainerResizeBound) {
+        window.addEventListener('resize', () => {
+            if (typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
+        });
+        window.__taskContainerResizeBound = true;
+    }
+
     // Select both standard table headers and Task header buttons
     const headers = document.querySelectorAll('th, .task-header-btn:not(.task-actions-header)');
     
@@ -90,31 +263,36 @@ function initResizableTable() {
 
         let x = 0;
         let w = 0;
+        let table = null;
+        let tableStartWidth = 0;
+        let columnCells = [];
+
+        const setColumnWidth = (width) => {
+            columnCells.forEach(cell => {
+                cell.style.setProperty('width', `${width}px`, 'important');
+                cell.style.setProperty('min-width', `${width}px`, 'important');
+            });
+        };
 
         const onMouseMove = (e) => {
             const dx = e.pageX - x;
             const newWidth = Math.max(100, w + dx);
             
             if (header.tagName === 'TH') {
-                header.style.width = `${newWidth}px`;
-                header.style.minWidth = `${newWidth}px`;
+                const widthDelta = newWidth - w;
+                if (table) {
+                    table.style.setProperty('width', `${Math.max(100, tableStartWidth + widthDelta)}px`, 'important');
+                    table.style.setProperty('min-width', `${Math.max(100, tableStartWidth + widthDelta)}px`, 'important');
+                }
+                setColumnWidth(newWidth);
             } else {
                 // Task Header Resizing via CSS Variables
                 header.style.width = `${newWidth}px`;
                 header.style.flex = 'none'; // Prevent flex growing/shrinking
                 
-                // Identify which column we are resizing
-                if (header.classList.contains('task-drag-handle-header')) {
-                    document.documentElement.style.setProperty('--task-col-drag-width', newWidth + 'px');
-                } else if (header.classList.contains('task-project-header')) {
-                    document.documentElement.style.setProperty('--task-col-project-width', newWidth + 'px');
-                } else if (header.classList.contains('task-date-header')) {
-                    document.documentElement.style.setProperty('--task-col-date-width', newWidth + 'px');
-                } else if (header.classList.contains('task-content-header')) {
-                    document.documentElement.style.setProperty('--task-col-content-min-width', newWidth + 'px');
-                } else if (header.classList.contains('task-actions-header')) {
-                    document.documentElement.style.setProperty('--task-col-actions-width', newWidth + 'px');
-                }
+                const columnVar = getTaskColumnVar(header);
+                if (columnVar) document.documentElement.style.setProperty(columnVar, newWidth + 'px');
+                window.updateTaskContainerWidth();
             }
         };
 
@@ -122,17 +300,45 @@ function initResizableTable() {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             document.body.classList.remove('resizing');
+            header.classList.remove('is-resizing');
+            resizer.classList.remove('is-resizing');
+            table = null;
+            columnCells = [];
         };
 
         resizer.addEventListener('mousedown', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             x = e.pageX;
             const styles = window.getComputedStyle(header);
-            w = parseInt(styles.width, 10);
+            w = parseInt(styles.width, 10) || header.getBoundingClientRect().width;
+
+            if (header.tagName === 'TH') {
+                table = header.closest('table');
+                if (table) {
+                    tableStartWidth = table.getBoundingClientRect().width;
+                    table.style.setProperty('width', `${tableStartWidth}px`, 'important');
+                    table.style.setProperty('min-width', `${tableStartWidth}px`, 'important');
+
+                    const colIndex = Array.from(header.parentNode.children).indexOf(header);
+                    columnCells = Array.from(table.querySelectorAll('tr'))
+                        .map(row => row.children[colIndex])
+                        .filter(Boolean);
+                    setColumnWidth(w);
+                }
+            }
+
+            if (header.classList.contains('task-header-btn')) {
+                const columnVar = getTaskColumnVar(header);
+                if (columnVar) document.documentElement.style.setProperty(columnVar, `${w}px`);
+                window.updateTaskContainerWidth();
+            }
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
             document.body.classList.add('resizing');
+            header.classList.add('is-resizing');
+            resizer.classList.add('is-resizing');
         });
 
         // Double Click to Auto-Fit
@@ -160,11 +366,23 @@ function initResizableTable() {
                 }
             });
 
-            header.style.width = `${maxWidth}px`;
-            header.style.minWidth = `${maxWidth}px`;
+            const currentWidth = header.getBoundingClientRect().width;
+            const currentTableWidth = table.getBoundingClientRect().width;
+            const columnCells = Array.from(rows)
+                .map(row => row.children[colIndex])
+                .filter(Boolean);
+
+            table.style.setProperty('width', `${Math.max(100, currentTableWidth + (maxWidth - currentWidth))}px`, 'important');
+            table.style.setProperty('min-width', `${Math.max(100, currentTableWidth + (maxWidth - currentWidth))}px`, 'important');
+            columnCells.forEach(cell => {
+                cell.style.setProperty('width', `${maxWidth}px`, 'important');
+                cell.style.setProperty('min-width', `${maxWidth}px`, 'important');
+            });
             document.body.removeChild(tester);
         });
     });
+
+    if (typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
 }
 
 function initBackgroundParallax() {

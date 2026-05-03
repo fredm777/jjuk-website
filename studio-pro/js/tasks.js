@@ -61,6 +61,12 @@ window.redoTask = async function() {
 
 // Global Keyboard Listener
 document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) return;
+
+    const activeEl = document.activeElement;
+    const isEditingField = activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName);
+    if (isEditingField) return;
+
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const cmdKey = isMac ? e.metaKey : e.ctrlKey;
     
@@ -613,6 +619,10 @@ window.renderTasks = function() {
             }
         });
     }
+
+    if (typeof window.updateTaskContainerWidth === 'function') {
+        window.updateTaskContainerWidth();
+    }
 }
 
 window.saveTaskOrder = async function(orderedIds) {
@@ -915,6 +925,22 @@ document.addEventListener('click', () => {
         menu.classList.remove('active');
     });
 });
+
+window.saveTask = async function(taskId) {
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    if (!task) throw new Error('Task not found');
+
+    const res = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(window.buildApiPayload('save_task', { task }))
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Task save failed');
+    if (json.data?.rowIndex) task.rowIndex = json.data.rowIndex;
+    return json;
+}
 
 // --- Task Editor Modal Logic ---
 window.showTaskEditor = function(taskId) {

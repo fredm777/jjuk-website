@@ -352,7 +352,7 @@
                                 <input type="text" id="customerSearchInput" class="card-search-input"
                                     placeholder="">
                                 <div class="card-search-icon">
-                                    <img src="assets/icons/search.svg" alt="search">
+                                    <img src="assets/icons/search_custom.png" alt="search">
                                 </div>
                             </div>
                         </div>
@@ -476,7 +476,7 @@
             </section>
 
             <section id="tasks" class="tab-content sub-view-container">
-                <div id="tasksListView" class="sub-view-stack active">
+                <div id="tasksListView" class="sub-view-stack">
                     <div class="card-wrapper">
                         <div class="card-actions-row">
                             <button id="addTaskBtn" class="card-add-btn" title="新增任務">
@@ -498,7 +498,7 @@
                                     <input type="text" id="taskSearchInput" class="card-search-input"
                                         placeholder="搜尋客戶、日期或任務..." oninput="window.filterTasks()" list="taskSearchSuggestions">
                                     <div class="card-search-icon">
-                                        <img src="assets/icons/search.svg" alt="search">
+                                        <img src="assets/icons/search_custom.png" alt="search">
                                     </div>
                                     <datalist id="taskSearchSuggestions"></datalist>
                                 </div>
@@ -506,17 +506,17 @@
                         </div>
                         <div class="tasks-container">
                             <div class="task-header-row">
-                                <div class="task-header-btn task-drag-handle-header task-col-drag active" id="sort-drag" onclick="window.setTaskSort('drag')" title="原始排序">
-                                    <img src="assets/icons/drag.svg" style="width: 14px; height: 14px; filter: brightness(0.5);">
+                                <div class="task-header-btn task-drag-handle-header task-col-drag" id="sort-drag" onclick="window.setTaskSort('drag')" title="原始排序">
+                                    <img src="assets/icons/drag.svg" style="width: 14px; height: 14px; filter: invert(1) brightness(0.7);">
                                 </div>
                                 <div class="task-header-btn task-project-header task-col-project" id="sort-project" onclick="window.setTaskSort('project')">
-                                    <img src="assets/icons/projects.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
+                                    專案 <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-date-header task-col-date" id="sort-date" onclick="window.setTaskSort('date')">
-                                    <img src="assets/icons/calendar.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
+                                    時間 <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-content-header task-col-content" id="sort-content" onclick="window.setTaskSort('content')">
-                                    <img src="assets/icons/tasks.svg" style="width: 16px; height: 16px;"> <span class="sort-arrow"></span>
+                                    內容 <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-actions-header task-col-actions"></div>
                             </div>
@@ -590,7 +590,7 @@
 
             <section id="permissions" class="tab-content sub-view-container">
                 <!-- Member Management Sub-view: List -->
-                <div id="permissionsListView" class="sub-view-stack active">
+                <div id="permissionsListView" class="sub-view-stack">
                     <div class="view-header">
                         <button class="back-btn" onclick="openProfileModal()">
                             <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
@@ -781,7 +781,7 @@
             </section>
 
             <section id="projects" class="tab-content sub-view-container">
-                <div id="projectsListView" class="sub-view-stack active">
+                <div id="projectsListView" class="sub-view-stack">
                     <div class="card-wrapper">
                         <div class="card-actions-row">
                             <button id="addProjectBtn" class="card-add-btn" title="建立新報價單">
@@ -806,7 +806,7 @@
                                 <input type="text" id="projectSearchInput" class="card-search-input"
                                     placeholder="">
                                 <div class="card-search-icon">
-                                    <img src="assets/icons/search.svg" alt="search">
+                                    <img src="assets/icons/search_custom.png" alt="search">
                                 </div>
                             </div>
                         </div>

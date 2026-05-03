@@ -221,13 +221,7 @@ function initResizableTable() {
 
     window.updateTaskContainerWidth = function () {
         const container = document.querySelector('#tasksListView .tasks-container, .tasks-container');
-        if (!container || window.matchMedia('(max-width: 768px)').matches) {
-            if (container) {
-                container.style.removeProperty('width');
-                container.style.removeProperty('min-width');
-            }
-            return;
-        }
+        if (!container || window.matchMedia('(max-width: 768px)').matches) return;
 
         const total =
             getCssPx('--task-col-drag-width') +
@@ -241,8 +235,37 @@ function initResizableTable() {
         if (total > 0) {
             container.style.setProperty('width', `${total}px`, 'important');
             container.style.setProperty('min-width', `${total}px`, 'important');
+            document.documentElement.style.setProperty('--total-task-width', `${total}px`);
         }
     };
+
+    // --- Task Column Width Persistence ---
+    window.saveTaskColumnWidths = function() {
+        const widths = {
+            '--task-col-drag-width': getComputedStyle(document.documentElement).getPropertyValue('--task-col-drag-width'),
+            '--task-col-project-width': getComputedStyle(document.documentElement).getPropertyValue('--task-col-project-width'),
+            '--task-col-date-width': getComputedStyle(document.documentElement).getPropertyValue('--task-col-date-width'),
+            '--task-col-content-width': getComputedStyle(document.documentElement).getPropertyValue('--task-col-content-width'),
+            '--task-col-actions-width': getComputedStyle(document.documentElement).getPropertyValue('--task-col-actions-width')
+        };
+        localStorage.setItem('studio_pro_task_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadTaskColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_task_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+                setTimeout(() => window.updateTaskContainerWidth(), 100);
+            } catch (e) { console.error('Failed to load column widths', e); }
+        }
+    };
+
+    // Load widths immediately
+    window.loadTaskColumnWidths();
 
     if (!window.__taskContainerResizeBound) {
         window.addEventListener('resize', () => {
@@ -299,9 +322,15 @@ function initResizableTable() {
         const onMouseUp = () => {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = 'default';
+            resizer.classList.remove('is-resizing');
+
+            // Save widths after resizing tasks
+            if (header.classList.contains('task-header-btn')) {
+                window.saveTaskColumnWidths();
+            }
             document.body.classList.remove('resizing');
             header.classList.remove('is-resizing');
-            resizer.classList.remove('is-resizing');
             table = null;
             columnCells = [];
         };

@@ -390,6 +390,7 @@ window.showQuotationEditor = async function (title, data = null) {
     if (typeof switchSubView === 'function') switchSubView('projects', 'edit');
     const form = document.getElementById('quotationForm');
     if (form) form.reset();
+    window.isProjectLoading = true; // Set loading flag
     if (document.getElementById('quotationTitle')) document.getElementById('quotationTitle').innerText = title;
     if (document.getElementById('quotationItemsBody')) document.getElementById('quotationItemsBody').innerHTML = '';
 
@@ -509,6 +510,8 @@ window.showQuotationEditor = async function (title, data = null) {
                 window.autoExpandTextarea(ta);
             }
         });
+        // Special case: if we don't have items to fetch, clear loading now
+        if (!data || !data.projectId) window.isProjectLoading = false;
     }, 150);
 }
 
@@ -663,21 +666,53 @@ async function fetchProjectItems(projId) {
     const tbody = document.getElementById('quotationItemsBody');
     if (tbody) tbody.innerHTML = '';
 
+    // Function to populate footer fields if they are currently empty or missing
+    const fillFooterIfEmpty = (data) => {
+        if (!data) return;
+        const fields = {
+            'qWfDraft': data.days,
+            'qWfEdit': data.revCount,
+            'qWfOrder': data.wfOrder,
+            'qWfDeposit': data.wfDeposit,
+            'qWfDelivery': data.wfDelivery,
+            'qBankData': data.bankData,
+            'qWfRemark': data.remark
+        };
+        for (const [id, val] of Object.entries(fields)) {
+            const el = document.getElementById(id);
+            if (el && val && (!el.value || el.value === '')) {
+                el.value = val;
+                if (typeof window.autoExpandTextarea === 'function') window.autoExpandTextarea(el);
+            }
+        }
+    };
+
     if (proj && proj.items && proj.items.length > 0) {
+        // If we have items, we likely have the rest of the data in the cache too
         proj.items.forEach(item => {
             addQuotationRow(item);
         });
+        fillFooterIfEmpty(proj);
     } else if (projId) {
-        console.log(">> Items missing in cache, triggering precision sync...");
+        console.log(">> Items or details missing in cache, triggering precision sync...");
         const refreshedProj = await syncSingleProject(projId);
-        if (refreshedProj && refreshedProj.items && refreshedProj.items.length > 0) {
-            refreshedProj.items.forEach(item => addQuotationRow(item));
+        if (refreshedProj) {
+            if (refreshedProj.items && refreshedProj.items.length > 0) {
+                refreshedProj.items.forEach(item => addQuotationRow(item));
+            } else {
+                addQuotationRow();
+            }
+            // CRITICAL: Fill footer fields (Bank, Notes etc) from the refreshed data
+            fillFooterIfEmpty(refreshedProj);
         } else {
             addQuotationRow();
         }
     } else {
         addQuotationRow();
     }
+    
+    // Final sync safety: Clear loading flag after items & details are processed
+    setTimeout(() => { window.isProjectLoading = false; }, 100);
 }
 
 function generateProjectId() {
@@ -855,6 +890,18 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
             console.log(">> Save in progress, queueing next background save...");
             nextSavePending = true;
         }
+        return;
+    }
+
+    // Safety: Don't save if critical fields are missing (might be a loading race condition)
+    const projectName = document.getElementById('qProjName')?.value;
+    if (!projectName && !isBackground) {
+        console.warn(">> Save blocked: Project Name is missing.");
+        return;
+    }
+
+    if (window.isProjectLoading) {
+        console.warn(">> Save blocked: Project is still loading from server.");
         return;
     }
 

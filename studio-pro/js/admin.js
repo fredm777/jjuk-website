@@ -21,7 +21,8 @@ async function fetchSettings(force = false) {
         return;
     }
 
-    setSyncStatus(true);
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
+    window.isSettingsLoading = true;
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
@@ -67,12 +68,19 @@ async function fetchSettings(force = false) {
             }
         }
     } catch(e) { console.error("Fetch Settings Error:", e); }
-    finally { setSyncStatus(false); }
+    finally { 
+        if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false); 
+        window.isSettingsLoading = false; // Clear loading flag
+    }
 }
 
 window.handleGlobalSettingsSubmit = async function(e) {
     if (e) e.preventDefault();
-    setSyncStatus(true);
+    if (window.isSettingsLoading) {
+        console.warn(">> Settings save blocked: loading in progress.");
+        return;
+    }
+    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
     
     const settings = {
         bank_name: document.getElementById('setBankName').value,

@@ -401,8 +401,10 @@ body {
 :root[data-theme] .task-autocomplete-dropdown,
 :root[data-theme] .suggestions-list {
     background: var(--surface) !important;
-    border-color: var(--border) !important;
+    border: none !important;
+    box-shadow: none !important;
     color: var(--text-dark);
+    border-radius: 10px !important;
 }
 
 :root[data-theme] th,
@@ -1506,7 +1508,7 @@ header {
 .card-add-btn:hover {
     background: #55667a !important;
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: none !important;
 }
 
 .card-add-btn img {
@@ -1536,7 +1538,7 @@ header {
 .nav-search-input {
     width: 100%;
     background: #F1F5F9;
-    border: none;
+    border: none !important;
     border-radius: 40px;
     padding: 10px 16px 10px 40px;
     font-size: 0.9375rem;
@@ -1727,8 +1729,8 @@ header {
 .card-search-input:focus,
 .card-search-wrapper:focus-within .card-search-input {
     background: white !important;
-    border: 1.5px solid var(--primary-green) !important;
-    box-shadow: 0 0 0 5px rgba(74, 222, 128, 0.15) !important;
+    border: none !important;
+    box-shadow: none !important;
     outline: none !important;
     padding: 0 35px 0 12px;
     text-align: left;
@@ -1829,10 +1831,10 @@ main {
 
 .grid-container {
     background: white;
-    border-radius: 10px;
-    border: none;
+    border-radius: 10px !important;
+    border: none !important;
     overflow: auto;
-    box-shadow: none;
+    box-shadow: none !important;
     width: fit-content;
     max-width: 100%;
     margin: 0 auto !important;
@@ -1878,14 +1880,14 @@ td {
 .table-container {
     background: white;
     border-radius: 10px !important;
-    border: none;
+    border: none !important;
     overflow-x: auto;
     /* Premium horizontal scroll */
     width: fit-content;
     max-width: 100%;
     margin: 0 auto !important;
     margin-bottom: 2rem;
-    box-shadow: none;
+    box-shadow: none !important;
 }
 
 .table-container::-webkit-scrollbar {
@@ -1936,12 +1938,12 @@ tbody tr:hover {
 
 .modal-card {
     background: white;
-    border-radius: var(--radius-xl) !important;
-    box-shadow: var(--card-shadow);
+    border-radius: 10px !important;
+    box-shadow: none !important;
     padding: 2.5rem;
     width: 100%;
     max-width: 440px;
-    border: 1.5px solid var(--border);
+    border: none !important;
 }
 
 .badge {
@@ -1997,10 +1999,10 @@ tbody tr:hover {
 .edit-card,
 .modal-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 10px !important;
     padding: var(--spacing-modal);
-    box-shadow: none;
-    border: none;
+    box-shadow: none !important;
+    border: none !important;
     max-width: 800px;
     margin: 0 auto;
 }
@@ -2008,10 +2010,10 @@ tbody tr:hover {
 /* Tasks Container (Matches .grid-container precisely in Shadow and Radius) */
 .tasks-container {
     background: white;
-    border-radius: 10px;
+    border-radius: 10px !important;
     padding: var(--spacing-modal);
-    box-shadow: none;
-    border: none;
+    box-shadow: none !important;
+    border: none !important;
     width: fit-content;
     max-width: 100%;
     margin: 0 auto !important;
@@ -2121,12 +2123,12 @@ tbody tr:hover {
 
 .edit-card {
     background: white;
-    border-radius: 12px;
-    border: 1.5px solid var(--border);
+    border-radius: 10px !important;
+    border: none !important;
     padding: 2.8rem;
     max-width: 800px;
     margin: 0 auto;
-    box-shadow: var(--card-shadow);
+    box-shadow: none !important;
 }
 
 .edit-card h3 {
@@ -2469,10 +2471,10 @@ tbody tr:hover {
 .grid-container,
 .quotation-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 10px !important;
     padding: var(--spacing-modal);
-    box-shadow: var(--shadow-sm);
-    border: 1.5px solid var(--border);
+    box-shadow: none !important;
+    border: none !important;
     max-width: var(--max-width-list);
     margin: 0 auto;
 }
@@ -4823,9 +4825,7 @@ input[type="date"].task-inline-input {
 
 .task-mobile-dropdown {
     display: none;
-}
     position: relative;
-    display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;

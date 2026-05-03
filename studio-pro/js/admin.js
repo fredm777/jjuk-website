@@ -76,39 +76,64 @@ async function fetchSettings(force = false) {
 
 window.handleGlobalSettingsSubmit = async function(e) {
     if (e) e.preventDefault();
+    
     if (window.isSettingsLoading) {
-        console.warn(">> Settings save blocked: loading in progress.");
+        Toast.fire({ icon: 'info', title: '設定讀取中', text: '請稍候再試' });
         return;
     }
-    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
+
+    const getVal = (id) => document.getElementById(id)?.value || '';
     
-    const settings = {
-        bank_name: document.getElementById('setBankName').value,
-        bank_code: ensureStringLiteral(document.getElementById('setBankCode').value),
-        bank_branch: document.getElementById('setBankBranch').value,
-        branch_code: ensureStringLiteral(document.getElementById('setBranchCode').value),
-        account_name: document.getElementById('setAccountName').value,
-        account_num: ensureStringLiteral(document.getElementById('setAccountNum').value),
-        
-        wf_order: document.getElementById('setWfOrder').value,
-        wf_order_lbl: document.getElementById('setWfOrderLbl').value,
-        wf_deposit: document.getElementById('setWfDeposit').value,
-        wf_deposit_lbl: document.getElementById('setWfDepositLbl').value,
-        wf_draft: document.getElementById('setWfDraft').value,
-        wf_draft_lbl: document.getElementById('setWfDraftLbl').value,
-        wf_edit: document.getElementById('setWfEdit').value,
-        wf_edit_lbl: document.getElementById('setWfEditLbl').value,
-        wf_delivery: document.getElementById('setWfDelivery').value,
-        wf_delivery_lbl: document.getElementById('setWfDeliveryLbl').value,
-        wf_remark: document.getElementById('setWfRemark') ? document.getElementById('setWfRemark').value : '',
-        wf_remark_lbl: document.getElementById('setWfRemarkLbl') ? document.getElementById('setWfRemarkLbl').value : ''
+    // Safety: Only block if the form is COMPLETELY empty but we have cached data
+    const bankVal = getVal('setBankName');
+    const remarkVal = getVal('setWfRemark');
+    
+    if (!bankVal && !remarkVal && window.sysSettingsCache && Object.keys(window.sysSettingsCache).length > 0) {
+        const confirmed = await Swal.fire({
+            title: '確認儲存空設定？',
+            text: '偵測到表單大部份為空。如果您確定要清空這些設定，請點擊確定。',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '確定清空並儲存',
+            cancelButtonText: '取消'
+        });
+        if (!confirmed.isConfirmed) return;
+    }
+
+    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
+    Swal.fire({
+        title: '正在儲存設定...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+    
+    const ensureStringLiteral = (val) => {
+        if (!val) return '';
+        const s = String(val);
+        return s.startsWith('0') ? "'" + s : s;
     };
 
-    function ensureStringLiteral(val) {
-        if (!val) return '';
-        if (val.startsWith('0')) return "'" + val;
-        return val;
-    }
+    const settings = {
+        bank_name: getVal('setBankName'),
+        bank_code: ensureStringLiteral(getVal('setBankCode')),
+        bank_branch: getVal('setBankBranch'),
+        branch_code: ensureStringLiteral(getVal('setBranchCode')),
+        account_name: getVal('setAccountName'),
+        account_num: ensureStringLiteral(getVal('setAccountNum')),
+        
+        wf_order: getVal('setWfOrder'),
+        wf_order_lbl: getVal('setWfOrderLbl'),
+        wf_deposit: getVal('setWfDeposit'),
+        wf_deposit_lbl: getVal('setWfDepositLbl'),
+        wf_draft: getVal('setWfDraft'),
+        wf_draft_lbl: getVal('setWfDraftLbl'),
+        wf_edit: getVal('setWfEdit'),
+        wf_edit_lbl: getVal('setWfEditLbl'),
+        wf_delivery: getVal('setWfDelivery'),
+        wf_delivery_lbl: getVal('setWfDeliveryLbl'),
+        wf_remark: getVal('setWfRemark'),
+        wf_remark_lbl: getVal('setWfRemarkLbl')
+    };
     
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
@@ -118,16 +143,22 @@ window.handleGlobalSettingsSubmit = async function(e) {
             body: JSON.stringify(window.buildApiPayload('update_settings', { settings }))
         });
         const json = await res.json();
+        Swal.close(); // Close loading
+
         if (json.success) {
             window.isSettingsModified = false;
             window.sysSettingsCache = settings; // Update cache
             Toast.fire({ icon: 'success', title: '系統設定已更新' });
         } else {
-            Swal.fire('錯誤', '儲存設定失敗', 'error');
+            Swal.fire('儲存失敗', json.error || '伺服器拒絕了請求', 'error');
         }
     } catch(e) { 
-        Swal.fire('連線錯誤', '無法儲存設定', 'error');
-    } finally { setSyncStatus(false); }
+        Swal.close();
+        console.error("Save Settings Error:", e);
+        Swal.fire('連線錯誤', '無法連線至伺服器，請檢查網路連線', 'error');
+    } finally { 
+        if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false); 
+    }
 }
 
 // --- Project & Quotation Logic ---

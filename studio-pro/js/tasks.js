@@ -166,11 +166,10 @@ function initializeTaskWeight(t) {
 }
 
 window.updateTaskProjectFilter = function () {
-    const filterSelect = document.getElementById('taskProjectFilter');
-    if (!filterSelect) return;
-    const currVal = filterSelect.value;
+    const suggestionList = document.getElementById('taskSearchSuggestions');
+    if (!suggestionList) return;
     
-    let html = '<option value="">所有專案</option>';
+    let html = '';
     const projs = window.allProjects || [];
     const custs = window.allCustomers || [];
 
@@ -178,11 +177,14 @@ window.updateTaskProjectFilter = function () {
         if (p.status === '3') return; // Skip completed projects
         const cust = custs.find(c => String(c.customerId) === String(p.customerId));
         const nickname = cust ? (cust.nickname || cust.companyName) : '';
-        html += `<option value="${escapeHtml(p.projectId)}">${escapeHtml(p.projectName)} (${escapeHtml(nickname)})</option>`;
+        // Add both project name and customer nickname as suggestions
+        html += `<option value="${escapeHtml(p.projectName)}"></option>`;
+        if (nickname) {
+            html += `<option value="${escapeHtml(nickname)}"></option>`;
+        }
     });
 
-    filterSelect.innerHTML = html;
-    if (currVal) filterSelect.value = currVal;
+    suggestionList.innerHTML = html;
 }
 
 window.toggleTaskStatusFilter = function (type) {
@@ -196,15 +198,57 @@ window.toggleTaskStatusFilter = function (type) {
     window.filterTasksByProject();
 }
 
-window.filterTasksByProject = function () {
-    const filterSelect = document.getElementById('taskProjectFilter');
-    const pid = filterSelect ? filterSelect.value : '';
+window.filterTasks = function () {
+    const searchInput = document.getElementById('taskSearchInput');
+    const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    
     let filtered = window.allTasks || [];
 
-    if (pid && String(pid).trim() !== "") {
-        filtered = filtered.filter(t => String(t.projectId) === String(pid));
+    // 1. Keyword Filtering
+    if (query) {
+        const custs = window.allCustomers || [];
+        const projs = window.allProjects || [];
+        
+        filtered = filtered.filter(t => {
+            // Check Task Name (Content)
+            if (String(t.taskName || '').toLowerCase().includes(query)) return true;
+            
+            // Check Date (Support 05/05, 5/5, 2024-05-05 etc.)
+            const tDate = t.taskDate || ''; 
+            if (tDate) {
+                const parts = tDate.split('-');
+                if (parts.length === 3) {
+                    const mm = parts[1]; // 05
+                    const dd = parts[2]; // 05
+                    const m = parseInt(mm, 10).toString(); // 5
+                    const d = parseInt(dd, 10).toString(); // 5
+                    const dateVariants = [
+                        `${mm}/${dd}`, `${m}/${d}`,
+                        `${mm}-${dd}`, `${m}-${d}`,
+                        tDate
+                    ];
+                    if (dateVariants.some(v => v.includes(query))) return true;
+                } else if (tDate.toLowerCase().includes(query)) return true;
+            }
+            
+            // Check Project & Customer (Project Content: Text + Nickname)
+            const proj = projs.find(p => String(p.projectId) === String(t.projectId));
+            if (proj) {
+                const pName = proj.projectName.toLowerCase();
+                const cust = custs.find(c => String(c.customerId) === String(proj.customerId));
+                const cNick = cust ? (cust.nickname || cust.companyName || '').toLowerCase() : '';
+                
+                // Match individual parts or the combined display string
+                if (pName.includes(query)) return true;
+                if (cNick.includes(query)) return true;
+                if (`${cNick} - ${pName}`.includes(query)) return true;
+                if (`${pName} - ${cNick}`.includes(query)) return true;
+            }
+            return false;
+        });
     }
     
+    // 2. Status Filtering
     filtered = filtered.filter(t => {
         const s = t.isCompleted ? 'completed' : 'uncompleted';
         const filterArr = window.taskStatusFilters || [];
@@ -214,6 +258,9 @@ window.filterTasksByProject = function () {
     window.currentFilteredTasks = filtered;
     window.renderTasks();
 }
+
+// Keep alias for compatibility
+window.filterTasksByProject = window.filterTasks;
 
 window.setTaskSort = function (col) {
     if (col === 'drag') {
@@ -231,22 +278,60 @@ window.setTaskSort = function (col) {
 
 window.parseTaskLinks = function(text, isCompleted) {
     if (!text) return '<span style="opacity:0.5;">任務內容...</span>';
-    const urlPattern = /\[(https?:\/\/[^\]]+)\]/g;
-    let url = null;
-    const cleanText = text.replace(urlPattern, (match, foundUrl) => {
-        url = foundUrl;
-        return '';
-    }).trim() || text;
-
-    const escapedText = escapeHtml(cleanText).replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
     
-    // Use a wrapper span for strikethrough to avoid extending it across the whole container width
+    // 1. Detect [http...] style links (Primary link)
+    const urlPattern = /\[(https?:\/\/[^\]]+)\]/g;
+    let mainUrl = null;
+    let cleanText = text.replace(urlPattern, (match, foundUrl) => {
+        mainUrl = foundUrl;
+        return '';
+    }).trim();
+    
+    if (!cleanText) cleanText = text;
+
+    let escapedText = escapeHtml(cleanText).replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
+    
+    // 2. Detect Local Paths (Windows & Mac)
+    // Windows: C:\... or "C:\..."
+    const winPathRegex = /([a-zA-Z]:\\[^"<>|?*\t\n\r]+)/g;
+    // Mac: /Users/...
+    const macPathRegex = /(\/Users\/[^"<>|?*\t\n\r]+)/g;
+
+    escapedText = escapedText.replace(winPathRegex, (match) => {
+        const path = match.replace(/&quot;/g, '').replace(/"/g, '').trim();
+        return `<span class="local-path-tag" onclick="event.stopPropagation(); window.copyLocalPath('${path.replace(/\\/g, '\\\\')}')" title="點擊複製路徑">${match}</span>`;
+    });
+
+    escapedText = escapedText.replace(macPathRegex, (match) => {
+        const path = match.replace(/&quot;/g, '').replace(/"/g, '').trim();
+        return `<span class="local-path-tag" onclick="event.stopPropagation(); window.copyLocalPath('${path}')" title="點擊複製路徑">${match}</span>`;
+    });
+
     const strikethroughClass = isCompleted ? 'text-strikethrough' : '';
     
-    if (url) {
-        return `<a href="${url}" target="_blank" class="task-main-link ${strikethroughClass}" onclick="event.stopPropagation()">${escapedText}</a>`;
+    if (mainUrl) {
+        return `<a href="${mainUrl}" target="_blank" class="task-main-link ${strikethroughClass}" onclick="event.stopPropagation()">${escapedText}</a>`;
     }
     return `<span class="${strikethroughClass}">${escapedText}</span>`;
+}
+
+window.copyLocalPath = function(path) {
+    const el = document.createElement('textarea');
+    el.value = path;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    
+    if (window.Toast) {
+        window.Toast.fire({
+            icon: 'success',
+            title: '路徑已複製',
+            text: '請在檔案總管或 Finder 中貼上開啟'
+        });
+    } else {
+        alert('路徑已複製：' + path);
+    }
 }
 
 window.enterTaskEditMode = function(wrapper) {

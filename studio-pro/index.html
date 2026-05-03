@@ -305,6 +305,7 @@
 
     <!-- Dashboard View (Initially Hidden) -->
     <div id="app" class="hidden">
+        <div id="syncProgressBar"></div>
         <div class="sticky-nav-container">
             <header>
                 <div class="header-content">
@@ -494,11 +495,14 @@
                                         <img src="assets/icons/checked.svg" style="width: 20px; height: 20px;">
                                     </button>
                                 </div>
-                                <select id="taskProjectFilter" onchange="filterTasksByProject()"
-                                    class="card-search-input"
-                                    style="width: 140px; min-width: 140px; padding-left: 12px; height: 48px; border-radius: 10px;">
-                                    <option value="">所有專案</option>
-                                </select>
+                                <div class="card-search-wrapper">
+                                    <input type="text" id="taskSearchInput" class="card-search-input"
+                                        placeholder="搜尋客戶、日期或任務..." oninput="window.filterTasks()" list="taskSearchSuggestions">
+                                    <div class="card-search-icon">
+                                        <img src="assets/icons/search.svg" alt="search">
+                                    </div>
+                                    <datalist id="taskSearchSuggestions"></datalist>
+                                </div>
                             </div>
                         </div>
                         <div class="tasks-container">
@@ -922,15 +926,15 @@
                                 .quote-sheet-table th,
                                 .quote-sheet-table td {
                                     border: 1px solid var(--text-dark);
-                                    padding: 4px 6px; /* Reduced padding */
+                                    padding: 6px 8px; /* Increased padding slightly */
                                     vertical-align: middle !important;
-                                    text-align: center !important;
+                                    text-align: left !important; /* Default to left for better readability */
                                 }
 
                                 .quote-sheet-table th {
                                     background-color: #f3f3f3;
-                                    font-weight: 600;
-                                    text-align: center;
+                                    font-weight: 700;
+                                    text-align: center !important; /* Headers stay centered */
                                 }
 
                                 .quote-sheet-table input,
@@ -938,16 +942,29 @@
                                     width: 100%;
                                     border: none;
                                     background: transparent;
-                                    padding: 2px;
+                                    padding: 4px;
                                     margin: 0;
                                     font-size: inherit;
                                     font-family: inherit;
                                     color: inherit;
                                     outline: none;
-                                    text-align: center;
+                                    text-align: inherit; /* Inherit from parent td */
                                 }
 
-                                .quote-sheet-table .i-content {
+                                .quote-sheet-table .text-center,
+                                .quote-sheet-table .text-center input,
+                                .quote-sheet-table .text-center textarea {
+                                    text-align: center !important;
+                                }
+
+                                .quote-sheet-table .text-right,
+                                .quote-sheet-table .text-right input,
+                                .quote-sheet-table .text-right textarea {
+                                    text-align: right !important;
+                                }
+
+                                .quote-sheet-table .i-content,
+                                .quote-sheet-table .i-name {
                                     text-align: left !important;
                                     padding: 8px 10px !important;
                                 }
@@ -1092,14 +1109,11 @@
 
                                 <table class="quote-sheet-table quote-body-table thick-border">
                                     <colgroup>
-                                        <col width="25%">
-                                        <col width="40%">
-                                        <col width="12%">
-                                        <col width="10%">
-                                        <col width="13%">
+                                        <col><col><col><col><col><col>
                                     </colgroup>
                                     <thead>
                                         <tr>
+                                            <th>#</th>
                                             <th>項目</th>
                                             <th>內容</th>
                                             <th>單價</th>
@@ -1112,7 +1126,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="5" style="padding: 0; background: #fafafa;">
+                                            <td colspan="6" style="padding: 0; background: #fafafa;">
                                                 <button type="button" onclick="addQuotationRow()"
                                                     style="width:100%; border:none; background:transparent; padding: 8px; cursor:pointer; color: #2563eb; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 6px;">
                                                     <img src="assets/icons/plus.svg" alt="add"
@@ -1138,14 +1152,14 @@
                                             <tr>
                                                 <td id="qWfOrderLbl" class="bg-light text-center">訂購單</td>
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfOrder"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="報價單承蒙認可簽署後..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>
                                             <tr>
                                                 <td id="qWfDepositLbl" class="bg-light text-center">訂金</td>
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDeposit"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="總額50%..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>
@@ -1154,7 +1168,7 @@
                                                 </td>
                                                 <td style="padding: 0; vertical-align: middle;">
                                                     <textarea id="qBankData" rows="1"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         placeholder="銀行：...\n戶名：...\n帳號：..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
                                                 </td>
@@ -1162,28 +1176,28 @@
                                             <tr>
                                                 <td id="qWfDraftLbl" class="bg-light text-center">初稿</td>
                                                 <td style="padding: 0; vertical-align: middle;"><input id="qWfDraft"
-                                                        style="border:none; background:transparent; outline:none; width:100%; padding:4px 8px; font-family:inherit; font-size:inherit; text-align: center;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; padding:4px 8px; font-family:inherit; font-size:inherit; text-align: left;"
                                                         placeholder="3 至 5 個工作天..."
                                                         oninput="triggerQuotationAutoSave()"></td>
                                             </tr>
                                             <tr>
                                                 <td id="qWfEditLbl" class="bg-light text-center">修改次數</td>
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfEdit"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="2次免費整體調整..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>
                                             <tr>
                                                 <td id="qWfDeliveryLbl" class="bg-light text-center">交付內容</td>
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDelivery"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="定稿後，支付尾款..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>
                                             <tr>
                                                 <td id="qWfRemarkLbl" class="bg-light text-center">其他</td>
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: center; overflow:hidden;"
+                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="其他補充說明..."
                                                         oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>

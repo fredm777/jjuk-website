@@ -94,13 +94,11 @@ window.logError = (ctx, err) => {
 
 function setSyncStatus(active) {
     const bar = document.getElementById('syncProgressBar');
-    const badge = document.getElementById('syncBadge');
     if (active) {
         if (bar) {
             bar.style.width = '30%';
             bar.classList.add('active');
         }
-        if (badge) badge.classList.add('active');
         // Simulate progress
         setTimeout(() => { 
             if (bar && bar.classList.contains('active')) bar.style.width = '70%'; 
@@ -112,7 +110,6 @@ function setSyncStatus(active) {
                 bar.classList.remove('active');
                 bar.style.width = '0%';
             }
-            if (badge) badge.classList.remove('active');
         }, 300);
     }
 }

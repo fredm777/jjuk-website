@@ -78,11 +78,15 @@ window.routeFromProfile = function(tabId, sectionId) {
 
 
 function initResizableTable() {
-    document.querySelectorAll('th').forEach(th => {
-        if (th.querySelector('.resizer')) return;
+    // Select both standard table headers and Task header buttons
+    const headers = document.querySelectorAll('th, .task-header-btn:not(.task-actions-header)');
+    
+    headers.forEach(header => {
+        if (header.querySelector('.resizer')) return;
+        
         const resizer = document.createElement('div');
         resizer.className = 'resizer';
-        th.appendChild(resizer);
+        header.appendChild(resizer);
 
         let x = 0;
         let w = 0;
@@ -90,8 +94,28 @@ function initResizableTable() {
         const onMouseMove = (e) => {
             const dx = e.pageX - x;
             const newWidth = Math.max(100, w + dx);
-            th.style.width = `${newWidth}px`;
-            th.style.minWidth = `${newWidth}px`; // Important for table-layout
+            
+            if (header.tagName === 'TH') {
+                header.style.width = `${newWidth}px`;
+                header.style.minWidth = `${newWidth}px`;
+            } else {
+                // Task Header Resizing via CSS Variables
+                header.style.width = `${newWidth}px`;
+                header.style.flex = 'none'; // Prevent flex growing/shrinking
+                
+                // Identify which column we are resizing
+                if (header.classList.contains('task-drag-handle-header')) {
+                    document.documentElement.style.setProperty('--task-col-drag-width', newWidth + 'px');
+                } else if (header.classList.contains('task-project-header')) {
+                    document.documentElement.style.setProperty('--task-col-project-width', newWidth + 'px');
+                } else if (header.classList.contains('task-date-header')) {
+                    document.documentElement.style.setProperty('--task-col-date-width', newWidth + 'px');
+                } else if (header.classList.contains('task-content-header')) {
+                    document.documentElement.style.setProperty('--task-col-content-min-width', newWidth + 'px');
+                } else if (header.classList.contains('task-actions-header')) {
+                    document.documentElement.style.setProperty('--task-col-actions-width', newWidth + 'px');
+                }
+            }
         };
 
         const onMouseUp = () => {
@@ -101,8 +125,9 @@ function initResizableTable() {
         };
 
         resizer.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
             x = e.pageX;
-            const styles = window.getComputedStyle(th);
+            const styles = window.getComputedStyle(header);
             w = parseInt(styles.width, 10);
 
             document.addEventListener('mousemove', onMouseMove);
@@ -112,31 +137,32 @@ function initResizableTable() {
 
         // Double Click to Auto-Fit
         resizer.addEventListener('dblclick', () => {
-            const colIndex = Array.from(th.parentNode.children).indexOf(th);
-            const table = th.closest('table');
+            if (header.tagName !== 'TH') return; // Auto-fit only for standard tables for now
+            
+            const colIndex = Array.from(header.parentNode.children).indexOf(header);
+            const table = header.closest('table');
+            if (!table) return;
             const rows = table.querySelectorAll('tr');
 
-            // Create a temporary span to measure text width accurately
             const tester = document.createElement('span');
             tester.style.visibility = 'hidden';
             tester.style.position = 'absolute';
             tester.style.whiteSpace = 'nowrap';
-            tester.style.font = window.getComputedStyle(th).font;
+            tester.style.font = window.getComputedStyle(header).font;
             document.body.appendChild(tester);
 
-            let maxWidth = 0;
+            let maxWidth = 100; // Start with requested minimum
             rows.forEach(row => {
                 const cell = row.children[colIndex];
                 if (cell) {
                     tester.innerText = cell.innerText;
-                    const cellWidth = tester.offsetWidth + 32; // Include padding
-                    if (cellWidth > maxWidth) maxWidth = cellWidth;
+                    maxWidth = Math.max(maxWidth, tester.offsetWidth + 20);
                 }
             });
 
+            header.style.width = `${maxWidth}px`;
+            header.style.minWidth = `${maxWidth}px`;
             document.body.removeChild(tester);
-            th.style.width = `${maxWidth}px`;
-            th.style.minWidth = `${maxWidth}px`;
         });
     });
 }

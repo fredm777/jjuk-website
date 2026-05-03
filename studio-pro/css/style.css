@@ -41,6 +41,13 @@
     --color-active-bg: #D5D9DF;
     --color-hover-blue: #00C800;
     --max-width-list: 1100px;
+    
+    /* Task Column Widths */
+    --task-col-drag-width: 100px;
+    --task-col-project-width: 180px;
+    --task-col-date-width: 100px;
+    --task-col-content-min-width: 100px;
+    --task-col-actions-width: 100px;
 }
 
 /* --- Base Utility Classes --- */
@@ -1836,6 +1843,7 @@ main {
     overflow: auto;
     box-shadow: none !important;
     width: fit-content;
+    min-width: 400px; /* Sensible minimum */
     max-width: 100%;
     margin: 0 auto !important;
 }
@@ -1874,6 +1882,28 @@ td {
     min-width: 200px;
     line-height: 1.5;
     padding: 1.25rem 1rem !important;
+    text-align: left;
+}
+
+#projectTable th:nth-child(2),
+#projectTable td:nth-child(2),
+#projectTable th:nth-child(4),
+#projectTable td:nth-child(4) {
+    text-align: center;
+}
+
+#projectTable th:nth-child(5),
+#projectTable td:nth-child(5),
+#projectTable th:nth-child(6),
+#projectTable td:nth-child(6),
+#projectTable th:nth-child(7),
+#projectTable td:nth-child(7) {
+    text-align: right;
+}
+
+#customerTable th:nth-child(3),
+#customerTable td:nth-child(3) {
+    text-align: center; /* Tax ID usually centered */
 }
 
 
@@ -1884,6 +1914,7 @@ td {
     overflow-x: auto;
     /* Premium horizontal scroll */
     width: fit-content;
+    min-width: 400px;
     max-width: 100%;
     margin: 0 auto !important;
     margin-bottom: 2rem;
@@ -1904,11 +1935,17 @@ td {
     border: 2px solid #f8fafc;
 }
 
-.customers-table {
-    width: 100%;
+.grid-container table, .table-container table, .permission-matrix-table, #customerTable, #projectTable {
+    width: auto !important;
+    min-width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    /* Allow columns to be smaller than their content */
+}
+
+th, td {
+    min-width: 100px !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 tbody tr:hover {
@@ -4260,17 +4297,21 @@ input[type="date"].task-inline-input {
     padding: 6px 12px !important;
     /* More compact padding */
     height: auto !important;
+    width: max-content !important;
+    min-width: 100% !important;
 }
 
 .task-col-drag {
-    width: 32px;
+    width: var(--task-col-drag-width);
+    min-width: 100px;
     flex-shrink: 0;
     display: flex;
     justify-content: center;
 }
 
 .task-col-project {
-    width: 180px;
+    width: var(--task-col-project-width);
+    min-width: 100px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -4281,8 +4322,8 @@ input[type="date"].task-inline-input {
 }
 
 .task-col-date {
-    width: 70px;
-    /* Reduced from 100px to match mobile-style logic */
+    width: var(--task-col-date-width);
+    min-width: 100px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -4291,14 +4332,15 @@ input[type="date"].task-inline-input {
 
 .task-col-content {
     flex: 1;
-    min-width: 0;
+    min-width: var(--task-col-content-min-width);
     white-space: normal !important;
     word-break: break-word !important;
     line-height: 1.3;
 }
 
 .task-col-actions {
-    width: 60px;
+    width: var(--task-col-actions-width);
+    min-width: 100px;
     flex-shrink: 0;
     display: flex;
     justify-content: center;
@@ -5564,4 +5606,79 @@ input[type="date"].task-inline-input {
     border: 0px solid transparent !important;
     box-shadow: none !important;
     outline: none !important;
+}
+
+/* Universal Table Column Minimum Width */
+th, .task-header-btn {
+    min-width: 100px !important;
+    position: relative;
+}
+
+td {
+    min-width: 100px;
+}
+
+/* Exceptions for Serial Number (S/N) and Drag handles */
+th:first-child, 
+td:first-child,
+.task-col-drag,
+.task-drag-handle-header {
+    min-width: 40px !important;
+    width: 40px !important;
+}
+
+.grid-container th {
+    min-width: 100px !important;
+}
+
+/* Re-apply exception for grid containers too */
+.grid-container th:first-child,
+.grid-container td:first-child {
+    min-width: 40px !important;
+    width: 40px !important;
+}
+
+.task-header-btn {
+    box-sizing: border-box;
+}
+
+/* Ensure resizer works on Task Header buttons too */
+.task-header-btn .resizer {
+    right: 0;
+    cursor: col-resize;
+    position: absolute;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    z-index: 10;
+}
+
+/* Local Path Links Styling */
+.local-path-tag {
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 0 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: underline dotted;
+    transition: all 0.2s ease;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.local-path-tag:hover {
+    background: #dbeafe;
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* Dark Mode Adjustment for local path tags */
+[data-theme="dark"] .local-path-tag {
+    background: #1e293b;
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .local-path-tag:hover {
+    background: #334155;
+    color: #93c5fd;
 }

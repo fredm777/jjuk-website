@@ -721,7 +721,7 @@ async function fetchProjectItems(projId) {
     }
     
     // Final sync safety: Clear loading flag after items & details are processed
-    setTimeout(() => { window.isProjectLoading = false; }, 100);
+    window.isProjectLoading = false;
 }
 
 function generateProjectId() {
@@ -829,9 +829,9 @@ function addQuotationRow(data = null) {
         <td class="text-center" data-label="#" style="cursor: pointer; color: var(--primary); font-weight: 700;" title="連點兩下刪除此列" ondblclick="if(confirm('確定要刪除此列項目？')) { this.closest('tr').remove(); calcQuotation(); triggerQuotationAutoSave(); }">${rowIdx}</td>
         <td data-label="項目名稱"><textarea class="i-name" placeholder="項目名稱" rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.name) : ''}</textarea></td>
         <td data-label="細項詳述"><textarea class="i-content" placeholder="細項詳述..." rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.content) : ''}</textarea></td>
-        <td data-label="單價"><input type="number" class="i-price text-right" value="${data ? data.price : ''}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
-        <td data-label="數量"><input type="number" class="i-qty text-center" value="${data ? data.qty : 1}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
-        <td data-label="小計">
+        <td class="text-right" data-label="單價"><input type="number" class="i-price text-right" value="${data ? data.price : ''}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
+        <td class="text-center" data-label="數量"><input type="number" class="i-qty text-center" value="${data ? data.qty : 1}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
+        <td class="text-right" data-label="小計">
             <input type="number" class="i-total text-right fw-bold" readonly tabindex="-1" value="${data ? data.subtotal : 0}">
         </td>
     `;
@@ -916,6 +916,19 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     if (window.isProjectLoading) {
         console.warn(">> Save blocked: Project is still loading from server.");
         return;
+    }
+
+    // EXTRA SAFETY: If Bank or Remarks are empty but were NOT empty in cache, warn but don't block unless it's suspicious
+    const currentBank = document.getElementById('qBankData')?.value || '';
+    const currentRemark = document.getElementById('qWfRemark')?.value || '';
+    const cachedProj = (window.allProjects || []).find(p => p.projectId === projectId);
+    
+    if (isBackground && cachedProj) {
+        if ((cachedProj.bankData && !currentBank) || (cachedProj.remark && !currentRemark)) {
+            console.warn(">> Background save potentially wiping data. Skipping this auto-save cycle.");
+            if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false);
+            return;
+        }
     }
 
     if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
@@ -1035,7 +1048,12 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
             if (!isBackground) {
                 // For manual saves, we AWAIT the precision sync to ensure consistency
                 if (typeof syncSingleProject === 'function') await syncSingleProject(projectId);
-                switchSubView('projects', 'list');
+                
+                // FORCE redirect back to list
+                if (typeof window.switchToTab === 'function') window.switchToTab('projects');
+                if (typeof switchSubView === 'function') switchSubView('projects', 'list');
+                
+                Toast.fire({ icon: 'success', title: '專案儲存成功' });
             } else {
                 console.log(">> Async Sync success. Row:", result.rowIndex);
                 // Precision sync for background saves (fire and forget)

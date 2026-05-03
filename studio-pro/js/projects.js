@@ -803,17 +803,12 @@ async function loadSettingsPreview() {
 
 window.autoExpandTextarea = function (el) {
     if (!el) return;
-    const fit = () => {
-        el.style.height = 'auto';
-        const borderOffset = el.offsetHeight - el.clientHeight;
-        el.style.height = `${el.scrollHeight + borderOffset}px`;
-
-        const row = el.closest('tr');
-        if (row) row.style.height = 'auto';
-    };
-
-    fit();
-    requestAnimationFrame(fit);
+    // Temporarily shrink to minimum to get true scrollHeight without previous height interference
+    el.style.height = '1px';
+    // Calculate border thickness (offsetHeight includes borders, clientHeight does not)
+    const borderOffset = el.offsetHeight - el.clientHeight;
+    // Set exact height to fit text + padding + borders without extra space
+    el.style.height = (el.scrollHeight + borderOffset) + 'px';
 };
 
 // Listen for window resize to fix height on text wrapping
@@ -923,6 +918,22 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
         return;
     }
 
+    // EXTRA SAFETY: If Bank or Remarks are empty but were NOT empty in cache, warn but don't block unless it's suspicious
+    const currentBank = document.getElementById('qBankData')?.value || '';
+    const currentRemark = document.getElementById('qWfRemark')?.value || '';
+    const cachedProj = (window.allProjects || []).find(p => p.projectId === projectId);
+    
+    if (isBackground && cachedProj) {
+        if ((cachedProj.bankData && !currentBank) || (cachedProj.remark && !currentRemark)) {
+            console.warn(">> Background save potentially wiping data. Skipping this auto-save cycle.");
+            if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false);
+            return;
+        }
+    }
+
+    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
+    isSavingQuotation = true;
+
     // Helper to extract values
     const getVal = (id) => document.getElementById(id)?.value || '';
     const getText = (id) => document.getElementById(id)?.innerText.replace(/,/g, '') || '0';
@@ -932,31 +943,18 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
     let rowIndex = rowIdxInput?.value || '';
     const projectId = getVal('projId');
 
-    // EXTRA SAFETY: If Bank or Remarks are empty but were NOT empty in cache, warn but don't block unless it's suspicious
-    const currentBank = document.getElementById('qBankData')?.value || '';
-    const currentRemark = document.getElementById('qWfRemark')?.value || '';
-    const cachedProj = (window.allProjects || []).find(p => p.projectId === projectId);
-    
-    if (isBackground && cachedProj) {
-        if ((cachedProj.bankData && !currentBank) || (cachedProj.remark && !currentRemark)) {
-            console.warn(">> Background save potentially wiping data. Skipping this auto-save cycle.");
-            return;
-        }
-    }
-
     // Permission check
     const isUpdate = !!rowIndex;
     if (isUpdate && !window.hasPermission('proj_u')) {
         Swal.fire('權限不足', '您的帳號級別無法編輯專案', 'error');
+        isSavingQuotation = false;
         return;
     }
     if (!isUpdate && !window.hasPermission('proj_c')) {
         Swal.fire('權限不足', '您的帳號級別無法建立專案', 'error');
+        isSavingQuotation = false;
         return;
     }
-
-    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
-    isSavingQuotation = true;
 
     // Safety Match: Find rowIndex if missing
     if (!rowIndex && projectId) {

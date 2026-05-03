@@ -413,6 +413,7 @@ window.showQuotationEditor = async function (title, data = null) {
         if (document.getElementById('qWfOrder')) document.getElementById('qWfOrder').value = data.wfOrder || '';
         if (document.getElementById('qWfDeposit')) document.getElementById('qWfDeposit').value = data.wfDeposit || '';
         if (document.getElementById('qWfDelivery')) document.getElementById('qWfDelivery').value = data.wfDelivery || '';
+
         if (document.getElementById('qBankData')) document.getElementById('qBankData').value = data.bankData || '';
         if (document.getElementById('qWfRemark')) document.getElementById('qWfRemark').value = data.remark || '';
         if (document.getElementById('qDepositPaid')) document.getElementById('qDepositPaid').value = data.depositPaid || 0;
@@ -429,6 +430,14 @@ window.showQuotationEditor = async function (title, data = null) {
         }
 
         fetchProjectItems(data.projectId);
+
+        // Auto-expand all textareas after loading
+        setTimeout(() => {
+            ['qBankData', 'qWfRemark', 'qWfOrder', 'qWfDeposit', 'qWfDelivery'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && typeof window.autoExpandTextarea === 'function') window.autoExpandTextarea(el);
+            });
+        }, 300);
     } else {
         // New Mode
         if (document.getElementById('projRowIndex')) document.getElementById('projRowIndex').value = '';
@@ -818,7 +827,7 @@ function addQuotationRow(data = null) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td class="text-center" data-label="#" style="cursor: pointer; color: var(--primary); font-weight: 700;" title="連點兩下刪除此列" ondblclick="if(confirm('確定要刪除此列項目？')) { this.closest('tr').remove(); calcQuotation(); triggerQuotationAutoSave(); }">${rowIdx}</td>
-        <td data-label="項目名稱"><input class="i-name" placeholder="項目名稱" value="${data ? escapeHtml(data.name) : ''}" oninput="triggerQuotationAutoSave()"></td>
+        <td data-label="項目名稱"><textarea class="i-name" placeholder="項目名稱" rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.name) : ''}</textarea></td>
         <td data-label="細項詳述"><textarea class="i-content" placeholder="細項詳述..." rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.content) : ''}</textarea></td>
         <td data-label="單價"><input type="number" class="i-price text-right" value="${data ? data.price : ''}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
         <td data-label="數量"><input type="number" class="i-qty text-center" value="${data ? data.qty : 1}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
@@ -829,9 +838,13 @@ function addQuotationRow(data = null) {
     tbody.appendChild(tr);
 
     // Initial expansion for loaded data
-    const ta = tr.querySelector('textarea');
-    if (ta && data && data.content) {
-        setTimeout(() => autoExpandTextarea(ta), 0);
+    const textareas = tr.querySelectorAll('textarea');
+    if (data) {
+        setTimeout(() => {
+            textareas.forEach(ta => {
+                if (typeof window.autoExpandTextarea === 'function') window.autoExpandTextarea(ta);
+            });
+        }, 0);
     }
 
     calcQuotation();

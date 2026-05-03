@@ -547,11 +547,18 @@
 
                                 <div class="form-group" style="margin-top: 1.5rem;">
                                     <label>任務內容</label>
-                                    <input type="date" id="taskDate">
+                                    <textarea id="taskNameField" placeholder="描述任務細節..." rows="3"></textarea>
                                 </div>
-                                <div class="form-group" style="flex: 1;">
-                                    <label>時間</label>
-                                    <input type="time" id="taskTime">
+
+                                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>日期</label>
+                                        <input type="date" id="taskDate">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>時間</label>
+                                        <input type="time" id="taskTime">
+                                    </div>
                                 </div>
 
                                 <div id="taskError" class="auth-error-inline"></div>

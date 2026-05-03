@@ -92,14 +92,14 @@ window.handleTaskPaste = function(event, taskId) {
         
         let newVal = "";
         if (start !== end) {
-            // "Smart Paste" (Wrap selected text with link)
-            const before = input.value.substring(0, start).replace(linkPattern, '').trim();
-            const selected = input.value.substring(start, end).replace(linkPattern, '').trim();
-            const after = input.value.substring(end).replace(linkPattern, '').trim();
-            newVal = (before + " " + selected + " " + after).replace(/\s+/g, ' ').trim() + " [" + finalPasteUrl + "]";
+            // "Smart Paste" (Replace selected with link, keep rest)
+            const before = input.value.substring(0, start).replace(linkPattern, '');
+            const after = input.value.substring(end).replace(linkPattern, '');
+            const selected = input.value.substring(start, end).replace(linkPattern, '');
+            newVal = (before + selected + after).trim() + " [" + finalPasteUrl + "]";
         } else {
-            // "Global Paste" (Wrap whole text with link)
-            const cleanText = input.value.replace(linkPattern, '').replace(/\s+/g, ' ').trim();
+            // "Global Paste" (Append link to end)
+            const cleanText = input.value.replace(linkPattern, '').trim();
             newVal = cleanText + " [" + finalPasteUrl + "]";
         }
         
@@ -238,7 +238,7 @@ window.parseTaskLinks = function(text, isCompleted) {
         return '';
     }).trim() || text;
 
-    const escapedText = escapeHtml(cleanText).replace(/\n/g, '<br>');
+    const escapedText = escapeHtml(cleanText).replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
     
     // Use a wrapper span for strikethrough to avoid extending it across the whole container width
     const strikethroughClass = isCompleted ? 'text-strikethrough' : '';
@@ -260,20 +260,24 @@ window.enterTaskEditMode = function(wrapper) {
     // Clean input value for editing (strip [link] if it's a task content field)
     if (input.classList.contains('task-edit-input')) {
         const linkPattern = /\[https?:\/\/[^\]]+\]/g;
-        input.value = input.value.replace(linkPattern, '').replace(/\s+/g, ' ').trim();
+        // CRITICAL: We MUST NOT use .replace(/\s+/g, ' ') here.
+        // We only strip the link tag for clean editing.
+        input.value = input.value.replace(linkPattern, '').trim();
     }
 
-    // Force focus and ensure cursor is visible
+    // Force focus and ensure height is correct for multiline
     setTimeout(() => {
         input.focus();
         if (input.tagName === 'TEXTAREA') {
-            input.style.height = '';
-            input.style.height = input.scrollHeight + 'px';
+            // Reset height to get correct scrollHeight
+            input.style.height = 'auto'; 
+            const newHeight = Math.max(38, input.scrollHeight);
+            input.style.height = newHeight + 'px';
         }
         if (input.select && !input.classList.contains('task-edit-input')) {
             input.select();
         }
-    }, 10);
+    }, 50);
 }
 
 window.exitTaskEditMode = function(input, taskId) {
@@ -826,3 +830,73 @@ document.addEventListener('click', () => {
         menu.classList.remove('active');
     });
 });
+
+// --- Task Editor Modal Logic ---
+window.showTaskEditor = function(taskId) {
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    if (!task) return;
+
+    window.closeAllModals();
+    const modal = document.getElementById('taskEditorModal');
+    if (!modal) return;
+
+    // Fill form fields
+    document.getElementById('taskEditId').value = taskId;
+    document.getElementById('taskNameField').value = task.taskName || '';
+    document.getElementById('taskDateField').value = task.taskDate || '';
+    document.getElementById('taskTimeField').value = task.taskTime || '09:00';
+    document.getElementById('taskStatusField').value = task.isCompleted ? 'true' : 'false';
+    
+    // Fill project dropdown
+    const projSelect = document.getElementById('taskProjectField');
+    if (projSelect) {
+        let html = '<option value="">-- 選擇專案 (可不選) --</option>';
+        window.allProjects.forEach(p => {
+            const cust = window.allCustomers.find(c => String(c.customerId) === String(p.customerId));
+            const nickname = cust ? (cust.nickname || cust.companyName) : '未知客戶';
+            html += `<option value="${escapeHtml(p.projectId)}" ${String(p.projectId) === String(task.projectId) ? 'selected' : ''}>
+                ${escapeHtml(p.projectName)} (${escapeHtml(nickname)})
+            </option>`;
+        });
+        projSelect.innerHTML = html;
+    }
+
+    modal.classList.add('active');
+    
+    // Auto-expand the textarea
+    setTimeout(() => {
+        const ta = document.getElementById('taskNameField');
+        if (ta && typeof window.autoExpandTextarea === 'function') {
+            window.autoExpandTextarea(ta);
+        }
+    }, 100);
+}
+
+window.submitTaskEditor = async function(event) {
+    if (event) event.preventDefault();
+    const taskId = document.getElementById('taskEditId').value;
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    if (!task) return;
+
+    // Update local object
+    task.taskName = document.getElementById('taskNameField').value.trim();
+    task.taskDate = document.getElementById('taskDateField').value;
+    task.taskTime = document.getElementById('taskTimeField').value;
+    task.isCompleted = document.getElementById('taskStatusField').value === 'true';
+    task.projectId = document.getElementById('taskProjectField').value;
+
+    window.closeModal('taskEditorModal');
+    window.filterTasksByProject(); // Refresh UI
+
+    // Sync to backend
+    setSyncStatus(true);
+    try {
+        await window.saveTask(taskId);
+        Toast.fire({ icon: 'success', title: '任務已更新' });
+    } catch (e) {
+        console.error(e);
+        Swal.fire('錯誤', '儲存失敗', 'error');
+    } finally {
+        setSyncStatus(false);
+    }
+}

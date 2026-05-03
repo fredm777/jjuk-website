@@ -5550,3 +5550,18 @@ input[type="date"].task-inline-input {
             justify-content: center !important;
         }
     }
+/* --- Global Container Style Rules (User Request) --- */
+.grid-container, 
+.table-container, 
+.modal-card, 
+.edit-card,
+.card-wrapper,
+.tasks-container,
+.customer-card,
+.project-card,
+#quotationPrintArea .quotation-box {
+    border-radius: 10px !important;
+    border: 0px solid transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}

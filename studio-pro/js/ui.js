@@ -238,7 +238,6 @@ function initResizableTable() {
             document.body.classList.remove('resizing');
             header.classList.remove('is-resizing');
         };
-        };
 
         const startResize = (e) => {
             if (document.body.classList.contains('resizing')) return;

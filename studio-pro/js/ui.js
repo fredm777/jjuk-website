@@ -41,8 +41,10 @@ function initTabs() {
             } else if (tabId === 'projects') {
                 if (typeof fetchProjects === 'function') fetchProjects();
                 if (typeof fetchCustomers === 'function') fetchCustomers();
+                if (typeof window.loadProjectColumnWidths === 'function') window.loadProjectColumnWidths();
             } else {
                 renderCustomers();
+                if (typeof window.loadCustomerColumnWidths === 'function') window.loadCustomerColumnWidths();
             }
 
             // Re-init resizers and icons for new tab content
@@ -153,6 +155,22 @@ function initResizableTable() {
         }
     };
 
+    window.updateCustomerContainerWidth = function () {
+        const table = document.querySelector('#customerTable');
+        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+
+        const total =
+            getCssPx('--cust-col-1-width') +
+            getCssPx('--cust-col-2-width') +
+            getCssPx('--cust-col-3-width') +
+            getCssPx('--cust-col-4-width') +
+            getCssPx('--cust-col-5-width');
+
+        if (total > 0) {
+            document.documentElement.style.setProperty('--total-cust-width', `${total}px`);
+        }
+    };
+
     // --- Task Column Width Persistence ---
     window.saveTaskColumnWidths = function() {
         const widths = {
@@ -230,21 +248,48 @@ function initResizableTable() {
         }
     };
 
+    // --- Customers List Column Width Persistence ---
+    window.saveCustomerColumnWidths = function() {
+        const widths = {
+            '--cust-col-1-width': getComputedStyle(document.documentElement).getPropertyValue('--cust-col-1-width'),
+            '--cust-col-2-width': getComputedStyle(document.documentElement).getPropertyValue('--cust-col-2-width'),
+            '--cust-col-3-width': getComputedStyle(document.documentElement).getPropertyValue('--cust-col-3-width'),
+            '--cust-col-4-width': getComputedStyle(document.documentElement).getPropertyValue('--cust-col-4-width'),
+            '--cust-col-5-width': getComputedStyle(document.documentElement).getPropertyValue('--cust-col-5-width')
+        };
+        localStorage.setItem('studio_pro_customer_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadCustomerColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_customer_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+                setTimeout(() => { if (typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth(); }, 100);
+            } catch (e) { console.error('Failed to load customer widths', e); }
+        }
+    };
+
     // Load widths immediately
     window.loadTaskColumnWidths();
     window.loadQuotationColumnWidths();
     window.loadProjectColumnWidths();
+    window.loadCustomerColumnWidths();
 
     if (!window.__taskContainerResizeBound) {
         window.addEventListener('resize', () => {
             if (typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
             if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth();
             if (typeof window.updateProjectContainerWidth === 'function') window.updateProjectContainerWidth();
+            if (typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth();
         });
         window.__taskContainerResizeBound = true;
     }
     // Select only intended tables AND the specialized Task Header buttons
-    const targetContainers = document.querySelectorAll('#projectTable, #projectsEditView .quote-body-table, #tasksListView table, .task-header-row');
+    const targetContainers = document.querySelectorAll('#customerTable, #projectTable, #projectsEditView .quote-body-table, #tasksListView table, .task-header-row');
     
     targetContainers.forEach(container => {
         const headers = container.querySelectorAll('th, .task-header-btn');
@@ -312,12 +357,18 @@ function initResizableTable() {
                 else if (header.classList.contains('p-col-5')) varName = '--proj-col-5-width';
                 else if (header.classList.contains('p-col-6')) varName = '--proj-col-6-width';
                 else if (header.classList.contains('p-col-7')) varName = '--proj-col-7-width';
+                else if (header.classList.contains('c-col-1')) varName = '--cust-col-1-width';
+                else if (header.classList.contains('c-col-2')) varName = '--cust-col-2-width';
+                else if (header.classList.contains('c-col-3')) varName = '--cust-col-3-width';
+                else if (header.classList.contains('c-col-4')) varName = '--cust-col-4-width';
+                else if (header.classList.contains('c-col-5')) varName = '--cust-col-5-width';
 
                 if (varName) {
                     document.documentElement.style.setProperty(varName, `${newWidth}px`);
                     // Trigger container width updates
                     if (varName.startsWith('--quote')) window.updateQuotationContainerWidth();
                     if (varName.startsWith('--proj')) window.updateProjectContainerWidth();
+                    if (varName.startsWith('--cust')) window.updateCustomerContainerWidth();
                 }
             } else {
                 applyTaskColumnWidth(newWidth);
@@ -367,6 +418,12 @@ function initResizableTable() {
                 header.classList.contains('p-col-4') || header.classList.contains('p-col-5') || header.classList.contains('p-col-6') ||
                 header.classList.contains('p-col-7')) {
                 window.saveProjectColumnWidths();
+            }
+
+            // Save widths after resizing customer table
+            if (header.classList.contains('c-col-1') || header.classList.contains('c-col-2') || header.classList.contains('c-col-3') ||
+                header.classList.contains('c-col-4') || header.classList.contains('c-col-5')) {
+                window.saveCustomerColumnWidths();
             }
 
             document.body.classList.remove('resizing');

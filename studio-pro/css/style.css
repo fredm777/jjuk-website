@@ -46,8 +46,10 @@
     --task-col-drag-width: 48px;
     --task-col-project-width: 200px;
     --task-col-date-width: 100px;
-    --task-col-content-min-width: 100px;
+    --task-col-content-min-width: 350px;
     --task-col-actions-width: 140px;
+    --task-row-gap: 12px;
+    --task-row-padding-x: 24px;
 
     --quote-col-5-width: 19%;
     --quote-col-6-width: 19%;
@@ -60,6 +62,13 @@
     --proj-col-5-width: 110px;
     --proj-col-6-width: 110px;
     --proj-col-7-width: 110px;
+
+    /* --- Customers List Variables --- */
+    --cust-col-1-width: auto;
+    --cust-col-2-width: 100px;
+    --cust-col-3-width: 120px;
+    --cust-col-4-width: 150px;
+    --cust-col-5-width: 100px;
 }
 
 /* --- Base Utility Classes --- */
@@ -1900,7 +1909,9 @@ th {
     text-transform: uppercase;
     border-bottom: 1px solid var(--border);
     position: relative;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 20px;
@@ -1910,7 +1921,9 @@ td {
     padding: 0.75rem 1.25rem;
     border-bottom: 1px solid #f1f5f9;
     font-size: 0.9375rem;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -1920,7 +1933,7 @@ td {
 #projectTableBody td:nth-child(3) {
     white-space: normal !important;
     text-overflow: initial !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     min-width: 200px;
     line-height: 1.5;
     padding: 1.25rem 1rem !important;
@@ -1934,6 +1947,12 @@ td {
 #projectTable th:nth-child(5) { width: var(--proj-col-5-width); }
 #projectTable th:nth-child(6) { width: var(--proj-col-6-width); }
 #projectTable th:nth-child(7) { width: var(--proj-col-7-width); }
+
+#customerTable th:nth-child(1) { width: var(--cust-col-1-width); }
+#customerTable th:nth-child(2) { width: var(--cust-col-2-width); }
+#customerTable th:nth-child(3) { width: var(--cust-col-3-width); }
+#customerTable th:nth-child(4) { width: var(--cust-col-4-width); }
+#customerTable th:nth-child(5) { width: var(--cust-col-5-width); }
 
 #projectTable th:nth-child(2),
 #projectTable td:nth-child(2),
@@ -1985,8 +2004,26 @@ td {
     border: 2px solid #f8fafc;
 }
 
-.grid-container table, .table-container table, .permission-matrix-table, #customerTable, #projectTable {
+.grid-container table, .table-container table, .permission-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#projectTable {
     width: var(--total-proj-width, 100%);
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#customerTable {
+    width: var(--total-cust-width, 100%);
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#projectsEditView .quote-body-table {
+    width: var(--total-quote-width, 100%);
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -2021,7 +2058,7 @@ th, td {
 
 th, td {
     position: relative !important;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 body.resizing {
@@ -2132,7 +2169,7 @@ tbody tr:hover {
     padding: var(--spacing-modal);
     box-shadow: none !important;
     border: none !important;
-    width: fit-content !important;
+    width: var(--total-task-width, fit-content) !important;
     max-width: none !important;
     margin: 0 !important;
 }
@@ -2697,12 +2734,12 @@ tbody tr:hover {
     border: 1px solid var(--text-dark);
     padding: 4px 8px;
     vertical-align: middle;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 /* Specific fix for the customer search cell */
 .quote-sheet-table td {
-    overflow: visible !important;
+    overflow: hidden !important;
     position: relative;
     /* Base for suggestions-list */
 }
@@ -4355,7 +4392,8 @@ input[type="date"].task-inline-input {
 .task-content-header {
     flex: 1;
     min-width: var(--task-col-content-min-width);
-    text-align: center;
+    text-align: left;
+    padding-left: 0;
 }
 
 .task-actions-header {
@@ -5838,7 +5876,7 @@ td:first-child,
         -webkit-backdrop-filter: none !important;
         mask-image: none !important;
         -webkit-mask-image: none !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         isolation: isolate !important;
     }
 
@@ -5917,7 +5955,7 @@ td:first-child,
 
     .sticky-nav-container {
         background: transparent !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         padding-bottom: 0 !important;
         isolation: isolate !important;
     }
@@ -6080,7 +6118,7 @@ td:first-child,
     #tasks #taskList {
         width: max-content !important;
         min-width: 720px !important;
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     #tasks .task-col-drag,
@@ -6145,7 +6183,7 @@ td:first-child,
 
     #tasks .task-display-text {
         white-space: normal !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         text-overflow: clip !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
@@ -6849,7 +6887,7 @@ td:first-child,
         padding: 48px 16px !important;
         text-align: center !important;
         white-space: normal !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         text-overflow: clip !important;
     }
 
@@ -6871,7 +6909,7 @@ td:first-child,
 
 /* --- Final position lock: navbar + profile/settings container --- */
 .sticky-nav-container {
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 .sticky-nav-container header {
@@ -7219,7 +7257,7 @@ td:first-child,
     }
 
     #tasks .task-header-btn {
-        overflow: visible !important;
+        overflow: hidden !important;
         touch-action: none !important;
     }
 
@@ -7894,7 +7932,7 @@ html {
         padding-right: 0 !important;
         justify-content: center !important;
         justify-self: center !important;
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     #tasks .task-drag-handle img,

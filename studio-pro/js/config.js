@@ -92,62 +92,34 @@ window.logError = (ctx, err) => {
     });
 };
 
+let syncRequestCount = 0;
 function setSyncStatus(active) {
     const bar = document.getElementById('syncProgressBar');
-    window.__syncStatusCount = window.__syncStatusCount || 0;
-    window.__syncStatusTimer = window.__syncStatusTimer || null;
-
     if (active) {
-        window.__syncStatusCount += 1;
-        if (window.__syncStatusTimer) {
-            clearTimeout(window.__syncStatusTimer);
-            window.__syncStatusTimer = null;
-        }
+        syncRequestCount++;
         if (bar) {
             bar.style.width = '30%';
             bar.classList.add('active');
         }
         // Simulate progress
         setTimeout(() => { 
-            if (bar && bar.classList.contains('active')) bar.style.width = '70%'; 
+            if (bar && syncRequestCount > 0) bar.style.width = '70%'; 
         }, 500);
     } else {
-        window.__syncStatusCount = Math.max(0, window.__syncStatusCount - 1);
-        if (window.__syncStatusCount > 0) return;
+        syncRequestCount--;
+        if (syncRequestCount < 0) syncRequestCount = 0;
 
-        if (bar) bar.style.width = '100%';
-        window.__syncStatusTimer = setTimeout(() => {
-            if (bar) {
-                bar.classList.remove('active');
-                bar.style.width = '0%';
-            }
-            window.__syncStatusTimer = null;
-        }, 300);
+        if (syncRequestCount === 0) {
+            if (bar) bar.style.width = '100%';
+            setTimeout(() => {
+                if (bar && syncRequestCount === 0) {
+                    bar.classList.remove('active');
+                    bar.style.width = '0%';
+                }
+            }, 300);
+        }
     }
 }
-
-window.setSyncStatus = setSyncStatus;
-
-// Keep the green sync bar present for every backend POST, including future write actions.
-(function bindBackendSyncIndicator() {
-    if (window.__backendSyncIndicatorBound || typeof window.fetch !== 'function') return;
-
-    const nativeFetch = window.fetch.bind(window);
-    window.fetch = async function(input, init = {}) {
-        const url = typeof input === 'string' ? input : input?.url;
-        const method = (init?.method || input?.method || 'GET').toUpperCase();
-        const shouldTrack = url === GAS_WEB_APP_URL && method === 'POST';
-
-        if (shouldTrack) setSyncStatus(true);
-        try {
-            return await nativeFetch(input, init);
-        } finally {
-            if (shouldTrack) setSyncStatus(false);
-        }
-    };
-
-    window.__backendSyncIndicatorBound = true;
-})();
 
 // --- Hybrid Caching Helpers ---
 const DATA_CACHE_WHITELIST = ['projectStatusFilters', 'taskStatusFilters'];

@@ -177,6 +177,7 @@ window.fetchProjects = async function () {
 window.syncSingleProject = async function (projectId) {
     if (!projectId) return;
     console.log(`>> Syncing single project: ${projectId}`);
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
 
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
@@ -220,6 +221,8 @@ window.syncSingleProject = async function (projectId) {
         }
     } catch (err) {
         console.error("Single Project Sync Error:", err);
+    } finally {
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
     }
 }
 
@@ -672,6 +675,7 @@ window.handleAddProjectTask = function () {
 
 async function fetchProjectItems(projId) {
     const proj = (window.allProjects || []).find(p => p.projectId === projId);
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
     const tbody = document.getElementById('quotationItemsBody');
     if (tbody) tbody.innerHTML = '';
 
@@ -696,32 +700,37 @@ async function fetchProjectItems(projId) {
         }
     };
 
-    if (proj && proj.items && proj.items.length > 0) {
-        // If we have items, we likely have the rest of the data in the cache too
-        proj.items.forEach(item => {
-            addQuotationRow(item);
-        });
-        fillFooterIfEmpty(proj);
-    } else if (projId) {
-        console.log(">> Items or details missing in cache, triggering precision sync...");
-        const refreshedProj = await syncSingleProject(projId);
-        if (refreshedProj) {
-            if (refreshedProj.items && refreshedProj.items.length > 0) {
-                refreshedProj.items.forEach(item => addQuotationRow(item));
+    try {
+        if (proj && proj.items && proj.items.length > 0) {
+            // If we have items, we likely have the rest of the data in the cache too
+            proj.items.forEach(item => {
+                addQuotationRow(item);
+            });
+            fillFooterIfEmpty(proj);
+        } else if (projId) {
+            console.log(">> Items or details missing in cache, triggering precision sync...");
+            const refreshedProj = await syncSingleProject(projId);
+            if (refreshedProj) {
+                if (refreshedProj.items && refreshedProj.items.length > 0) {
+                    refreshedProj.items.forEach(item => addQuotationRow(item));
+                } else {
+                    addQuotationRow();
+                }
+                // CRITICAL: Fill footer fields (Bank, Notes etc) from the refreshed data
+                fillFooterIfEmpty(refreshedProj);
             } else {
                 addQuotationRow();
             }
-            // CRITICAL: Fill footer fields (Bank, Notes etc) from the refreshed data
-            fillFooterIfEmpty(refreshedProj);
         } else {
             addQuotationRow();
         }
-    } else {
-        addQuotationRow();
+    } catch (err) {
+        console.error("fetchProjectItems Error:", err);
+    } finally {
+        // Final sync safety: Clear loading flag after items & details are processed
+        window.isProjectLoading = false;
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
     }
-    
-    // Final sync safety: Clear loading flag after items & details are processed
-    window.isProjectLoading = false;
 }
 
 function generateProjectId() {
@@ -803,17 +812,12 @@ async function loadSettingsPreview() {
 
 window.autoExpandTextarea = function (el) {
     if (!el) return;
-    const fit = () => {
-        el.style.height = 'auto';
-        const borderOffset = el.offsetHeight - el.clientHeight;
-        el.style.height = `${el.scrollHeight + borderOffset}px`;
-
-        const row = el.closest('tr');
-        if (row) row.style.height = 'auto';
-    };
-
-    fit();
-    requestAnimationFrame(fit);
+    // Temporarily shrink to minimum to get true scrollHeight without previous height interference
+    el.style.height = '1px';
+    // Calculate border thickness (offsetHeight includes borders, clientHeight does not)
+    const borderOffset = el.offsetHeight - el.clientHeight;
+    // Set exact height to fit text + padding + borders without extra space
+    el.style.height = (el.scrollHeight + borderOffset) + 'px';
 };
 
 // Listen for window resize to fix height on text wrapping
@@ -897,22 +901,31 @@ window.triggerQuotationAutoSave = function () {
 }
 
 let isSavingQuotation = false;
-let nextSavePending = false; // Queue for rapid edits
-window.isQuotationModified = false; // Flag for unsaved changes
+let nextSavePending = false; 
+let nextSaveIsManual = false; // Track if the queued save was a manual click
+window.isQuotationModified = false; 
 
 window.handleQuotationSubmit = async function (e, isBackground = false) {
     if (e) e.preventDefault();
 
     if (isSavingQuotation) {
-        if (isBackground) {
-            console.log(">> Save in progress, queueing next background save...");
-            nextSavePending = true;
-        }
+        console.log(">> Save in progress, queueing next save...");
+        nextSavePending = true;
+        if (!isBackground) nextSaveIsManual = true;
         return;
     }
 
+    // Helper to extract values
+    const getVal = (id) => document.getElementById(id)?.value || '';
+    const getText = (id) => document.getElementById(id)?.innerText.replace(/,/g, '') || '0';
+    const ensureLit = (val) => (val && String(val).startsWith('0')) ? "'" + val : val;
+
+    const projectId = getVal('projId');
+    const rowIdxInput = document.getElementById('projRowIndex');
+    let rowIndex = rowIdxInput?.value || '';
+
     // Safety: Don't save if critical fields are missing (might be a loading race condition)
-    const projectName = document.getElementById('qProjName')?.value;
+    const projectName = getVal('qProjName');
     if (!projectName && !isBackground) {
         console.warn(">> Save blocked: Project Name is missing.");
         return;
@@ -923,18 +936,9 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
         return;
     }
 
-    // Helper to extract values
-    const getVal = (id) => document.getElementById(id)?.value || '';
-    const getText = (id) => document.getElementById(id)?.innerText.replace(/,/g, '') || '0';
-    const ensureLit = (val) => (val && String(val).startsWith('0')) ? "'" + val : val;
-
-    const rowIdxInput = document.getElementById('projRowIndex');
-    let rowIndex = rowIdxInput?.value || '';
-    const projectId = getVal('projId');
-
     // EXTRA SAFETY: If Bank or Remarks are empty but were NOT empty in cache, warn but don't block unless it's suspicious
-    const currentBank = document.getElementById('qBankData')?.value || '';
-    const currentRemark = document.getElementById('qWfRemark')?.value || '';
+    const currentBank = getVal('qBankData');
+    const currentRemark = getVal('qWfRemark');
     const cachedProj = (window.allProjects || []).find(p => p.projectId === projectId);
     
     if (isBackground && cachedProj) {
@@ -944,19 +948,22 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
         }
     }
 
+    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
+    isSavingQuotation = true;
+
+
     // Permission check
     const isUpdate = !!rowIndex;
     if (isUpdate && !window.hasPermission('proj_u')) {
         Swal.fire('權限不足', '您的帳號級別無法編輯專案', 'error');
+        isSavingQuotation = false;
         return;
     }
     if (!isUpdate && !window.hasPermission('proj_c')) {
         Swal.fire('權限不足', '您的帳號級別無法建立專案', 'error');
+        isSavingQuotation = false;
         return;
     }
-
-    if (typeof window.setSyncStatus === 'function') window.setSyncStatus(true);
-    isSavingQuotation = true;
 
     // Safety Match: Find rowIndex if missing
     if (!rowIndex && projectId) {
@@ -1073,9 +1080,11 @@ window.handleQuotationSubmit = async function (e, isBackground = false) {
 
         // Handle Queued Save
         if (nextSavePending) {
-            console.log(">> Triggering queued save...");
+            const wasManual = nextSaveIsManual;
             nextSavePending = false;
-            window.handleQuotationSubmit(null, true);
+            nextSaveIsManual = false;
+            console.log(`>> Triggering queued ${wasManual ? 'manual' : 'background'} save...`);
+            window.handleQuotationSubmit(null, !wasManual);
         }
     }
 };

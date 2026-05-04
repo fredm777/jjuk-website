@@ -162,11 +162,14 @@
         <div class="auth-card">
             <!-- Login -->
             <div id="loginStage" class="auth-stage">
-                <div class="auth-header" style="margin-bottom: 1.5rem;">
-                    <div class="logo-big">Studio Pro</div>
+                <div class="auth-header">
+                    <div class="logo-big">
+                        <img src="assets/icons/logo.svg" alt="Studio Pro">
+                        <span>Studio Pro</span>
+                    </div>
                 </div>
                 <form id="loginForm">
-                    <div class="form-group"><label>帳號</label><input type="text" id="loginUser" required></div>
+                    <div class="form-group"><label>帳號</label><input type="text" id="loginUser" placeholder="請輸入帳號" required></div>
                     <div class="form-group">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
@@ -175,9 +178,9 @@
                                 style="font-size: 0.75rem; color: var(--primary); font-weight: 600; text-decoration: none;">忘記密碼？</a>
                         </div>
                         <div class="password-wrapper">
-                            <input type="password" id="loginPass" required>
-                            <span class="toggle-password visible" onclick="togglePassword('loginPass')">
-                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            <input type="password" id="loginPass" placeholder="請輸入密碼" required>
+                            <span class="toggle-password" onclick="togglePassword('loginPass')">
+                                <img src="assets/icons/eye.svg" alt="toggle">
                             </span>
                         </div>
                     </div>
@@ -250,9 +253,9 @@
                     <div class="form-group">
                         <label>密碼</label>
                         <div class="password-wrapper">
-                            <input type="password" id="regPass" required>
-                            <span class="toggle-password visible" onclick="togglePassword('regPass')">
-                                <img src="assets/icons/eye off.svg" alt="toggle">
+                            <input type="password" id="regPass" placeholder="設定您的密碼" required>
+                            <span class="toggle-password" onclick="togglePassword('regPass')">
+                                <img src="assets/icons/eye.svg" alt="toggle">
                             </span>
                         </div>
                     </div>
@@ -305,6 +308,7 @@
 
     <!-- Dashboard View (Initially Hidden) -->
     <div id="app" class="hidden">
+        <div id="syncProgressBar"></div>
         <div class="sticky-nav-container">
             <header>
                 <div class="header-content">
@@ -352,7 +356,7 @@
                                 <input type="text" id="customerSearchInput" class="card-search-input"
                                     placeholder="">
                                 <div class="card-search-icon">
-                                    <img src="assets/icons/search_custom.png" alt="search">
+                                    <img src="assets/icons/search.svg" alt="search">
                                 </div>
                             </div>
                         </div>
@@ -498,7 +502,7 @@
                                     <input type="text" id="taskSearchInput" class="card-search-input"
                                         placeholder="搜尋客戶、日期或任務..." oninput="window.filterTasks()" list="taskSearchSuggestions">
                                     <div class="card-search-icon">
-                                        <img src="assets/icons/search_custom.png" alt="search">
+                                        <img src="assets/icons/search.svg" alt="search">
                                     </div>
                                     <datalist id="taskSearchSuggestions"></datalist>
                                 </div>
@@ -516,9 +520,11 @@
                                     時間 <span class="sort-arrow"></span>
                                 </div>
                                 <div class="task-header-btn task-content-header task-col-content" id="sort-content" onclick="window.setTaskSort('content')">
-                                    內容 <span class="sort-arrow"></span>
+                                    任務 <span class="sort-arrow"></span>
                                 </div>
-                                <div class="task-header-btn task-actions-header task-col-actions"></div>
+                                <div class="task-header-btn task-actions-header task-col-actions" id="sort-status" onclick="window.setTaskSort('status')">
+                                    <span class="sort-arrow"></span>
+                                </div>
                             </div>
                             <ul id="taskList" style="list-style: none; padding: 0; margin: 0;">
                                 <!-- Tasks inject here -->
@@ -625,7 +631,7 @@
                     </div>
                     <div class="card-wrapper" style="padding: 1rem 2rem 2rem 2rem;">
                         <div
-                            style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 1.5rem;">
+                            style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
                             <button class="primary-btn" onclick="saveRolePermissions()"
                                 style="width: auto; padding: 0.6rem 1.5rem;">儲存設定</button>
                         </div>
@@ -731,7 +737,7 @@
                                 <input id="setAccountNum" placeholder="輸入帳號">
                             </div>
 
-                            <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                            <div style="margin-top: 2rem; display: flex; justify-content: center;">
                                 <button type="submit" class="save-btn"
                                     style="width: auto; padding: 0.75rem 2rem;">儲存變更</button>
                             </div>
@@ -806,7 +812,7 @@
                                 <input type="text" id="projectSearchInput" class="card-search-input"
                                     placeholder="">
                                 <div class="card-search-icon">
-                                    <img src="assets/icons/search_custom.png" alt="search">
+                                    <img src="assets/icons/search.svg" alt="search">
                                 </div>
                             </div>
                         </div>
@@ -927,7 +933,7 @@
                                     border: 1px solid var(--text-dark);
                                     padding: 6px 8px; /* Increased padding slightly */
                                     vertical-align: middle !important;
-                                    text-align: left !important; /* Default to left for better readability */
+                                    text-align: center !important;
                                 }
 
                                 .quote-sheet-table th {
@@ -964,7 +970,7 @@
 
                                 .quote-sheet-table .i-content,
                                 .quote-sheet-table .i-name {
-                                    text-align: left !important;
+                                    text-align: center !important;
                                     padding: 8px 10px !important;
                                 }
 
@@ -1018,7 +1024,7 @@
                                 }
 
                                 .resizer:hover,
-                                .resizer.is-resizing {
+                                .resizing .resizer {
                                     background: var(--primary);
                                 }
 
@@ -1108,12 +1114,7 @@
 
                                 <table class="quote-sheet-table quote-body-table thick-border">
                                     <colgroup>
-                                        <col class="quote-col-index">
-                                        <col class="quote-col-item">
-                                        <col class="quote-col-content">
-                                        <col class="quote-col-price">
-                                        <col class="quote-col-qty">
-                                        <col class="quote-col-total">
+                                        <col><col><col><col><col><col>
                                     </colgroup>
                                     <thead>
                                         <tr>
@@ -1174,7 +1175,7 @@
                                                     <textarea id="qBankData" rows="1"
                                                         style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         placeholder="銀行：...\n戶名：...\n帳號：..."
-                                                        oninput="autoExpandTextarea(this)"></textarea>
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -1203,7 +1204,7 @@
                                                 <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
                                                         style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
                                                         rows="1" placeholder="其他補充說明..."
-                                                        oninput="autoExpandTextarea(this)"></textarea></td>
+                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
                                             </tr>
                                         </tbody>
                                     </table>

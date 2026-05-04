@@ -61,12 +61,6 @@ window.redoTask = async function() {
 
 // Global Keyboard Listener
 document.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented) return;
-
-    const activeEl = document.activeElement;
-    const isEditingField = activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName);
-    if (isEditingField) return;
-
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const cmdKey = isMac ? e.metaKey : e.ctrlKey;
     
@@ -479,6 +473,9 @@ window.renderTasks = function() {
             } else if (column === 'content') {
                 valA = a.taskName || '';
                 valB = b.taskName || '';
+            } else if (column === 'status') {
+                valA = a.isCompleted ? 1 : 0;
+                valB = b.isCompleted ? 1 : 0;
             }
 
             const res = String(valA).localeCompare(String(valB), 'zh-Hant');
@@ -619,10 +616,6 @@ window.renderTasks = function() {
             }
         });
     }
-
-    if (typeof window.updateTaskContainerWidth === 'function') {
-        window.updateTaskContainerWidth();
-    }
 }
 
 window.saveTaskOrder = async function(orderedIds) {
@@ -656,6 +649,30 @@ window.saveTaskOrder = async function(orderedIds) {
     }
 }
 
+window.saveTask = async function(taskId) {
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    if (!task) return { success: false, error: "Task not found" };
+
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
+    try {
+        const res = await fetch(GAS_WEB_APP_URL, {
+            method: 'POST', mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+            task.rowIndex = json.data.rowIndex;
+        }
+        return json;
+    } catch (e) {
+        console.error("Save Task Error:", e);
+        return { success: false, error: e.message };
+    } finally {
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
+    }
+}
+
 window.updateTaskField = async function(taskId, field, value) {
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     if (!task || task[field] === value) return;
@@ -673,21 +690,12 @@ window.updateTaskField = async function(taskId, field, value) {
     // Always re-render on any field update to ensure UI is in sync
     window.filterTasksByProject();
 
-    setSyncStatus(true);
     try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST', mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
-        });
-        const json = await res.json();
-        if (json.success && json.data) {
-            task.rowIndex = json.data.rowIndex;
-            // setCache('tasks', window.allTasks); // Removed persistence
-        }
-    } catch (e) { console.error(e); } finally {
+        await window.saveTask(taskId);
+    } catch (e) { 
+        console.error(e); 
+    } finally {
         window.saveLocks.delete(taskId);
-        setSyncStatus(false);
     }
 }
 
@@ -859,23 +867,7 @@ window.selectTaskProjectForInline = async function(taskId, projectId) {
     window.filterTasksByProject();
 
     // FORCE SAVE TO BACKEND IMMEDIATELY
-    setSyncStatus(true);
-    try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST', mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
-        });
-        const json = await res.json();
-        if (json.success && json.data) {
-            task.rowIndex = json.data.rowIndex;
-            // setCache('tasks', window.allTasks); // Removed persistence
-        }
-    } catch (e) {
-        console.error("Save Error after Selection:", e);
-    } finally {
-        setSyncStatus(false);
-    }
+    await window.saveTask(taskId);
 }
 
 // Helper to save custom text if no project was selected from the dropdown
@@ -925,22 +917,6 @@ document.addEventListener('click', () => {
         menu.classList.remove('active');
     });
 });
-
-window.saveTask = async function(taskId) {
-    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
-    if (!task) throw new Error('Task not found');
-
-    const res = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(window.buildApiPayload('save_task', { task }))
-    });
-    const json = await res.json();
-    if (!json.success) throw new Error(json.error || 'Task save failed');
-    if (json.data?.rowIndex) task.rowIndex = json.data.rowIndex;
-    return json;
-}
 
 // --- Task Editor Modal Logic ---
 window.showTaskEditor = function(taskId) {
@@ -1000,14 +976,15 @@ window.submitTaskEditor = async function(event) {
     window.filterTasksByProject(); // Refresh UI
 
     // Sync to backend
-    setSyncStatus(true);
     try {
-        await window.saveTask(taskId);
-        Toast.fire({ icon: 'success', title: '任務已更新' });
+        const res = await window.saveTask(taskId);
+        if (res && res.success) {
+            Toast.fire({ icon: 'success', title: '任務已更新' });
+        } else {
+            throw new Error(res ? res.error : "Unknown error");
+        }
     } catch (e) {
         console.error(e);
-        Swal.fire('錯誤', '儲存失敗', 'error');
-    } finally {
-        setSyncStatus(false);
+        Swal.fire('錯誤', '儲存失敗: ' + e.message, 'error');
     }
 }

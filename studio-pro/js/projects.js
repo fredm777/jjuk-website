@@ -366,17 +366,16 @@ window.renderProjects = function () {
 window.showQuotationEditor = async function (title, data = null) {
     // Ensure settings are cached before opening so we can instantly read bank & remark data
     if (!window.sysSettingsCache && window.currentUser && window.currentUser.sheetId) {
-        try {
-            const loading = document.getElementById('projectLoading');
-            if (loading) loading.style.display = 'block';
-            const res = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(window.buildApiPayload('get_settings'))
-            });
-            const json = await res.json();
-            if (json.success) window.sysSettingsCache = json.settings;
-            if (loading) loading.style.display = 'none';
-        } catch (e) { }
+        if (typeof window.fetchSettings === 'function') {
+            await window.fetchSettings();
+        }
+    }
+
+    // Ensure customers are cached for selection logic
+    if ((!window.allCustomers || window.allCustomers.length === 0) && window.currentUser && window.currentUser.sheetId) {
+        if (typeof window.fetchCustomers === 'function') {
+            await window.fetchCustomers();
+        }
     }
 
     // Mobile Reminder
@@ -464,7 +463,7 @@ window.showQuotationEditor = async function (title, data = null) {
                 s.bank_name ? `銀行：${s.bank_name}${s.bank_code ? ' (' + s.bank_code + ')' : ''}` : '',
                 s.bank_branch ? `分行：${s.bank_branch}${s.branch_code ? ' (' + s.branch_code + ')' : ''}` : '',
                 s.account_name ? `戶名：${s.account_name}` : '',
-                s.account_num ? `帳號：${s.account_num.replace(/^'/, '')}` : ''
+                s.account_num ? `帳號：${String(s.account_num).replace(/^'/, '')}` : ''
             ].filter(x => x).join('\n');
             if (document.getElementById('qBankData')) document.getElementById('qBankData').value = bankStr;
 
@@ -1175,45 +1174,62 @@ window.initQuotationAutocomplete = function () {
     const suggest = document.getElementById('autocompleteSuggestions');
     if (!input || !suggest) return;
 
-    // Load data if missing
-    if (!window.allCustomers || window.allCustomers.length === 0) {
-        if (typeof fetchCustomers === 'function') {
-            console.log(">> Customer data missing for autocomplete, triggering fetch...");
-            fetchCustomers();
-        }
-    }
-
     if (input.dataset.autocompleteBound) return;
     input.dataset.autocompleteBound = 'true';
 
-    input.addEventListener('input', (e) => {
-        const val = e.target.value.trim().toLowerCase();
+    let customerFetchPromise = null;
+    const ensureCustomerData = () => {
+        if (window.allCustomers && window.allCustomers.length > 0) return Promise.resolve();
+        const loader = window.fetchCustomers || (typeof fetchCustomers === 'function' ? fetchCustomers : null);
+        if (!loader) return Promise.resolve();
+        if (!customerFetchPromise) {
+            console.log(">> Customer data missing for autocomplete, triggering fetch...");
+            customerFetchPromise = Promise.resolve(loader()).finally(() => {
+                customerFetchPromise = null;
+            });
+        }
+        return customerFetchPromise;
+    };
+
+    ensureCustomerData();
+
+    input.addEventListener('input', async (e) => {
+        const rawVal = e.target.value.trim();
+        const val = rawVal.toLowerCase();
+        const qCustName = document.getElementById('qCustName');
+        if (qCustName) qCustName.value = rawVal;
+
         if (!val) {
             suggest.style.display = 'none';
+            if (qCustName) qCustName.value = '';
             return;
         }
 
-        // Safety Pre-fetch Check
-        if (!window.allCustomers || window.allCustomers.length === 0) {
-            console.log(">> Emergency pre-fetch triggered by input event...");
-            if (typeof fetchCustomers === 'function') fetchCustomers();
+        // Reset linked ID if user types manually
+        if (e.isTrusted && input.dataset.selectedId) {
+            delete input.dataset.selectedId;
         }
 
-        // Reset linked ID if user types manually
-        if (input.dataset.selectedId) {
-            delete input.dataset.selectedId;
-            const qCustName = document.getElementById('qCustName');
-            if (qCustName) qCustName.value = '';
+        // Safety pre-fetch check
+        if (!window.allCustomers || window.allCustomers.length === 0) {
+            suggest.innerHTML = `
+                <div class="suggestion-item no-results" style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.8125rem;">
+                    載入客戶資料...
+                </div>
+            `;
+            suggest.style.display = 'block';
+            await ensureCustomerData();
+            if (input.value.trim().toLowerCase() !== val) return;
         }
 
         // --- Downloads-Logic: Explicit field matching for accuracy ---
         const matches = (window.allCustomers || []).filter(c => {
-            const cn = (c.companyName || '').toLowerCase();
-            const nk = (c.nickname || '').toLowerCase();
-            const ct = (c.contact || '').toLowerCase();
-            const tx = (c.taxId || '').toLowerCase();
-            const ph = (c.phone || '').toLowerCase();
-            const em = (c.email || '').toLowerCase();
+            const cn = String(c.companyName || '').toLowerCase();
+            const nk = String(c.nickname || '').toLowerCase();
+            const ct = String(c.contact || '').toLowerCase();
+            const tx = String(c.taxId || '').toLowerCase();
+            const ph = String(c.phone || '').toLowerCase();
+            const em = String(c.email || '').toLowerCase();
 
             return cn.includes(val) || nk.includes(val) || ct.includes(val) ||
                 tx.includes(val) || ph.includes(val) || em.includes(val);
@@ -1273,7 +1289,12 @@ window.initQuotationAutocomplete = function () {
     });
 };
 
-window.selectQuotationCustomer = function (id, isInit = false) {
+window.selectQuotationCustomer = async function (id, isInit = false) {
+    if (!window.allCustomers || window.allCustomers.length === 0) {
+        if (typeof window.fetchCustomers === 'function') {
+            await window.fetchCustomers();
+        }
+    }
     if (!window.allCustomers) return;
     const cust = window.allCustomers.find(c => String(c.customerId) === String(id));
     if (!cust) return;
@@ -1281,8 +1302,6 @@ window.selectQuotationCustomer = function (id, isInit = false) {
     const input = document.getElementById('qCustSearch');
     const hiddenName = document.getElementById('qCustName');
     const suggest = document.getElementById('autocompleteSuggestions');
-
-    // Clean leading quotes from Excel/Sheets import
     const clean = (val) => String(val || '').replace(/^'/, '').trim();
 
     // 1. Fill Identity Fields
@@ -1293,7 +1312,7 @@ window.selectQuotationCustomer = function (id, isInit = false) {
     }
     if (hiddenName) hiddenName.value = displayName;
 
-    // 2. Exact Field Filling (Restored from stable version)
+    // 2. Fill customer info fields only
     const qTaxId = document.getElementById('qTaxId');
     const qContact = document.getElementById('qContact');
     const qPhone = document.getElementById('qPhone');
@@ -1315,7 +1334,7 @@ window.selectQuotationCustomer = function (id, isInit = false) {
         }
     }
 
-    console.log(">> [SUCCESS] Imported Customer Info for:", displayName);
+    console.log(">> [SUCCESS] Linked quotation customer and filled customer fields:", displayName);
 };
 
 /**

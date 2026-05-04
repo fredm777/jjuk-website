@@ -51,24 +51,29 @@
     --task-row-gap: 12px;
     --task-row-padding-x: 24px;
 
-    --quote-col-5-width: 19%;
-    --quote-col-6-width: 19%;
+    /* Quotation Column Widths */
+    --quote-col-1-width: 56px;
+    --quote-col-2-width: 180px;
+    --quote-col-3-width: 280px;
+    --quote-col-4-width: 160px;
+    --quote-col-5-width: 140px;
+    --quote-col-6-width: 180px;
 
     /* --- Projects List Variables --- */
-    --proj-col-1-width: auto;
-    --proj-col-2-width: 100px;
-    --proj-col-3-width: auto;
-    --proj-col-4-width: 120px;
-    --proj-col-5-width: 110px;
-    --proj-col-6-width: 110px;
-    --proj-col-7-width: 110px;
+    --proj-col-1-width: 210px;
+    --proj-col-2-width: 120px;
+    --proj-col-3-width: 220px;
+    --proj-col-4-width: 140px;
+    --proj-col-5-width: 130px;
+    --proj-col-6-width: 130px;
+    --proj-col-7-width: 150px;
 
     /* --- Customers List Variables --- */
-    --cust-col-1-width: auto;
-    --cust-col-2-width: 100px;
-    --cust-col-3-width: 120px;
-    --cust-col-4-width: 150px;
-    --cust-col-5-width: 100px;
+    --cust-col-1-width: 220px;
+    --cust-col-2-width: 120px;
+    --cust-col-3-width: 140px;
+    --cust-col-4-width: 160px;
+    --cust-col-5-width: 160px;
 
     /* --- Member List Variables --- */
     --member-col-1-width: 150px;
@@ -78,10 +83,10 @@
     --member-col-5-width: 100px;
 
     /* --- Permission Matrix Variables --- */
-    --pm-col-0-width: 20px;
-    --pm-col-1-width: 20px;
-    --pm-col-2-width: 20px;
-    --pm-col-3-width: 20px;
+    --pm-col-0-width: 180px;
+    --pm-col-1-width: 92px;
+    --pm-col-2-width: 92px;
+    --pm-col-3-width: 92px;
 }
 
 /* --- Base Utility Classes --- */
@@ -439,13 +444,20 @@ body {
 :root[data-theme] .edit-card,
 :root[data-theme] .modal-card,
 :root[data-theme] .placeholder-container,
-:root[data-theme] .task-autocomplete-dropdown,
-:root[data-theme] .suggestions-list {
+:root[data-theme] .task-autocomplete-dropdown {
     background: var(--surface) !important;
     border: none !important;
     box-shadow: none !important;
     color: var(--text-dark);
     border-radius: 10px !important;
+}
+
+:root[data-theme] .suggestions-list {
+    background: var(--surface) !important;
+    color: var(--text-dark);
+    border-radius: 10px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 :root[data-theme] th,
@@ -1732,7 +1744,7 @@ header {
     align-items: center;
     width: fit-content !important;
     min-width: 320px;
-    max-width: 100%;
+    max-width: none;
     margin-left: auto !important;
     margin-right: auto !important;
     margin-top: 0;
@@ -1908,11 +1920,11 @@ main {
     background: white;
     border-radius: 10px !important;
     border: none !important;
-    overflow: auto;
+    overflow: visible;
     box-shadow: none !important;
     width: fit-content;
     min-width: 0; 
-    max-width: 100%;
+    max-width: none;
     margin: 0 auto !important;
 }
 
@@ -1997,11 +2009,10 @@ td {
     background: white;
     border-radius: 10px !important;
     border: none !important;
-    overflow-x: auto;
-    /* Premium horizontal scroll */
+    overflow-x: visible;
     width: fit-content;
     min-width: 400px;
-    max-width: 100%;
+    max-width: none;
     margin: 0 auto !important;
     margin-bottom: 2rem;
     box-shadow: none !important;
@@ -2214,9 +2225,9 @@ tbody tr:hover {
     border: none !important;
     width: fit-content !important;
     min-width: 600px !important;
-    max-width: 100% !important;
+    max-width: none !important;
     margin: 0 auto !important;
-    overflow-x: auto !important;
+    overflow-x: visible !important;
 }
 
 #tasksListView .card-actions-row {
@@ -2791,7 +2802,7 @@ tbody tr:hover {
 
 /* Specific fix for the customer search cell */
 .quote-sheet-table td {
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative;
     /* Base for suggestions-list */
 }
@@ -6366,17 +6377,25 @@ td:first-child,
 
 #projectsEditView .quote-body-table {
     width: var(--total-quote-width, 100%) !important;
+    min-width: var(--total-quote-width, 100%) !important;
     table-layout: fixed !important;
 }
 
 @media (min-width: 769px) {
-    /* Restored exact percentages from backup 011_260430 */
-    #projectsEditView .quote-body-table col:nth-child(1) { width: var(--quote-col-1-width, 8%) !important; }
-    #projectsEditView .quote-body-table col:nth-child(2) { width: var(--quote-col-2-width, 22%) !important; }
-    #projectsEditView .quote-body-table col:nth-child(3) { width: var(--quote-col-3-width, 35%) !important; }
-    #projectsEditView .quote-body-table col:nth-child(4) { width: var(--quote-col-4-width, 12%) !important; }
-    #projectsEditView .quote-body-table col:nth-child(5) { width: var(--quote-col-5-width, 10%) !important; }
-    #projectsEditView .quote-body-table col:nth-child(6) { width: var(--quote-col-6-width, 13%) !important; }
+    #projectsEditView .quotation-card,
+    #projectsEditView #quotationForm {
+        width: fit-content !important;
+        min-width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+    }
+
+    #projectsEditView .quote-body-table col:nth-child(1) { width: var(--quote-col-1-width, 56px) !important; }
+    #projectsEditView .quote-body-table col:nth-child(2) { width: var(--quote-col-2-width, 180px) !important; }
+    #projectsEditView .quote-body-table col:nth-child(3) { width: var(--quote-col-3-width, 280px) !important; }
+    #projectsEditView .quote-body-table col:nth-child(4) { width: var(--quote-col-4-width, 160px) !important; }
+    #projectsEditView .quote-body-table col:nth-child(5) { width: var(--quote-col-5-width, 140px) !important; }
+    #projectsEditView .quote-body-table col:nth-child(6) { width: var(--quote-col-6-width, 180px) !important; }
 
     /* Force Left Alignment for Item and Content columns */
     #projectsEditView .quote-body-table th:nth-child(2),
@@ -8364,4 +8383,215 @@ html {
     min-width: 600px;
     border-collapse: separate;
     border-spacing: 0;
+}
+
+/* --- Final column-resize rule: expand containers instead of inner scrolling --- */
+html,
+body,
+main,
+.app-container,
+.app-main,
+.main-container,
+.content-area,
+.tab-content,
+.sub-view-stack {
+    overflow-x: visible !important;
+    max-width: none !important;
+}
+
+#customersListView,
+#projectsListView,
+#tasksListView,
+#permissionsListView,
+#permissionsEditView,
+#permissionsMatrixView,
+#customersListView .card-wrapper,
+#projectsListView .card-wrapper,
+#tasksListView .card-wrapper,
+#permissionsListView .card-wrapper,
+#permissionsEditView .card-wrapper,
+#permissionsMatrixView .card-wrapper,
+#customersListView .grid-container,
+#projectsListView .grid-container,
+#tasksListView .tasks-container,
+#permissionsEditView .grid-container,
+#permissionsMatrixView .grid-container {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    width: fit-content !important;
+    min-width: 100% !important;
+    max-width: none !important;
+}
+
+#projectsListView .card-wrapper,
+#projectsListView .grid-container {
+    width: calc(var(--total-proj-width, 100%) + 48px) !important;
+    min-width: calc(var(--total-proj-width, 100%) + 48px) !important;
+}
+
+#customersListView .card-wrapper,
+#customersListView .grid-container {
+    width: calc(var(--total-cust-width, 100%) + 48px) !important;
+    min-width: calc(var(--total-cust-width, 100%) + 48px) !important;
+}
+
+#tasksListView .card-wrapper,
+#tasksListView .tasks-container {
+    width: calc(var(--total-task-width, 100%) + 48px) !important;
+    min-width: calc(var(--total-task-width, 100%) + 48px) !important;
+}
+
+/* --- Mobile column resize follows the same width rules as desktop --- */
+@media (max-width: 768px) {
+    html,
+    body,
+    main,
+    .app-container,
+    .app-main,
+    .main-container,
+    .content-area,
+    .tab-content,
+    .sub-view-stack,
+    #customersListView,
+    #projectsListView,
+    #tasksListView,
+    #permissionsListView,
+    #permissionsEditView,
+    #permissionsMatrixView,
+    #customersListView .card-wrapper,
+    #projectsListView .card-wrapper,
+    #tasksListView .card-wrapper,
+    #permissionsListView .card-wrapper,
+    #permissionsEditView .card-wrapper,
+    #permissionsMatrixView .card-wrapper,
+    #customersListView .grid-container,
+    #projectsListView .grid-container,
+    #tasksListView .tasks-container,
+    #permissionsEditView .grid-container,
+    #permissionsMatrixView .grid-container {
+        overflow: visible !important;
+        overflow-x: visible !important;
+        max-width: none !important;
+    }
+
+    #customersListView .card-wrapper,
+    #customersListView .grid-container {
+        width: calc(var(--total-cust-width, 100vw) + 48px) !important;
+        min-width: calc(var(--total-cust-width, 100vw) + 48px) !important;
+    }
+
+    #projectsListView .card-wrapper,
+    #projectsListView .grid-container {
+        width: calc(var(--total-proj-width, 100vw) + 48px) !important;
+        min-width: calc(var(--total-proj-width, 100vw) + 48px) !important;
+    }
+
+    #tasksListView .card-wrapper,
+    #tasksListView .tasks-container {
+        width: calc(var(--total-task-width, 100vw) + 48px) !important;
+        min-width: calc(var(--total-task-width, 100vw) + 48px) !important;
+    }
+
+    #permissionsListView .card-wrapper,
+    #permissionsEditView .card-wrapper,
+    #permissionsMatrixView .card-wrapper,
+    #permissionsEditView .grid-container,
+    #permissionsMatrixView .grid-container {
+        width: calc(var(--total-perm-width, 100vw) + 64px) !important;
+        min-width: calc(var(--total-perm-width, 100vw) + 64px) !important;
+    }
+
+    #projectTable,
+    #customerTable,
+    .permission-matrix-table {
+        table-layout: fixed !important;
+        max-width: none !important;
+    }
+
+    #projectTable {
+        width: var(--total-proj-width, 100vw) !important;
+        min-width: var(--total-proj-width, 100vw) !important;
+    }
+
+    #customerTable {
+        width: var(--total-cust-width, 100vw) !important;
+        min-width: var(--total-cust-width, 100vw) !important;
+    }
+
+    .permission-matrix-table {
+        width: var(--total-perm-width, 100vw) !important;
+        min-width: var(--total-perm-width, 100vw) !important;
+    }
+
+    #projectTable th,
+    #projectTable td,
+    #customerTable th,
+    #customerTable td,
+    .permission-matrix-table th,
+    .permission-matrix-table td {
+        display: table-cell !important;
+        min-width: 20px !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+    }
+}
+
+#projectTable,
+#customerTable,
+#memberTable,
+.permission-matrix-table,
+#projectTable th,
+#projectTable td,
+#customerTable th,
+#customerTable td,
+#memberTable th,
+#memberTable td,
+.permission-matrix-table th,
+.permission-matrix-table td {
+    box-sizing: border-box !important;
+}
+
+#projectTable th,
+#customerTable th,
+#memberTable th,
+.permission-matrix-table th {
+    min-width: 20px !important;
+}
+
+#permissionsListView .card-wrapper,
+#permissionsEditView .card-wrapper,
+#permissionsMatrixView .card-wrapper,
+#permissionsEditView .grid-container,
+#permissionsMatrixView .grid-container {
+    width: calc(var(--total-perm-width, 100%) + 64px) !important;
+    min-width: calc(var(--total-perm-width, 100%) + 64px) !important;
+}
+
+#projectTable {
+    width: var(--total-proj-width, 100%) !important;
+    min-width: var(--total-proj-width, 100%) !important;
+    max-width: none !important;
+}
+
+#customerTable {
+    width: var(--total-cust-width, 100%) !important;
+    min-width: var(--total-cust-width, 100%) !important;
+    max-width: none !important;
+}
+
+#memberTable {
+    width: var(--total-member-width, 600px) !important;
+    min-width: var(--total-member-width, 600px) !important;
+    max-width: none !important;
+}
+
+.permission-matrix-table {
+    width: var(--total-perm-width, 100%) !important;
+    min-width: var(--total-perm-width, 100%) !important;
+    max-width: none !important;
+}
+
+#tasksListView .tasks-container {
+    width: calc(var(--total-task-width, 100%) + 48px) !important;
+    min-width: calc(var(--total-task-width, 100%) + 48px) !important;
 }

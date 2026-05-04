@@ -452,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Pre-fetch system settings for automation
-        if (typeof fetchSettings === 'function') fetchSettings();
+        if (typeof window.fetchSettings === 'function') await window.fetchSettings();
+        if (typeof window.fetchCustomers === 'function') await window.fetchCustomers();
 
         if (!window.currentUser && document.querySelectorAll('.auth-stage.active').length === 0) {
             checkAuth();

@@ -132,6 +132,8 @@ function initResizableTable() {
         return Number.isFinite(parsed) ? parsed : 0;
     };
 
+    const isPxWidth = (val) => /^\s*\d+(\.\d+)?px\s*$/.test(String(val || ''));
+
     const updateContainerForColumn = (varName) => {
         if (!varName) return;
         if (varName.startsWith('--task') && typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
@@ -267,9 +269,39 @@ function initResizableTable() {
         applyColumnWidth(header, maxWidth);
     };
 
+    const getRenderedTableWidth = (table, fallback = 0) => {
+        if (!table) return fallback;
+        const headerRow = table.tHead?.rows?.[0] || table.querySelector('tr');
+        const cellTotal = headerRow ? Array.from(headerRow.cells).reduce((sum, cell) => {
+            const style = window.getComputedStyle(cell);
+            if (style.display === 'none' || style.visibility === 'hidden') return sum;
+            return sum + cell.getBoundingClientRect().width;
+        }, 0) : 0;
+
+        return Math.ceil(Math.max(
+            fallback,
+            cellTotal,
+            table.getBoundingClientRect().width,
+            table.scrollWidth
+        ));
+    };
+
+    const setMeasuredTableWidth = (varName, table, fallbackTotal) => {
+        if (!varName || !table || fallbackTotal <= 0) return;
+        const applyWidth = () => {
+            const measured = getRenderedTableWidth(table, fallbackTotal);
+            if (measured > 0) {
+                document.documentElement.style.setProperty(varName, `${measured}px`);
+            }
+        };
+
+        document.documentElement.style.setProperty(varName, `${fallbackTotal}px`);
+        requestAnimationFrame(applyWidth);
+    };
+
     window.updateTaskContainerWidth = function () {
         const container = document.querySelector('#tasksListView .tasks-container, .tasks-container');
-        if (!container || window.matchMedia('(max-width: 768px)').matches) return;
+        if (!container) return;
 
         const total =
             getCssPx('--task-col-drag-width') +
@@ -287,7 +319,7 @@ function initResizableTable() {
 
     window.updateQuotationContainerWidth = function () {
         const table = document.querySelector('#projectsEditView .quote-body-table');
-        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+        if (!table) return;
 
         const total =
             getCssPx('--quote-col-1-width') +
@@ -298,13 +330,13 @@ function initResizableTable() {
             getCssPx('--quote-col-6-width');
 
         if (total > 0) {
-            document.documentElement.style.setProperty('--total-quote-width', `${total}px`);
+            setMeasuredTableWidth('--total-quote-width', table, total);
         }
     };
 
     window.updateProjectContainerWidth = function () {
         const table = document.querySelector('#projectTable');
-        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+        if (!table) return;
 
         const total =
             getCssPx('--proj-col-1-width') +
@@ -316,13 +348,13 @@ function initResizableTable() {
             getCssPx('--proj-col-7-width');
 
         if (total > 0) {
-            document.documentElement.style.setProperty('--total-proj-width', `${total}px`);
+            setMeasuredTableWidth('--total-proj-width', table, total);
         }
     };
 
     window.updateCustomerContainerWidth = function () {
         const table = document.querySelector('#customerTable');
-        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+        if (!table) return;
 
         const total =
             getCssPx('--cust-col-1-width') +
@@ -332,7 +364,7 @@ function initResizableTable() {
             getCssPx('--cust-col-5-width');
 
         if (total > 0) {
-            document.documentElement.style.setProperty('--total-cust-width', `${total}px`);
+            setMeasuredTableWidth('--total-cust-width', table, total);
         }
     };
 
@@ -380,7 +412,9 @@ function initResizableTable() {
             try {
                 const widths = JSON.parse(saved);
                 for (const [prop, val] of Object.entries(widths)) {
-                    if (val) document.documentElement.style.setProperty(prop, val);
+                    if (isPxWidth(val)) {
+                        document.documentElement.style.setProperty(prop, val);
+                    }
                 }
                 setTimeout(() => { if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth(); }, 100);
             } catch (e) { console.error('Failed to load quotation widths', e); }
@@ -407,7 +441,7 @@ function initResizableTable() {
             try {
                 const widths = JSON.parse(saved);
                 for (const [prop, val] of Object.entries(widths)) {
-                    if (val) document.documentElement.style.setProperty(prop, val);
+                    if (isPxWidth(val)) document.documentElement.style.setProperty(prop, val);
                 }
             } catch (e) { console.error('Failed to load project widths', e); }
         }
@@ -431,7 +465,7 @@ function initResizableTable() {
             try {
                 const widths = JSON.parse(saved);
                 for (const [prop, val] of Object.entries(widths)) {
-                    if (val) document.documentElement.style.setProperty(prop, val);
+                    if (isPxWidth(val)) document.documentElement.style.setProperty(prop, val);
                 }
                 setTimeout(() => { if (typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth(); }, 100);
             } catch (e) { console.error('Failed to load customer widths', e); }
@@ -455,7 +489,7 @@ function initResizableTable() {
             try {
                 const widths = JSON.parse(saved);
                 for (const [prop, val] of Object.entries(widths)) {
-                    if (val) document.documentElement.style.setProperty(prop, val);
+                    if (isPxWidth(val)) document.documentElement.style.setProperty(prop, val);
                 }
             } catch (e) { console.error('Failed to load member widths', e); }
         }
@@ -478,7 +512,7 @@ function initResizableTable() {
             try {
                 const widths = JSON.parse(saved);
                 for (const [prop, val] of Object.entries(widths)) {
-                    if (val) document.documentElement.style.setProperty(prop, val);
+                    if (isPxWidth(val)) document.documentElement.style.setProperty(prop, val);
                 }
             } catch (e) { console.error('Failed to load matrix widths', e); }
         }
@@ -491,6 +525,13 @@ function initResizableTable() {
     window.loadCustomerColumnWidths();
     window.loadMemberColumnWidths();
     window.loadPermMatrixColumnWidths();
+
+    if (typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
+    if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth();
+    if (typeof window.updateProjectContainerWidth === 'function') window.updateProjectContainerWidth();
+    if (typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth();
+    if (typeof window.updateMemberContainerWidth === 'function') window.updateMemberContainerWidth();
+    if (typeof window.updatePermMatrixContainerWidth === 'function') window.updatePermMatrixContainerWidth();
 
     if (!window.__taskContainerResizeBound) {
         window.addEventListener('resize', () => {

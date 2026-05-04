@@ -5,12 +5,12 @@ window.switchAdminSubTab = function(target) {
     if (target === 'members') {
         const listEl = document.getElementById('adminMembersTab'); // Fixed ID
         if (listEl) listEl.classList.add('active');
-        fetchMembers();
-        fetchRolePermissions();
+        window.fetchMembers();
+        window.fetchRolePermissions();
     } else if (target === 'settings') {
         const bankEl = document.getElementById('bankSettingsView'); // Correct target
         if (bankEl) bankEl.classList.add('active');
-        fetchSettings();
+        window.fetchSettings();
     }
 }
 
@@ -51,11 +51,11 @@ window.initWorkflowAutoResize = function() {
     window.resizeWorkflowTextareas();
 };
 
-async function fetchSettings(force = false) {
+window.fetchSettings = async function(force = false) {
     // Prevent washing away unsaved changes unless forced
     if (!force && window.sysSettingsCache && window.isSettingsModified) {
         console.log(">> fetchSettings skipped: local changes exist.");
-        return;
+        return window.sysSettingsCache;
     }
 
     if (typeof setSyncStatus === 'function') setSyncStatus(true);
@@ -109,8 +109,13 @@ async function fetchSettings(force = false) {
                     }
                 };
             }
+            return s;
         }
-    } catch(e) { console.error("Fetch Settings Error:", e); }
+        return null;
+    } catch(e) { 
+        console.error("Fetch Settings Error:", e);
+        return null;
+    }
     finally { 
         if (typeof window.setSyncStatus === 'function') window.setSyncStatus(false); 
         window.isSettingsLoading = false; // Clear loading flag
@@ -210,7 +215,7 @@ window.handleGlobalSettingsSubmit = async function(e) {
 
 // --- Project & Quotation Logic ---
 
-async function fetchMembers() {
+window.fetchMembers = async function() {
     if (!window.currentUser || (window.currentUser.level || '').trim() !== '管理者') {
         console.warn(">> fetchMembers blocked: insufficient permissions or no user");
         return;
@@ -398,7 +403,7 @@ const PERM_DEFINITIONS = [
 
 const ROLES = ['管理者', '副帳號', '主帳號'];
 
-async function fetchRolePermissions() {
+window.fetchRolePermissions = async function() {
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },

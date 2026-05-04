@@ -473,6 +473,9 @@ window.renderTasks = function() {
             } else if (column === 'content') {
                 valA = a.taskName || '';
                 valB = b.taskName || '';
+            } else if (column === 'status') {
+                valA = a.isCompleted ? 1 : 0;
+                valB = b.isCompleted ? 1 : 0;
             }
 
             const res = String(valA).localeCompare(String(valB), 'zh-Hant');

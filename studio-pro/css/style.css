@@ -4260,7 +4260,7 @@ input[type="date"].task-inline-input {
     height: 34px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center !important;
     padding: 0 8px;
     font-size: 0.8125rem;
     font-weight: 800;
@@ -4306,15 +4306,7 @@ input[type="date"].task-inline-input {
 }
 
 .task-actions-header {
-    width: 92px;
-    cursor: default;
-    background: transparent;
-}
-
-.task-actions-header:hover {
-    border-color: transparent;
-    box-shadow: none;
-    background: transparent;
+    width: var(--task-col-actions-width);
 }
 
 .task-header-row+#taskList {
@@ -4348,7 +4340,7 @@ input[type="date"].task-inline-input {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     white-space: normal !important;
     word-break: break-word !important;
     line-height: 1.3;
@@ -4360,7 +4352,7 @@ input[type="date"].task-inline-input {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .task-col-content {
@@ -4369,6 +4361,7 @@ input[type="date"].task-inline-input {
     white-space: normal !important;
     word-break: break-word !important;
     line-height: 1.3;
+    text-align: center;
 }
 
 .task-col-actions {
@@ -4430,14 +4423,7 @@ input[type="date"].task-inline-input {
 }
 
 .task-header-btn.task-actions-header {
-    width: 60px; /* Reduced from 110px to match .task-col-actions */
-    background: transparent;
-    border: none !important;
-    cursor: default;
-}
-
-.task-header-btn.task-actions-header:hover {
-    box-shadow: none !important;
+    width: var(--task-col-actions-width);
 }
 
 

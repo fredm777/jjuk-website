@@ -34,6 +34,7 @@ function initTabs() {
                 if (typeof fetchSettings === 'function') fetchSettings();
             } else if (tabId === 'tasks') {
                 if (typeof fetchTasks === 'function') fetchTasks();
+                if (typeof window.loadTaskColumnWidths === 'function') window.loadTaskColumnWidths();
                 if (!window.allProjects || window.allProjects.length === 0) {
                     if (typeof fetchProjects === 'function') fetchProjects();
                 }
@@ -113,8 +114,6 @@ function initResizableTable() {
             getCssPx('--task-row-padding-x');
 
         if (total > 0) {
-            container.style.setProperty('width', `${total}px`, 'important');
-            container.style.setProperty('min-width', `${total}px`, 'important');
             document.documentElement.style.setProperty('--total-task-width', `${total}px`);
         }
     };
@@ -174,19 +173,12 @@ function initResizableTable() {
         };
 
         const getMinWidth = () => {
-            if (header.tagName === 'TH') return 100;
-            const isMobile = window.matchMedia('(max-width: 768px)').matches;
-            if (!isMobile) return 100;
-            if (header.classList.contains('task-drag-handle-header')) return 28;
-            if (header.classList.contains('task-date-header')) return 56;
-            if (header.classList.contains('task-actions-header')) return 32;
-            return 72;
+            return 20; // Effectively no limit
         };
 
         const applyTaskColumnWidth = (newWidth) => {
-            header.style.width = `${newWidth}px`;
-            header.style.flex = 'none'; // Prevent flex growing/shrinking
-
+            // Identify which column we are resizing and update its variable
+            // This ensures only the targeted column's width is changed.
             // Identify which column we are resizing
             if (header.classList.contains('task-drag-handle-header')) {
                 document.documentElement.style.setProperty('--task-col-drag-width', newWidth + 'px');
@@ -236,6 +228,7 @@ function initResizableTable() {
                 window.saveTaskColumnWidths();
             }
             document.body.classList.remove('resizing');
+            resizer.classList.remove('is-resizing');
             header.classList.remove('is-resizing');
         };
 
@@ -267,6 +260,8 @@ function initResizableTable() {
                 document.addEventListener('mouseup', onPointerUp);
             }
             document.body.classList.add('resizing');
+            resizer.classList.add('is-resizing');
+            header.classList.add('is-resizing');
         };
 
         if (window.PointerEvent) {

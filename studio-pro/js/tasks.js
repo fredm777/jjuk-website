@@ -5,10 +5,12 @@ window.allTasks = window.allTasks || [];
 window.currentFilteredTasks = window.currentFilteredTasks || [];
 const cachedTaskFilters = typeof getCache === 'function' ? getCache('taskStatusFilters') : null;
 window.taskStatusFilters = cachedTaskFilters || ['uncompleted', 'completed']; 
-window.taskSort = { column: 'drag', direction: 'asc' }; // Initialize sorting state
-
 if (!window.saveLocks) window.saveLocks = new Map();
 window.taskHistory = { undo: [], redo: [] };
+
+// Load Task Sort State from LocalStorage
+const savedSort = localStorage.getItem('studio_pro_task_sort');
+window.taskSort = savedSort ? JSON.parse(savedSort) : { column: 'drag', direction: 'asc' };
 
 // Helper to push state for Undo
 window.pushTaskHistory = function() {
@@ -273,6 +275,8 @@ window.setTaskSort = function (col) {
             window.taskSort.direction = 'asc';
         }
     }
+    // Save state
+    localStorage.setItem('studio_pro_task_sort', JSON.stringify(window.taskSort));
     window.renderTasks();
 }
 

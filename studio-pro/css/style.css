@@ -43,11 +43,11 @@
     --max-width-list: 1100px;
     
     /* Task Column Widths */
-    --task-col-drag-width: 100px;
-    --task-col-project-width: 180px;
+    --task-col-drag-width: 48px;
+    --task-col-project-width: 200px;
     --task-col-date-width: 100px;
     --task-col-content-min-width: 100px;
-    --task-col-actions-width: 100px;
+    --task-col-actions-width: 130px;
 }
 
 /* --- Base Utility Classes --- */
@@ -1891,7 +1891,7 @@ th {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 100px;
+    min-width: 20px;
 }
 
 td {
@@ -1973,9 +1973,46 @@ td {
 }
 
 th, td {
-    min-width: 100px !important;
+    position: relative; /* For resizers */
+    min-width: 20px !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+
+/* --- Column Resizer --- */
+.resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.resizer:hover,
+.resizer.is-resizing {
+    background: var(--color-hover-blue);
+    opacity: 0.5;
+}
+
+.resizer:hover::after,
+.resizer.is-resizing::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    top: 15%;
+    width: 2px;
+    height: 70%;
+    background: var(--color-hover-blue);
+    border-radius: 2px;
+}
+
+body.resizing {
+    cursor: col-resize !important;
+    user-select: none !important;
 }
 
 tbody tr:hover {
@@ -2076,14 +2113,14 @@ tbody tr:hover {
 
 /* Tasks Container (Matches .grid-container precisely in Shadow and Radius) */
 .tasks-container {
-    background: white;
+    background: var(--surface);
     border-radius: 10px !important;
     padding: var(--spacing-modal);
     box-shadow: none !important;
     border: none !important;
-    width: fit-content;
-    max-width: 100%;
-    margin: 0 auto !important;
+    width: fit-content !important;
+    max-width: none !important;
+    margin: 0 !important;
 }
 
 /* Specific List Container Alignment */
@@ -4254,6 +4291,7 @@ input[type="date"].task-inline-input {
 }
 
 .task-header-btn {
+    position: relative; /* Required for resizer positioning */
     background: #f1f5f9;
     color: #64748b;
     border-radius: 8px;
@@ -4266,14 +4304,14 @@ input[type="date"].task-inline-input {
     font-weight: 800;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1.5px solid transparent;
+    box-shadow: inset 0 0 0 1.5px transparent;
     user-select: none;
     letter-spacing: 0.05em;
+    width: 100% !important;
 }
 
 .task-header-btn:hover {
-    border-color: var(--color-hover-blue);
-    box-shadow: 0 0 0 1px var(--color-hover-blue);
+    box-shadow: inset 0 0 0 1.5px var(--color-hover-blue), 0 0 0 1px var(--color-hover-blue);
     color: var(--primary);
     background: white;
 }
@@ -4289,24 +4327,26 @@ input[type="date"].task-inline-input {
 }
 
 .task-drag-handle-header {
-    width: 24px;
+    width: var(--task-col-drag-width);
     padding: 0;
 }
 
 .task-project-header {
-    width: 150px;
+    width: var(--task-col-project-width);
 }
 
 .task-date-header {
-    width: 80px;
+    width: var(--task-col-date-width);
 }
 
 .task-content-header {
     flex: 1;
+    min-width: var(--task-col-content-min-width);
+    text-align: center;
 }
 
 .task-actions-header {
-    width: var(--task-col-actions-width);
+    width: 100% !important;
 }
 
 .task-header-row+#taskList {
@@ -4316,27 +4356,30 @@ input[type="date"].task-inline-input {
 /* --- Task Grid System (Alignment Fix) --- */
 .task-header-row,
 .task-item {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 
+        var(--task-col-drag-width) 
+        var(--task-col-project-width) 
+        var(--task-col-date-width) 
+        minmax(var(--task-col-content-min-width), 1fr) 
+        var(--task-col-actions-width) !important;
     align-items: center !important;
     gap: 12px !important;
-    padding: 6px 12px !important;
-    /* More compact padding */
-    height: auto !important;
-    width: max-content !important;
-    min-width: 100% !important;
+    padding: 8px 12px !important;
+    width: 100% !important;
 }
 
 .task-col-drag {
     width: var(--task-col-drag-width);
-    min-width: 100px;
     flex-shrink: 0;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .task-col-project {
     width: var(--task-col-project-width);
-    min-width: 100px;
+    min-width: 20px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -4348,7 +4391,7 @@ input[type="date"].task-inline-input {
 
 .task-col-date {
     width: var(--task-col-date-width);
-    min-width: 100px;
+    min-width: 20px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -4365,12 +4408,18 @@ input[type="date"].task-inline-input {
 }
 
 .task-col-actions {
-    width: var(--task-col-actions-width);
-    min-width: 100px;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.task-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    justify-content: center !important;
 }
 
 /* Drag & Drop Cursor Logic */
@@ -5633,7 +5682,7 @@ th, .task-header-btn {
 }
 
 td {
-    min-width: 100px;
+    min-width: 20px;
 }
 
 /* Exceptions for Serial Number (S/N) and Drag handles */

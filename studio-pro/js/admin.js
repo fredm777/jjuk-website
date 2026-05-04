@@ -262,6 +262,7 @@ function renderMembers(list) {
         `;
         tbody.appendChild(tr);
     });
+    if (typeof window.initResizers === 'function') window.initResizers('memberTable');
 }
 
 function filterMembers(query) {
@@ -465,6 +466,7 @@ function renderPermissionMatrix() {
 
     // Re-trigger icon replacement for the new matrix rows
     if (window.replaceIcons) window.replaceIcons();
+    if (typeof window.initResizers === 'function') window.initResizers('.permission-matrix-table');
 }
 
 window.saveRolePermissions = async function() {

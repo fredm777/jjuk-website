@@ -437,12 +437,60 @@ function initResizableTable() {
             } catch (e) { console.error('Failed to load customer widths', e); }
         }
     };
+    // --- Member List Column Width Persistence ---
+    window.saveMemberColumnWidths = function() {
+        const widths = {
+            '--member-col-1-width': getComputedStyle(document.documentElement).getPropertyValue('--member-col-1-width'),
+            '--member-col-2-width': getComputedStyle(document.documentElement).getPropertyValue('--member-col-2-width'),
+            '--member-col-3-width': getComputedStyle(document.documentElement).getPropertyValue('--member-col-3-width'),
+            '--member-col-4-width': getComputedStyle(document.documentElement).getPropertyValue('--member-col-4-width'),
+            '--member-col-5-width': getComputedStyle(document.documentElement).getPropertyValue('--member-col-5-width')
+        };
+        localStorage.setItem('studio_pro_member_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadMemberColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_member_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+            } catch (e) { console.error('Failed to load member widths', e); }
+        }
+    };
+
+    // --- Permission Matrix Column Width Persistence ---
+    window.savePermMatrixColumnWidths = function() {
+        const widths = {
+            '--pm-col-0-width': getComputedStyle(document.documentElement).getPropertyValue('--pm-col-0-width'),
+            '--pm-col-1-width': getComputedStyle(document.documentElement).getPropertyValue('--pm-col-1-width'),
+            '--pm-col-2-width': getComputedStyle(document.documentElement).getPropertyValue('--pm-col-2-width'),
+            '--pm-col-3-width': getComputedStyle(document.documentElement).getPropertyValue('--pm-col-3-width')
+        };
+        localStorage.setItem('studio_pro_perm_matrix_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadPermMatrixColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_perm_matrix_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+            } catch (e) { console.error('Failed to load matrix widths', e); }
+        }
+    };
 
     // Load widths immediately
     window.loadTaskColumnWidths();
     window.loadQuotationColumnWidths();
     window.loadProjectColumnWidths();
     window.loadCustomerColumnWidths();
+    window.loadMemberColumnWidths();
+    window.loadPermMatrixColumnWidths();
 
     if (!window.__taskContainerResizeBound) {
         window.addEventListener('resize', () => {
@@ -450,11 +498,13 @@ function initResizableTable() {
             if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth();
             if (typeof window.updateProjectContainerWidth === 'function') window.updateProjectContainerWidth();
             if (typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth();
+            if (typeof window.updateMemberContainerWidth === 'function') window.updateMemberContainerWidth();
+            if (typeof window.updatePermMatrixContainerWidth === 'function') window.updatePermMatrixContainerWidth();
         });
         window.__taskContainerResizeBound = true;
     }
     // Select only intended tables AND the specialized Task Header buttons
-    const targetContainers = document.querySelectorAll('#customerTable, #projectTable, #projectsEditView .quote-body-table, #tasksListView table, .task-header-row');
+    const targetContainers = document.querySelectorAll('#customerTable, #projectTable, #memberTable, #projectsEditView .quote-body-table, #tasksListView table, .task-header-row, .permission-matrix-table');
     
     targetContainers.forEach(container => {
         const headers = container.querySelectorAll('th, .task-header-btn');
@@ -527,6 +577,15 @@ function initResizableTable() {
                 else if (header.classList.contains('c-col-3')) varName = '--cust-col-3-width';
                 else if (header.classList.contains('c-col-4')) varName = '--cust-col-4-width';
                 else if (header.classList.contains('c-col-5')) varName = '--cust-col-5-width';
+                else if (header.classList.contains('m-col-1')) varName = '--member-col-1-width';
+                else if (header.classList.contains('m-col-2')) varName = '--member-col-2-width';
+                else if (header.classList.contains('m-col-3')) varName = '--member-col-3-width';
+                else if (header.classList.contains('m-col-4')) varName = '--member-col-4-width';
+                else if (header.classList.contains('m-col-5')) varName = '--member-col-5-width';
+                else if (header.classList.contains('pm-col-0')) varName = '--pm-col-0-width';
+                else if (header.classList.contains('pm-col-1')) varName = '--pm-col-1-width';
+                else if (header.classList.contains('pm-col-2')) varName = '--pm-col-2-width';
+                else if (header.classList.contains('pm-col-3')) varName = '--pm-col-3-width';
 
                 if (varName) {
                     document.documentElement.style.setProperty(varName, `${newWidth}px`);
@@ -534,6 +593,8 @@ function initResizableTable() {
                     if (varName.startsWith('--quote')) window.updateQuotationContainerWidth();
                     if (varName.startsWith('--proj')) window.updateProjectContainerWidth();
                     if (varName.startsWith('--cust')) window.updateCustomerContainerWidth();
+                    if (varName.startsWith('--member')) window.updateMemberContainerWidth();
+                    if (varName.startsWith('--pm')) window.updatePermMatrixContainerWidth();
                 }
             } else {
                 applyTaskColumnWidth(newWidth);
@@ -589,6 +650,18 @@ function initResizableTable() {
             if (header.classList.contains('c-col-1') || header.classList.contains('c-col-2') || header.classList.contains('c-col-3') ||
                 header.classList.contains('c-col-4') || header.classList.contains('c-col-5')) {
                 window.saveCustomerColumnWidths();
+            }
+
+            // Save widths after resizing member table
+            if (header.classList.contains('m-col-1') || header.classList.contains('m-col-2') || header.classList.contains('m-col-3') ||
+                header.classList.contains('m-col-4') || header.classList.contains('m-col-5')) {
+                window.saveMemberColumnWidths();
+            }
+
+            // Save widths after resizing permission matrix
+            if (header.classList.contains('pm-col-0') || header.classList.contains('pm-col-1') || header.classList.contains('pm-col-2') ||
+                header.classList.contains('pm-col-3')) {
+                window.savePermMatrixColumnWidths();
             }
 
             document.body.classList.remove('resizing');
@@ -822,3 +895,35 @@ window.addEventListener('hashchange', () => {
         handleInitialHash();
     }
 });
+
+window.updateMemberContainerWidth = function() {
+    const table = document.getElementById('memberTable');
+    if (!table) return;
+    const widths = [
+        '--member-col-1-width', '--member-col-2-width', '--member-col-3-width',
+        '--member-col-4-width', '--member-col-5-width'
+    ];
+    let total = 0;
+    const rootStyle = getComputedStyle(document.documentElement);
+    widths.forEach(w => {
+        const val = rootStyle.getPropertyValue(w).trim();
+        if (val.endsWith('px')) total += parseInt(val);
+        else if (val === 'auto') total += 150; // default
+    });
+    document.documentElement.style.setProperty('--total-member-width', (total + 40) + 'px');
+};
+
+window.updatePermMatrixContainerWidth = function() {
+    const table = document.querySelector('.permission-matrix-table');
+    if (!table) return;
+    const widths = [
+        '--pm-col-0-width', '--pm-col-1-width', '--pm-col-2-width', '--pm-col-3-width'
+    ];
+    let total = 0;
+    const rootStyle = getComputedStyle(document.documentElement);
+    widths.forEach(w => {
+        const val = rootStyle.getPropertyValue(w).trim();
+        if (val.endsWith('px')) total += parseInt(val);
+    });
+    document.documentElement.style.setProperty('--total-perm-width', total + 'px');
+};

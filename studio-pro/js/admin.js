@@ -14,6 +14,43 @@ window.switchAdminSubTab = function(target) {
     }
 }
 
+const WORKFLOW_TEXTAREA_IDS = [
+    'setWfOrder',
+    'setWfDeposit',
+    'setWfDraft',
+    'setWfEdit',
+    'setWfDelivery',
+    'setWfRemark'
+];
+
+function resizeWorkflowTextarea(el) {
+    if (!el) return;
+    const minHeight = window.matchMedia('(max-width: 768px)').matches ? 48 : 80;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(el.scrollHeight, minHeight)}px`;
+}
+
+window.resizeWorkflowTextareas = function() {
+    requestAnimationFrame(() => {
+        WORKFLOW_TEXTAREA_IDS.forEach(id => resizeWorkflowTextarea(document.getElementById(id)));
+    });
+};
+
+window.initWorkflowAutoResize = function() {
+    if (window.__workflowAutoResizeBound) {
+        window.resizeWorkflowTextareas();
+        return;
+    }
+
+    WORKFLOW_TEXTAREA_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => resizeWorkflowTextarea(el));
+    });
+    window.addEventListener('resize', window.resizeWorkflowTextareas);
+    window.__workflowAutoResizeBound = true;
+    window.resizeWorkflowTextareas();
+};
+
 async function fetchSettings(force = false) {
     // Prevent washing away unsaved changes unless forced
     if (!force && window.sysSettingsCache && window.isSettingsModified) {
@@ -60,11 +97,17 @@ async function fetchSettings(force = false) {
             setVal('setWfDeliveryLbl', s.wf_delivery_lbl, '交付內容說明');
             setVal('setWfRemark', s.wf_remark);
             setVal('setWfRemarkLbl', s.wf_remark_lbl, '其他說明');
+            if (typeof window.initWorkflowAutoResize === 'function') window.initWorkflowAutoResize();
 
             // Add change tracking
             const settingsForm = document.getElementById('globalSettingsForm');
             if (settingsForm) {
-                settingsForm.oninput = () => { window.isSettingsModified = true; };
+                settingsForm.oninput = (event) => {
+                    window.isSettingsModified = true;
+                    if (event.target && event.target.closest('#workflowSettingsView') && event.target.tagName === 'TEXTAREA') {
+                        resizeWorkflowTextarea(event.target);
+                    }
+                };
             }
         }
     } catch(e) { console.error("Fetch Settings Error:", e); }
@@ -73,6 +116,10 @@ async function fetchSettings(force = false) {
         window.isSettingsLoading = false; // Clear loading flag
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.initWorkflowAutoResize === 'function') window.initWorkflowAutoResize();
+});
 
 window.handleGlobalSettingsSubmit = async function(e) {
     if (e) e.preventDefault();

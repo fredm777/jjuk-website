@@ -908,17 +908,52 @@ window.toggleTaskDropdown = function(event, taskId) {
     
     // Close others
     allMenus.forEach(menu => {
-        if (menu !== targetMenu) menu.classList.remove('active');
+        if (menu !== targetMenu) {
+            menu.classList.remove('active');
+            menu.removeAttribute('style');
+        }
     });
     
-    // Toggle target
-    if (targetMenu) targetMenu.classList.toggle('active');
+    if (!targetMenu) return;
+
+    const willOpen = !targetMenu.classList.contains('active');
+    targetMenu.classList.toggle('active', willOpen);
+
+    if (!willOpen) {
+        targetMenu.removeAttribute('style');
+        return;
+    }
+
+    const trigger = event.currentTarget;
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const menuWidth = Math.min(220, window.innerWidth - (viewportPadding * 2));
+    const left = Math.min(
+        window.innerWidth - menuWidth - viewportPadding,
+        Math.max(viewportPadding, triggerRect.right - menuWidth)
+    );
+
+    targetMenu.style.position = 'fixed';
+    targetMenu.style.width = `${menuWidth}px`;
+    targetMenu.style.minWidth = '0';
+    targetMenu.style.left = `${left}px`;
+    targetMenu.style.right = 'auto';
+    targetMenu.style.zIndex = '9000';
+
+    const menuRect = targetMenu.getBoundingClientRect();
+    const belowTop = triggerRect.bottom + 8;
+    const aboveTop = triggerRect.top - menuRect.height - 8;
+    const top = belowTop + menuRect.height > window.innerHeight - viewportPadding
+        ? Math.max(viewportPadding, aboveTop)
+        : belowTop;
+    targetMenu.style.top = `${top}px`;
 }
 
 // Global listener to close dropdowns when clicking outside
 document.addEventListener('click', () => {
     document.querySelectorAll('.task-dropdown-menu.active').forEach(menu => {
         menu.classList.remove('active');
+        menu.removeAttribute('style');
     });
 });
 

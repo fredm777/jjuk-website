@@ -8006,3 +8006,221 @@ html {
         padding: 0 !important;
     }
 }
+
+/* --- Mobile task page spacing: balanced list width with screen gutters --- */
+@media (max-width: 768px) {
+    :root {
+        --task-col-drag-width: 30px;
+        --task-col-date-width: 66px;
+        --task-col-content-min-width: 180px;
+        --task-col-actions-width: 32px;
+    }
+
+    #tasksListView {
+        --task-mobile-gutter: clamp(16px, 4.8vw, 24px);
+        --task-mobile-max-width: 560px;
+        --task-mobile-row-width: calc(
+            var(--task-col-drag-width) +
+            var(--task-col-date-width) +
+            var(--task-col-content-min-width) +
+            var(--task-col-actions-width) +
+            30px
+        );
+    }
+
+    #tasksListView .card-wrapper {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+
+    #tasksListView .card-actions-row,
+    #tasksListView .tasks-container {
+        width: min(calc(100vw - (var(--task-mobile-gutter) * 2)), var(--task-mobile-max-width)) !important;
+        min-width: 0 !important;
+        max-width: min(calc(100vw - (var(--task-mobile-gutter) * 2)), var(--task-mobile-max-width)) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        box-sizing: border-box !important;
+    }
+
+    #tasksListView .card-actions-row {
+        transform: none !important;
+        margin-top: 10px !important;
+        margin-bottom: 18px !important;
+    }
+
+    #tasksListView .tasks-container {
+        padding: 10px 0 4px !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #tasks .task-header-row,
+    #tasks #taskList,
+    #tasks .task-item {
+        width: max(100%, var(--task-mobile-row-width)) !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #tasks .task-header-row,
+    #tasks .task-item {
+        grid-template-columns:
+            var(--task-col-drag-width)
+            var(--task-col-date-width)
+            minmax(var(--task-col-content-min-width), 1fr)
+            var(--task-col-actions-width) !important;
+        gap: 10px !important;
+        padding: 10px 0 !important;
+    }
+
+    #tasks .task-col-project,
+    #tasks .task-project-header,
+    #tasks #taskList .task-item > .task-col-project {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #tasks .task-drag-handle,
+    #tasks .task-drag-handle-header {
+        grid-column: 1 !important;
+    }
+
+    #tasks .task-col-date,
+    #tasks .task-date-header {
+        grid-column: 2 !important;
+        width: var(--task-col-date-width) !important;
+        max-width: var(--task-col-date-width) !important;
+        min-width: 0 !important;
+    }
+
+    #tasks .task-col-content,
+    #tasks .task-content-header {
+        grid-column: 3 !important;
+    }
+
+    #tasks .task-col-actions,
+    #tasks .task-actions,
+    #tasks .task-actions-header,
+    #tasks .task-mobile-dropdown,
+    #tasks .task-mobile-dropdown .action-btn-icon {
+        grid-column: 4 !important;
+        width: var(--task-col-actions-width) !important;
+        min-width: var(--task-col-actions-width) !important;
+        max-width: var(--task-col-actions-width) !important;
+    }
+
+    #tasks .task-col-drag,
+    #tasks .task-drag-handle,
+    #tasks .task-drag-handle-header {
+        width: var(--task-col-drag-width) !important;
+        min-width: var(--task-col-drag-width) !important;
+        max-width: var(--task-col-drag-width) !important;
+        overflow: visible !important;
+    }
+
+    #tasks .task-header-btn {
+        overflow: visible !important;
+        touch-action: none !important;
+    }
+
+    #tasks .task-drag-handle img,
+    #tasks .task-drag-handle-header img {
+        display: block !important;
+        width: 16px !important;
+        height: 16px !important;
+        opacity: 0.78 !important;
+        filter: brightness(0) saturate(100%) invert(45%) sepia(13%) saturate(755%) hue-rotate(176deg) brightness(90%) contrast(88%) !important;
+    }
+
+    #tasks .task-display-text {
+        line-height: 1.38 !important;
+    }
+}
+
+@media (max-width: 380px) {
+    :root {
+        --task-col-drag-width: 28px;
+        --task-col-date-width: 56px;
+        --task-col-content-min-width: 160px;
+        --task-col-actions-width: 30px;
+    }
+
+    #tasksListView {
+        --task-mobile-gutter: 14px;
+        --task-mobile-row-width: calc(
+            var(--task-col-drag-width) +
+            var(--task-col-date-width) +
+            var(--task-col-content-min-width) +
+            var(--task-col-actions-width) +
+            24px
+        );
+    }
+
+    #tasks .task-header-row,
+    #tasks .task-item {
+        gap: 8px !important;
+    }
+
+    #tasks .task-header-btn {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+}
+
+/* --- Mobile workflow settings rhythm + content-based field height --- */
+#workflowSettingsView textarea {
+    field-sizing: content;
+    overflow: hidden !important;
+    resize: none;
+    line-height: 1.45;
+}
+
+@media (max-width: 768px) {
+    #workflowSettingsView .edit-card {
+        padding-top: 1rem !important;
+    }
+
+    #workflowSettingsView .compact-form-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 3px !important;
+        margin-bottom: 10px !important;
+    }
+
+    #workflowSettingsView .wf-label-input,
+    #workflowSettingsView textarea {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #workflowSettingsView .wf-label-input {
+        min-height: 48px !important;
+        height: auto !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    #workflowSettingsView textarea {
+        min-height: 48px !important;
+        height: auto;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+}

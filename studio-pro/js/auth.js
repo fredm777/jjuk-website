@@ -269,6 +269,7 @@ window.handleVerify = async function (e) {
 window.checkAvailability = async function (type, val) {
     if (!val) return;
     const errEl = document.getElementById(type === 'username' ? 'regUserError' : 'regEmailError');
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -282,25 +283,11 @@ window.checkAvailability = async function (type, val) {
             errEl.innerText = '';
             errEl.classList.remove('active');
         }
-    } catch (e) { }
-}
-
-window.loginViaLine = async function () {
-    setSyncStatus(true);
-    try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) {
-            liff.login({ redirectUri: window.location.origin + window.location.pathname });
-        } else {
-            await handleLiffLogin();
-        }
-    } catch (e) {
-        console.error("LIFF Login Init Error:", e);
-        Swal.fire('錯誤', '無法啟動 LINE 登入模組', 'error');
+    } catch (e) { 
     } finally {
-        setSyncStatus(false);
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
     }
-};
+}
 
 window.loginViaLine = async function () {
     setSyncStatus(true);
@@ -497,11 +484,12 @@ window.logout = function () {
 
 window.togglePassword = (id) => {
     const el = document.getElementById(id); if (!el) return;
-    const isPass = el.type === 'password';
-    el.type = isPass ? 'text' : 'password';
+    const isCurrentlyPassword = el.type === 'password';
+    el.type = isCurrentlyPassword ? 'text' : 'password';
+
     const img = el.parentElement.querySelector('.toggle-password img');
     if (img) {
-        img.src = isPass ? 'assets/icons/eye.svg' : 'assets/icons/eye off.svg';
+        img.src = isCurrentlyPassword ? 'assets/icons/eye off.svg' : 'assets/icons/eye.svg';
     }
 };
 
@@ -569,6 +557,7 @@ window.apiPost = async function(action, data = {}) {
         return { success: false, error: "請先登入系統" };
     }
 
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
     const body = window.buildApiPayload(action, data);
 
     try {
@@ -582,5 +571,7 @@ window.apiPost = async function(action, data = {}) {
     } catch (err) {
         console.error(`>> API Error [${action}]:`, err);
         return { success: false, error: "連線至資料庫失敗，請檢查網路狀態。" };
+    } finally {
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
     }
 };

@@ -356,6 +356,7 @@ const PERM_DEFINITIONS = [
 const ROLES = ['管理者', '主帳號', '副帳號'];
 
 async function fetchRolePermissions() {
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -366,7 +367,11 @@ async function fetchRolePermissions() {
             window.rolePermissionsCache = json.permissions;
             renderPermissionMatrix();
         }
-    } catch (e) { console.error("Fetch Permissions Error:", e); }
+    } catch (e) { 
+        console.error("Fetch Permissions Error:", e); 
+    } finally {
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
+    }
 }
 
 function renderPermissionMatrix() {

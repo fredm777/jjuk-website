@@ -92,25 +92,32 @@ window.logError = (ctx, err) => {
     });
 };
 
+let syncRequestCount = 0;
 function setSyncStatus(active) {
     const bar = document.getElementById('syncProgressBar');
     if (active) {
+        syncRequestCount++;
         if (bar) {
             bar.style.width = '30%';
             bar.classList.add('active');
         }
         // Simulate progress
         setTimeout(() => { 
-            if (bar && bar.classList.contains('active')) bar.style.width = '70%'; 
+            if (bar && syncRequestCount > 0) bar.style.width = '70%'; 
         }, 500);
     } else {
-        if (bar) bar.style.width = '100%';
-        setTimeout(() => {
-            if (bar) {
-                bar.classList.remove('active');
-                bar.style.width = '0%';
-            }
-        }, 300);
+        syncRequestCount--;
+        if (syncRequestCount < 0) syncRequestCount = 0;
+
+        if (syncRequestCount === 0) {
+            if (bar) bar.style.width = '100%';
+            setTimeout(() => {
+                if (bar && syncRequestCount === 0) {
+                    bar.classList.remove('active');
+                    bar.style.width = '0%';
+                }
+            }, 300);
+        }
     }
 }
 

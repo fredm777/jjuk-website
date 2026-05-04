@@ -79,7 +79,7 @@ window.routeFromProfile = function(tabId, sectionId) {
 
 function initResizableTable() {
     // Select both standard table headers and Task header buttons
-    const headers = document.querySelectorAll('th, .task-header-btn:not(.task-actions-header)');
+    const headers = document.querySelectorAll('th, .task-header-btn');
     
     headers.forEach(header => {
         if (header.querySelector('.resizer')) return;
@@ -90,50 +90,110 @@ function initResizableTable() {
 
         let x = 0;
         let w = 0;
+        let activePointerId = null;
 
-        const onMouseMove = (e) => {
-            const dx = e.pageX - x;
-            const newWidth = Math.max(100, w + dx);
+        const getPageX = (e) => {
+            if (e.touches && e.touches[0]) return e.touches[0].pageX;
+            if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].pageX;
+            return e.pageX;
+        };
+
+        const getMinWidth = () => {
+            if (header.tagName === 'TH') return 100;
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            if (!isMobile) return 100;
+            if (header.classList.contains('task-drag-handle-header')) return 28;
+            if (header.classList.contains('task-date-header')) return 56;
+            if (header.classList.contains('task-actions-header')) return 32;
+            return 72;
+        };
+
+        const applyTaskColumnWidth = (newWidth) => {
+            header.style.width = `${newWidth}px`;
+            header.style.flex = 'none'; // Prevent flex growing/shrinking
+
+            // Identify which column we are resizing
+            if (header.classList.contains('task-drag-handle-header')) {
+                document.documentElement.style.setProperty('--task-col-drag-width', newWidth + 'px');
+            } else if (header.classList.contains('task-project-header')) {
+                document.documentElement.style.setProperty('--task-col-project-width', newWidth + 'px');
+            } else if (header.classList.contains('task-date-header')) {
+                document.documentElement.style.setProperty('--task-col-date-width', newWidth + 'px');
+            } else if (header.classList.contains('task-content-header')) {
+                document.documentElement.style.setProperty('--task-col-content-min-width', newWidth + 'px');
+            } else if (header.classList.contains('task-actions-header')) {
+                document.documentElement.style.setProperty('--task-col-actions-width', newWidth + 'px');
+            }
+        };
+
+        const onPointerMove = (e) => {
+            if (activePointerId !== null && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
+            e.preventDefault();
+            const dx = getPageX(e) - x;
+            const newWidth = Math.max(getMinWidth(), w + dx);
             
             if (header.tagName === 'TH') {
                 header.style.width = `${newWidth}px`;
                 header.style.minWidth = `${newWidth}px`;
             } else {
                 // Task Header Resizing via CSS Variables
-                header.style.width = `${newWidth}px`;
-                header.style.flex = 'none'; // Prevent flex growing/shrinking
-                
-                // Identify which column we are resizing
-                if (header.classList.contains('task-drag-handle-header')) {
-                    document.documentElement.style.setProperty('--task-col-drag-width', newWidth + 'px');
-                } else if (header.classList.contains('task-project-header')) {
-                    document.documentElement.style.setProperty('--task-col-project-width', newWidth + 'px');
-                } else if (header.classList.contains('task-date-header')) {
-                    document.documentElement.style.setProperty('--task-col-date-width', newWidth + 'px');
-                } else if (header.classList.contains('task-content-header')) {
-                    document.documentElement.style.setProperty('--task-col-content-min-width', newWidth + 'px');
-                } else if (header.classList.contains('task-actions-header')) {
-                    document.documentElement.style.setProperty('--task-col-actions-width', newWidth + 'px');
-                }
+                applyTaskColumnWidth(newWidth);
             }
         };
 
-        const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+        const onPointerUp = (e) => {
+            if (activePointerId !== null && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            document.removeEventListener('pointercancel', onPointerUp);
+            document.removeEventListener('mousemove', onPointerMove);
+            document.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('touchmove', onPointerMove);
+            document.removeEventListener('touchend', onPointerUp);
+            document.removeEventListener('touchcancel', onPointerUp);
+            if (activePointerId !== null && resizer.releasePointerCapture) {
+                try { resizer.releasePointerCapture(activePointerId); } catch (err) { }
+            }
+            activePointerId = null;
             document.body.classList.remove('resizing');
         };
 
-        resizer.addEventListener('mousedown', (e) => {
+        const startResize = (e) => {
+            if (document.body.classList.contains('resizing')) return;
+            if (e.type === 'mousedown' && e.button !== 0) return;
+            e.preventDefault();
             e.stopPropagation();
-            x = e.pageX;
+            activePointerId = e.pointerId ?? null;
+            x = getPageX(e);
             const styles = window.getComputedStyle(header);
             w = parseInt(styles.width, 10);
+            if (Number.isNaN(w)) w = header.getBoundingClientRect().width;
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            if (activePointerId !== null && resizer.setPointerCapture) {
+                try { resizer.setPointerCapture(activePointerId); } catch (err) { }
+            }
+
+            if (e.pointerId !== undefined) {
+                document.addEventListener('pointermove', onPointerMove, { passive: false });
+                document.addEventListener('pointerup', onPointerUp);
+                document.addEventListener('pointercancel', onPointerUp);
+            } else if (e.type === 'touchstart') {
+                document.addEventListener('touchmove', onPointerMove, { passive: false });
+                document.addEventListener('touchend', onPointerUp);
+                document.addEventListener('touchcancel', onPointerUp);
+            } else {
+                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('mouseup', onPointerUp);
+            }
             document.body.classList.add('resizing');
-        });
+        };
+
+        if (window.PointerEvent) {
+            resizer.addEventListener('pointerdown', startResize, { passive: false });
+        } else {
+            resizer.addEventListener('touchstart', startResize, { passive: false });
+            resizer.addEventListener('mousedown', startResize);
+        }
 
         // Double Click to Auto-Fit
         resizer.addEventListener('dblclick', () => {

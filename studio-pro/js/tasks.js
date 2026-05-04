@@ -646,6 +646,30 @@ window.saveTaskOrder = async function(orderedIds) {
     }
 }
 
+window.saveTask = async function(taskId) {
+    const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
+    if (!task) return { success: false, error: "Task not found" };
+
+    if (typeof setSyncStatus === 'function') setSyncStatus(true);
+    try {
+        const res = await fetch(GAS_WEB_APP_URL, {
+            method: 'POST', mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+            task.rowIndex = json.data.rowIndex;
+        }
+        return json;
+    } catch (e) {
+        console.error("Save Task Error:", e);
+        return { success: false, error: e.message };
+    } finally {
+        if (typeof setSyncStatus === 'function') setSyncStatus(false);
+    }
+}
+
 window.updateTaskField = async function(taskId, field, value) {
     const task = window.allTasks.find(t => String(t.taskId) === String(taskId));
     if (!task || task[field] === value) return;
@@ -663,21 +687,12 @@ window.updateTaskField = async function(taskId, field, value) {
     // Always re-render on any field update to ensure UI is in sync
     window.filterTasksByProject();
 
-    setSyncStatus(true);
     try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST', mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
-        });
-        const json = await res.json();
-        if (json.success && json.data) {
-            task.rowIndex = json.data.rowIndex;
-            // setCache('tasks', window.allTasks); // Removed persistence
-        }
-    } catch (e) { console.error(e); } finally {
+        await window.saveTask(taskId);
+    } catch (e) { 
+        console.error(e); 
+    } finally {
         window.saveLocks.delete(taskId);
-        setSyncStatus(false);
     }
 }
 
@@ -849,23 +864,7 @@ window.selectTaskProjectForInline = async function(taskId, projectId) {
     window.filterTasksByProject();
 
     // FORCE SAVE TO BACKEND IMMEDIATELY
-    setSyncStatus(true);
-    try {
-        const res = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST', mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(window.buildApiPayload('save_task', { task }))
-        });
-        const json = await res.json();
-        if (json.success && json.data) {
-            task.rowIndex = json.data.rowIndex;
-            // setCache('tasks', window.allTasks); // Removed persistence
-        }
-    } catch (e) {
-        console.error("Save Error after Selection:", e);
-    } finally {
-        setSyncStatus(false);
-    }
+    await window.saveTask(taskId);
 }
 
 // Helper to save custom text if no project was selected from the dropdown
@@ -974,14 +973,15 @@ window.submitTaskEditor = async function(event) {
     window.filterTasksByProject(); // Refresh UI
 
     // Sync to backend
-    setSyncStatus(true);
     try {
-        await window.saveTask(taskId);
-        Toast.fire({ icon: 'success', title: '任務已更新' });
+        const res = await window.saveTask(taskId);
+        if (res && res.success) {
+            Toast.fire({ icon: 'success', title: '任務已更新' });
+        } else {
+            throw new Error(res ? res.error : "Unknown error");
+        }
     } catch (e) {
         console.error(e);
-        Swal.fire('錯誤', '儲存失敗', 'error');
-    } finally {
-        setSyncStatus(false);
+        Swal.fire('錯誤', '儲存失敗: ' + e.message, 'error');
     }
 }

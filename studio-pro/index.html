@@ -596,7 +596,7 @@
 
             <section id="permissions" class="tab-content sub-view-container">
                 <!-- Member Management Sub-view: List -->
-                <div id="permissionsListView" class="sub-view-stack">
+                <div id="permissionsListView" class="sub-view-stack active">
                     <div class="view-header">
                         <button class="back-btn" onclick="openProfileModal()">
                             <img src="assets/icons/chevron-left.svg" alt="back"><span>返回個人設定</span>
@@ -605,14 +605,14 @@
                     </div>
                     <div class="card-wrapper">
                         <div class="grid-container">
-                            <table id="memberTable">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th class="m-col-1">系統帳號</th>
-                                        <th class="m-col-2">使用者暱稱</th>
-                                        <th class="m-col-3">目前的級別</th>
-                                        <th class="m-col-4">郵件地址</th>
-                                        <th class="m-col-5">帳號狀態</th>
+                                        <th>系統帳號</th>
+                                        <th>使用者暱稱</th>
+                                        <th>目前的級別</th>
+                                        <th>郵件地址</th>
+                                        <th>帳號狀態</th>
                                     </tr>
                                 </thead>
                                 <tbody id="memberTableBody"></tbody>
@@ -621,7 +621,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: Granular Permission Matrix View -->
+                <!-- Granular Permission Matrix View -->
                 <div id="permissionsMatrixView" class="sub-view-stack">
                     <div class="view-header">
                         <button class="back-btn" onclick="openProfileModal()">
@@ -629,9 +629,9 @@
                         </button>
                         <h2 style="margin: 0;">權限設定</h2>
                     </div>
-                    <div class="card-wrapper">
+                    <div class="card-wrapper" style="padding: 1rem 2rem 2rem 2rem;">
                         <div
-                            style="display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                            style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 1.5rem;">
                             <button class="primary-btn" onclick="saveRolePermissions()"
                                 style="width: auto; padding: 0.6rem 1.5rem;">儲存設定</button>
                         </div>
@@ -639,10 +639,10 @@
                             <table class="permission-matrix-table">
                                 <thead>
                                     <tr>
-                                        <th class="pm-col-0" style="text-align: left; background: #f8fafc;"></th>
-                                        <th class="pm-col-1" style="text-align: center; color: var(--primary);">管理者</th>
-                                        <th class="pm-col-2" style="text-align: center; color: #64748b;">主帳號</th>
-                                        <th class="pm-col-3" style="text-align: center; color: #6366f1;">副帳號</th>
+                                        <th style="text-align: left; background: #f8fafc;"></th>
+                                        <th style="text-align: center; color: var(--primary);">管理者</th>
+                                        <th style="text-align: center; color: #6366f1;">操作人員</th>
+                                        <th style="text-align: center; color: #64748b;">客戶</th>
                                     </tr>
                                 </thead>
                                 <tbody id="permissionMatrixBody">

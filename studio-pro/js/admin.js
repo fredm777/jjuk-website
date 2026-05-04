@@ -389,11 +389,6 @@ const PERM_DEFINITIONS = [
         { key: 'task_u', label: '編輯' },
         { key: 'task_d', label: '刪除' }
     ]},
-    { group: '系統通知', icon: 'notify.svg', perms: [
-        { key: 'notify_cust', label: '客戶異動通知' },
-        { key: 'notify_proj', label: '專案異動通知' },
-        { key: 'notify_task', label: '任務異動通知' }
-    ]},
     { group: '系統設定', icon: 'settings.svg', perms: [
         { key: 'set_v', label: '進入分頁' },
         { key: 'set_u', label: '修改設定' },
@@ -401,10 +396,9 @@ const PERM_DEFINITIONS = [
     ]}
 ];
 
-const ROLES = ['管理者', '主帳號', '副帳號'];
+const ROLES = ['管理者', '副帳號', '主帳號'];
 
 async function fetchRolePermissions() {
-    if (typeof setSyncStatus === 'function') setSyncStatus(true);
     try {
         const res = await fetch(GAS_WEB_APP_URL, {
             method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -415,11 +409,7 @@ async function fetchRolePermissions() {
             window.rolePermissionsCache = json.permissions;
             renderPermissionMatrix();
         }
-    } catch (e) { 
-        console.error("Fetch Permissions Error:", e); 
-    } finally {
-        if (typeof setSyncStatus === 'function') setSyncStatus(false);
-    }
+    } catch (e) { console.error("Fetch Permissions Error:", e); }
 }
 
 function renderPermissionMatrix() {
@@ -449,9 +439,9 @@ function renderPermissionMatrix() {
                 const isChecked = (perms[role] && perms[role][p.key]) ? 'checked' : '';
                 
                 // 權限鎖定邏輯：
-                // 1. 「管理者」欄位預設不可改 (系統固定)，但「系統通知」除外
+                // 1. 「管理者」欄位永遠不可改 (系統固定)
                 // 2. 如果是「系統設定」群組，且目前登入者不是「管理者」，則全部設為不可改 (唯讀)
-                let isDisabled = (role === '管理者' && group.group !== '系統通知'); 
+                let isDisabled = (role === '管理者'); 
                 const userLevel = (window.currentUser.level || '').trim();
                 if (group.group === '系統設定' && userLevel !== '管理者') {
                     isDisabled = true;
@@ -466,38 +456,27 @@ function renderPermissionMatrix() {
 
     // Re-trigger icon replacement for the new matrix rows
     if (window.replaceIcons) window.replaceIcons();
-    if (typeof window.initResizers === 'function') window.initResizers('.permission-matrix-table');
 }
 
 window.saveRolePermissions = async function() {
-    // 1. Initialize matrix from cache or empty object
-    const matrix = {};
-    ROLES.forEach(role => {
-        matrix[role] = {};
+    // 從快取開始建立新的矩陣，確保沒被修改到的 (例如 disabled 的系統設定) 數值能被保留
+    const matrix = JSON.parse(JSON.stringify(window.rolePermissionsCache || {}));
+    
+    // 確保所有角色都有初始化物件
+    ROLES.forEach(role => { 
+        if (!matrix[role]) matrix[role] = {}; 
     });
 
-    // 2. Read all checkboxes from the matrix UI
-    const checkboxes = document.querySelectorAll('.perm-checkbox');
-    console.log(`>> Found ${checkboxes.length} permission checkboxes.`);
-    
+    // 強制設定：管理者 (Super Admin) 永遠擁有所有權限
+    PERM_DEFINITIONS.forEach(g => g.perms.forEach(p => { matrix['管理者'][p.key] = true; }));
+
+    // 讀取畫面上「未被禁用」的勾選框來更新矩陣 (包含主帳號與副帳號的業務權限)
+    const checkboxes = document.querySelectorAll('.perm-checkbox:not(:disabled)');
     checkboxes.forEach(cb => {
         const role = cb.getAttribute('data-role');
         const key = cb.getAttribute('data-key');
-        if (role && key) {
-            matrix[role][key] = cb.checked;
-        }
+        matrix[role][key] = cb.checked;
     });
-
-    // 3. System Enforcement: Admins must have all core perms (except notifications)
-    PERM_DEFINITIONS.forEach(g => {
-        if (g.group !== '系統通知') {
-            g.perms.forEach(p => {
-                matrix['管理者'][p.key] = true;
-            });
-        }
-    });
-
-    console.log(">> Saving matrix payload:", matrix);
 
     setSyncStatus(true);
     try {
@@ -508,16 +487,12 @@ window.saveRolePermissions = async function() {
         const json = await res.json();
         if (json.success) {
             window.rolePermissionsCache = matrix;
-            Toast.fire({ title: '權限設定已更新', icon: 'success' });
+            Swal.fire({ icon: 'success', title: '權限設定已更新', text: '變更將在使用者下次登入時生效', timer: 2000, showConfirmButton: false });
         } else {
-            Swal.fire('錯誤', '存檔失敗: ' + json.error, 'error');
+            Swal.fire('錯誤', '存檔失敗', 'error');
         }
-    } catch (e) { 
-        console.error("Save Permissions Error:", e);
-        Swal.fire('錯誤', '網路連線失敗', 'error'); 
-    } finally { 
-        setSyncStatus(false); 
-    }
+    } catch (e) { Swal.fire('錯誤', '網路連線失敗', 'error'); }
+    finally { setSyncStatus(false); }
 }
 
 /**

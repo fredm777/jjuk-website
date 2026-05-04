@@ -47,7 +47,19 @@
     --task-col-project-width: 200px;
     --task-col-date-width: 100px;
     --task-col-content-min-width: 100px;
-    --task-col-actions-width: 130px;
+    --task-col-actions-width: 140px;
+
+    --quote-col-5-width: 19%;
+    --quote-col-6-width: 19%;
+
+    /* --- Projects List Variables --- */
+    --proj-col-1-width: auto;
+    --proj-col-2-width: 100px;
+    --proj-col-3-width: auto;
+    --proj-col-4-width: 120px;
+    --proj-col-5-width: 110px;
+    --proj-col-6-width: 110px;
+    --proj-col-7-width: 110px;
 }
 
 /* --- Base Utility Classes --- */
@@ -1915,6 +1927,14 @@ td {
     text-align: left;
 }
 
+#projectTable th:nth-child(1) { width: var(--proj-col-1-width); }
+#projectTable th:nth-child(2) { width: var(--proj-col-2-width); }
+#projectTable th:nth-child(3) { width: var(--proj-col-3-width); }
+#projectTable th:nth-child(4) { width: var(--proj-col-4-width); }
+#projectTable th:nth-child(5) { width: var(--proj-col-5-width); }
+#projectTable th:nth-child(6) { width: var(--proj-col-6-width); }
+#projectTable th:nth-child(7) { width: var(--proj-col-7-width); }
+
 #projectTable th:nth-child(2),
 #projectTable td:nth-child(2),
 #projectTable th:nth-child(4),
@@ -1966,8 +1986,7 @@ td {
 }
 
 .grid-container table, .table-container table, .permission-matrix-table, #customerTable, #projectTable {
-    width: auto !important;
-    min-width: 100%;
+    width: var(--total-proj-width, 100%);
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -1984,30 +2003,25 @@ th, td {
     position: absolute;
     right: 0;
     top: 0;
-    width: 8px;
+    width: 8px; /* Restored to original width */
     height: 100%;
     cursor: col-resize;
     user-select: none;
-    z-index: 10;
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    background: transparent; /* Invisible by default as requested */
     transition: background 0.2s;
 }
 
 .resizer:hover,
 .resizer.is-resizing {
-    background: var(--color-hover-blue);
-    opacity: 0.5;
+    background: var(--primary) !important;
+    opacity: 0.6 !important;
 }
 
-.resizer:hover::after,
-.resizer.is-resizing::after {
-    content: "";
-    position: absolute;
-    right: 2px;
-    top: 15%;
-    width: 2px;
-    height: 70%;
-    background: var(--color-hover-blue);
-    border-radius: 2px;
+th, td {
+    position: relative !important;
+    overflow: visible !important;
 }
 
 body.resizing {
@@ -2681,10 +2695,9 @@ tbody tr:hover {
 
 .items-table td {
     border: 1px solid var(--text-dark);
-    padding: 8px;
-    vertical-align: top;
+    padding: 4px 8px;
+    vertical-align: middle;
     overflow: visible !important;
-    /* CRITICAL: Ensure dropdowns aren't clipped */
 }
 
 /* Specific fix for the customer search cell */
@@ -2699,7 +2712,7 @@ tbody tr:hover {
     width: 100%;
     border: none !important;
     background: transparent !important;
-    padding: 4px;
+    padding: 2px 4px;
     font-size: 0.9rem;
     resize: none;
 }
@@ -3413,7 +3426,7 @@ tbody tr:hover {
 .compact-form-row {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .flex-1 {
@@ -3422,9 +3435,9 @@ tbody tr:hover {
 
 .invoice-box {
     background: #f8fafce0;
-    padding: 1rem 1.25rem;
+    padding: 0.5rem 1rem;
     border-radius: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
     border: 1px solid var(--border);
 }
 
@@ -3539,7 +3552,7 @@ tbody tr:hover {
     display: flex;
     align-items: stretch;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .compact-form-row label {
@@ -3683,11 +3696,11 @@ input[type="date"].task-inline-input {
 
 .compact-form-row input,
 .compact-form-row textarea {
-    padding: 10px 16px;
+    padding: 4px 16px;
     background: #f8fafc;
     border: 1.5px solid #f1f5f9;
     border-radius: 10px;
-    font-size: 0.9375rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-dark);
     font-family: inherit;
@@ -3767,7 +3780,7 @@ input[type="date"].task-inline-input {
 .profile-form-grid-row {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 #profileForm .compact-form-row {
@@ -3775,17 +3788,17 @@ input[type="date"].task-inline-input {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 2px;
     margin-bottom: 0;
 }
 
 #profileForm label {
     width: auto;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--text-muted);
     margin-left: 4px;
-    height: 18px;
+    height: 14px;
     /* Fixed height to prevent alignment issues with wrapping labels */
     display: flex;
     align-items: center;
@@ -3793,8 +3806,8 @@ input[type="date"].task-inline-input {
 
 #profileForm input {
     width: 100%;
-    height: 44px;
-    /* Consistent height for all inputs */
+    height: 30px;
+    /* Aggressively compact height */
     background: #f4f7f9;
     border: 2px solid transparent;
     border-radius: 10px;
@@ -3802,7 +3815,7 @@ input[type="date"].task-inline-input {
     text-align: center;
     font-weight: 700;
     color: var(--text-dark);
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     transition: all 0.2s;
     box-sizing: border-box;
 }
@@ -3919,11 +3932,11 @@ input[type="date"].task-inline-input {
     background: #f8fafc;
     border: none;
     border-radius: 10px;
-    padding: 10px 18px;
+    padding: 4px 18px;
     text-align: center;
     font-weight: 600;
     color: #6A798F;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     transition: all 0.2s;
 }
 
@@ -6223,8 +6236,25 @@ td:first-child,
     display: block !important;
     width: 100% !important;
     box-sizing: border-box !important;
+}
+
+#projectsEditView .quote-sheet-table th {
     text-align: center !important;
 }
+
+/* Specifically for '內容' (Content) and '項目' (Item) columns - Force Left Align */
+#projectsEditView .quote-sheet-table textarea.i-content,
+#projectsEditView .quote-sheet-table textarea.i-name,
+#projectsEditView .quote-sheet-table th.q-col-2,
+#projectsEditView .quote-sheet-table th.q-col-3 {
+    text-align: left !important;
+    padding: 6px 12px !important;
+    line-height: 1.5 !important;
+}
+
+/* Numeric columns stay centered/right */
+#projectsEditView .quote-sheet-table .text-right { text-align: right !important; }
+#projectsEditView .quote-sheet-table .text-center { text-align: center !important; }
 
 #projectsEditView .quote-sheet-table .bg-light.text-center {
     text-align: center !important;
@@ -6241,32 +6271,32 @@ td:first-child,
 }
 
 #projectsEditView .quote-body-table {
-    width: 100% !important;
+    width: var(--total-quote-width, 100%) !important;
     table-layout: fixed !important;
 }
 
 @media (min-width: 769px) {
-    #projectsEditView .quote-body-table col:nth-child(1) {
-        width: 48px !important;
+    /* Restored exact percentages from backup 011_260430 */
+    #projectsEditView .quote-body-table col:nth-child(1) { width: var(--quote-col-1-width, 8%) !important; }
+    #projectsEditView .quote-body-table col:nth-child(2) { width: var(--quote-col-2-width, 22%) !important; }
+    #projectsEditView .quote-body-table col:nth-child(3) { width: var(--quote-col-3-width, 35%) !important; }
+    #projectsEditView .quote-body-table col:nth-child(4) { width: var(--quote-col-4-width, 12%) !important; }
+    #projectsEditView .quote-body-table col:nth-child(5) { width: var(--quote-col-5-width, 10%) !important; }
+    #projectsEditView .quote-body-table col:nth-child(6) { width: var(--quote-col-6-width, 13%) !important; }
+
+    /* Force Left Alignment for Item and Content columns */
+    #projectsEditView .quote-body-table th:nth-child(2),
+    #projectsEditView .quote-body-table td:nth-child(2),
+    #projectsEditView .quote-body-table th:nth-child(3),
+    #projectsEditView .quote-body-table td:nth-child(3) {
+        text-align: left !important;
     }
 
-    #projectsEditView .quote-body-table col:nth-child(2) {
-        width: 18% !important;
-    }
-
-    #projectsEditView .quote-body-table col:nth-child(3) {
-        width: 26% !important;
-    }
-
-    #projectsEditView .quote-body-table col:nth-child(4),
-    #projectsEditView .quote-body-table col:nth-child(5),
-    #projectsEditView .quote-body-table col:nth-child(6) {
-        width: 18% !important;
-    }
-
-    #projectsEditView .quote-body-table th:first-child,
-    #projectsEditView .quote-body-table tbody td:first-child {
-        display: table-cell !important;
+    #projectsEditView .quote-body-table td:nth-child(2) input,
+    #projectsEditView .quote-body-table td:nth-child(2) textarea,
+    #projectsEditView .quote-body-table td:nth-child(3) input,
+    #projectsEditView .quote-body-table td:nth-child(3) textarea {
+        text-align: left !important;
     }
 }
 
@@ -7019,7 +7049,8 @@ td:first-child,
 #projectsEditView .quote-sheet-table .bg-light.text-center {
     text-align: center !important;
     vertical-align: middle !important;
-    line-height: 1.25 !important;
+    line-height: 1.1 !important;
+    padding: 4px !important;
 }
 
 #projectsEditView .quote-header-info input,
@@ -7029,6 +7060,7 @@ td:first-child,
     display: block !important;
     margin-top: auto !important;
     margin-bottom: auto !important;
+    padding: 4px 8px !important;
 }
 
 /* --- Mobile containment guard: keep content inside container bounds --- */

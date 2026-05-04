@@ -118,6 +118,41 @@ function initResizableTable() {
         }
     };
 
+    window.updateQuotationContainerWidth = function () {
+        const table = document.querySelector('#projectsEditView .quote-body-table');
+        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+
+        const total =
+            getCssPx('--quote-col-1-width') +
+            getCssPx('--quote-col-2-width') +
+            getCssPx('--quote-col-3-width') +
+            getCssPx('--quote-col-4-width') +
+            getCssPx('--quote-col-5-width') +
+            getCssPx('--quote-col-6-width');
+
+        if (total > 0) {
+            document.documentElement.style.setProperty('--total-quote-width', `${total}px`);
+        }
+    };
+
+    window.updateProjectContainerWidth = function () {
+        const table = document.querySelector('#projectTable');
+        if (!table || window.matchMedia('(max-width: 768px)').matches) return;
+
+        const total =
+            getCssPx('--proj-col-1-width') +
+            getCssPx('--proj-col-2-width') +
+            getCssPx('--proj-col-3-width') +
+            getCssPx('--proj-col-4-width') +
+            getCssPx('--proj-col-5-width') +
+            getCssPx('--proj-col-6-width') +
+            getCssPx('--proj-col-7-width');
+
+        if (total > 0) {
+            document.documentElement.style.setProperty('--total-proj-width', `${total}px`);
+        }
+    };
+
     // --- Task Column Width Persistence ---
     window.saveTaskColumnWidths = function() {
         const widths = {
@@ -143,24 +178,84 @@ function initResizableTable() {
         }
     };
 
+    // --- Quotation Column Width Persistence ---
+    window.saveQuotationColumnWidths = function() {
+        const widths = {
+            '--quote-col-1-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-1-width'),
+            '--quote-col-2-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-2-width'),
+            '--quote-col-3-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-3-width'),
+            '--quote-col-4-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-4-width'),
+            '--quote-col-5-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-5-width'),
+            '--quote-col-6-width': getComputedStyle(document.documentElement).getPropertyValue('--quote-col-6-width')
+        };
+        localStorage.setItem('studio_pro_quote_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadQuotationColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_quote_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+                setTimeout(() => { if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth(); }, 100);
+            } catch (e) { console.error('Failed to load quotation widths', e); }
+        }
+    };
+
+    // --- Projects List Column Width Persistence ---
+    window.saveProjectColumnWidths = function() {
+        const widths = {
+            '--proj-col-1-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-1-width'),
+            '--proj-col-2-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-2-width'),
+            '--proj-col-3-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-3-width'),
+            '--proj-col-4-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-4-width'),
+            '--proj-col-5-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-5-width'),
+            '--proj-col-6-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-6-width'),
+            '--proj-col-7-width': getComputedStyle(document.documentElement).getPropertyValue('--proj-col-7-width')
+        };
+        localStorage.setItem('studio_pro_project_column_widths', JSON.stringify(widths));
+    };
+
+    window.loadProjectColumnWidths = function() {
+        const saved = localStorage.getItem('studio_pro_project_column_widths');
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                for (const [prop, val] of Object.entries(widths)) {
+                    if (val) document.documentElement.style.setProperty(prop, val);
+                }
+            } catch (e) { console.error('Failed to load project widths', e); }
+        }
+    };
+
     // Load widths immediately
     window.loadTaskColumnWidths();
+    window.loadQuotationColumnWidths();
+    window.loadProjectColumnWidths();
 
     if (!window.__taskContainerResizeBound) {
         window.addEventListener('resize', () => {
             if (typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
+            if (typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth();
+            if (typeof window.updateProjectContainerWidth === 'function') window.updateProjectContainerWidth();
         });
         window.__taskContainerResizeBound = true;
     }
-    // Select both standard table headers and Task header buttons
-    const headers = document.querySelectorAll('th, .task-header-btn');
+    // Select only intended tables AND the specialized Task Header buttons
+    const targetContainers = document.querySelectorAll('#projectTable, #projectsEditView .quote-body-table, #tasksListView table, .task-header-row');
     
-    headers.forEach(header => {
-        if (header.querySelector('.resizer')) return;
-        
-        const resizer = document.createElement('div');
-        resizer.className = 'resizer';
-        header.appendChild(resizer);
+    targetContainers.forEach(container => {
+        const headers = container.querySelectorAll('th, .task-header-btn');
+        headers.forEach(header => {
+            // Clean up existing resizers first
+            const existing = header.querySelectorAll('.resizer');
+            existing.forEach(r => r.remove());
+            
+            const resizer = document.createElement('div');
+            resizer.className = 'resizer';
+            header.appendChild(resizer);
 
         let x = 0;
         let w = 0;
@@ -172,9 +267,8 @@ function initResizableTable() {
             return e.pageX;
         };
 
-        const getMinWidth = () => {
-            return 20; // Effectively no limit
-        };
+        const getMinWidth = () => 20;
+        let isDragging = false;
 
         const applyTaskColumnWidth = (newWidth) => {
             // Identify which column we are resizing and update its variable
@@ -195,21 +289,55 @@ function initResizableTable() {
 
         const onPointerMove = (e) => {
             if (activePointerId !== null && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
-            e.preventDefault();
+            isDragging = true;
             const dx = getPageX(e) - x;
             const newWidth = Math.max(getMinWidth(), w + dx);
             
+            // Apply width directly to the header and any linked variable
+            header.style.width = `${newWidth}px`;
+            header.style.minWidth = `${newWidth}px`;
+
             if (header.tagName === 'TH') {
-                header.style.width = `${newWidth}px`;
-                header.style.minWidth = `${newWidth}px`;
+                let varName = null;
+                if (header.classList.contains('q-col-1')) varName = '--quote-col-1-width';
+                else if (header.classList.contains('q-col-2')) varName = '--quote-col-2-width';
+                else if (header.classList.contains('q-col-3')) varName = '--quote-col-3-width';
+                else if (header.classList.contains('q-col-4')) varName = '--quote-col-4-width';
+                else if (header.classList.contains('q-col-5')) varName = '--quote-col-5-width';
+                else if (header.classList.contains('q-col-6')) varName = '--quote-col-6-width';
+                else if (header.classList.contains('p-col-1')) varName = '--proj-col-1-width';
+                else if (header.classList.contains('p-col-2')) varName = '--proj-col-2-width';
+                else if (header.classList.contains('p-col-3')) varName = '--proj-col-3-width';
+                else if (header.classList.contains('p-col-4')) varName = '--proj-col-4-width';
+                else if (header.classList.contains('p-col-5')) varName = '--proj-col-5-width';
+                else if (header.classList.contains('p-col-6')) varName = '--proj-col-6-width';
+                else if (header.classList.contains('p-col-7')) varName = '--proj-col-7-width';
+
+                if (varName) {
+                    document.documentElement.style.setProperty(varName, `${newWidth}px`);
+                    // Trigger container width updates
+                    if (varName.startsWith('--quote')) window.updateQuotationContainerWidth();
+                    if (varName.startsWith('--proj')) window.updateProjectContainerWidth();
+                }
             } else {
-                // Task Header Resizing via CSS Variables
                 applyTaskColumnWidth(newWidth);
+                window.updateTaskContainerWidth();
             }
         };
 
         const onPointerUp = (e) => {
             if (activePointerId !== null && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
+            
+            if (isDragging) {
+                // Temporary capture to block the click event (sorting)
+                const captureClick = (event) => {
+                    event.stopImmediatePropagation();
+                    header.removeEventListener('click', captureClick, true);
+                };
+                header.addEventListener('click', captureClick, true);
+            }
+            isDragging = false;
+
             document.removeEventListener('pointermove', onPointerMove);
             document.removeEventListener('pointerup', onPointerUp);
             document.removeEventListener('pointercancel', onPointerUp);
@@ -227,6 +355,20 @@ function initResizableTable() {
             if (header.classList.contains('task-header-btn')) {
                 window.saveTaskColumnWidths();
             }
+            
+            // Save widths after resizing quotation table
+            if (header.classList.contains('q-col-1') || header.classList.contains('q-col-2') || header.classList.contains('q-col-3') ||
+                header.classList.contains('q-col-4') || header.classList.contains('q-col-5') || header.classList.contains('q-col-6')) {
+                window.saveQuotationColumnWidths();
+            }
+
+            // Save widths after resizing project table
+            if (header.classList.contains('p-col-1') || header.classList.contains('p-col-2') || header.classList.contains('p-col-3') ||
+                header.classList.contains('p-col-4') || header.classList.contains('p-col-5') || header.classList.contains('p-col-6') ||
+                header.classList.contains('p-col-7')) {
+                window.saveProjectColumnWidths();
+            }
+
             document.body.classList.remove('resizing');
             resizer.classList.remove('is-resizing');
             header.classList.remove('is-resizing');
@@ -239,9 +381,7 @@ function initResizableTable() {
             e.stopPropagation();
             activePointerId = e.pointerId ?? null;
             x = getPageX(e);
-            const styles = window.getComputedStyle(header);
-            w = parseInt(styles.width, 10);
-            if (Number.isNaN(w)) w = header.getBoundingClientRect().width;
+            w = header.getBoundingClientRect().width;
 
             if (activePointerId !== null && resizer.setPointerCapture) {
                 try { resizer.setPointerCapture(activePointerId); } catch (err) { }
@@ -301,6 +441,7 @@ function initResizableTable() {
             document.body.removeChild(tester);
         });
     });
+});
 }
 
 function initBackgroundParallax() {

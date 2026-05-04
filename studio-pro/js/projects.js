@@ -836,8 +836,8 @@ function addQuotationRow(data = null) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td class="text-center" data-label="#" style="cursor: pointer; color: var(--primary); font-weight: 700;" title="連點兩下刪除此列" ondblclick="if(confirm('確定要刪除此列項目？')) { this.closest('tr').remove(); calcQuotation(); triggerQuotationAutoSave(); }">${rowIdx}</td>
-        <td data-label="項目名稱"><textarea class="i-name" placeholder="項目名稱" rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.name) : ''}</textarea></td>
-        <td data-label="細項詳述"><textarea class="i-content" placeholder="細項詳述..." rows="1" style="resize:vertical;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()">${data ? escapeHtml(data.content) : ''}</textarea></td>
+        <td data-label="項目名稱"><textarea class="i-name" placeholder="項目名稱" rows="1" style="resize:none; overflow:hidden;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()" onfocus="autoExpandTextarea(this)">${data ? escapeHtml(data.name) : ''}</textarea></td>
+        <td data-label="細項詳述"><textarea class="i-content" placeholder="細項詳述..." rows="1" style="resize:none; overflow:hidden;" oninput="autoExpandTextarea(this); triggerQuotationAutoSave()" onfocus="autoExpandTextarea(this)">${data ? escapeHtml(data.content) : ''}</textarea></td>
         <td class="text-right" data-label="單價"><input type="number" class="i-price text-right" value="${data ? data.price : ''}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
         <td class="text-center" data-label="數量"><input type="number" class="i-qty text-center" value="${data ? data.qty : 1}" oninput="calcQuotation(); triggerQuotationAutoSave();"></td>
         <td class="text-right" data-label="小計">

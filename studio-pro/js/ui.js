@@ -85,9 +85,30 @@ function initResizableTable() {
         ['task-drag-handle-header', '--task-col-drag-width'],
         ['task-project-header', '--task-col-project-width'],
         ['task-date-header', '--task-col-date-width'],
-        ['task-content-header', '--task-col-content-width'],
+        ['task-content-header', '--task-col-content-min-width'],
         ['task-actions-header', '--task-col-actions-width']
     ]);
+
+    const tableColumnVars = [
+        ['q-col-1', '--quote-col-1-width'],
+        ['q-col-2', '--quote-col-2-width'],
+        ['q-col-3', '--quote-col-3-width'],
+        ['q-col-4', '--quote-col-4-width'],
+        ['q-col-5', '--quote-col-5-width'],
+        ['q-col-6', '--quote-col-6-width'],
+        ['p-col-1', '--proj-col-1-width'],
+        ['p-col-2', '--proj-col-2-width'],
+        ['p-col-3', '--proj-col-3-width'],
+        ['p-col-4', '--proj-col-4-width'],
+        ['p-col-5', '--proj-col-5-width'],
+        ['p-col-6', '--proj-col-6-width'],
+        ['p-col-7', '--proj-col-7-width'],
+        ['c-col-1', '--cust-col-1-width'],
+        ['c-col-2', '--cust-col-2-width'],
+        ['c-col-3', '--cust-col-3-width'],
+        ['c-col-4', '--cust-col-4-width'],
+        ['c-col-5', '--cust-col-5-width']
+    ];
 
     const getTaskColumnVar = (header) => {
         for (const [className, varName] of taskColumnVars) {
@@ -96,10 +117,154 @@ function initResizableTable() {
         return null;
     };
 
+    const getTableColumnVar = (header) => {
+        for (const [className, varName] of tableColumnVars) {
+            if (header.classList.contains(className)) return varName;
+        }
+        return null;
+    };
+
+    const getColumnVar = (header) => getTaskColumnVar(header) || getTableColumnVar(header);
+
     const getCssPx = (name) => {
         const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         const parsed = parseFloat(raw);
         return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const updateContainerForColumn = (varName) => {
+        if (!varName) return;
+        if (varName.startsWith('--task') && typeof window.updateTaskContainerWidth === 'function') window.updateTaskContainerWidth();
+        if (varName.startsWith('--quote') && typeof window.updateQuotationContainerWidth === 'function') window.updateQuotationContainerWidth();
+        if (varName.startsWith('--proj') && typeof window.updateProjectContainerWidth === 'function') window.updateProjectContainerWidth();
+        if (varName.startsWith('--cust') && typeof window.updateCustomerContainerWidth === 'function') window.updateCustomerContainerWidth();
+    };
+
+    const saveColumnWidthsForHeader = (header) => {
+        if (header.classList.contains('task-header-btn') && typeof window.saveTaskColumnWidths === 'function') window.saveTaskColumnWidths();
+        if ((header.classList.contains('q-col-1') || header.classList.contains('q-col-2') || header.classList.contains('q-col-3') ||
+            header.classList.contains('q-col-4') || header.classList.contains('q-col-5') || header.classList.contains('q-col-6')) &&
+            typeof window.saveQuotationColumnWidths === 'function') window.saveQuotationColumnWidths();
+        if ((header.classList.contains('p-col-1') || header.classList.contains('p-col-2') || header.classList.contains('p-col-3') ||
+            header.classList.contains('p-col-4') || header.classList.contains('p-col-5') || header.classList.contains('p-col-6') ||
+            header.classList.contains('p-col-7')) && typeof window.saveProjectColumnWidths === 'function') window.saveProjectColumnWidths();
+        if ((header.classList.contains('c-col-1') || header.classList.contains('c-col-2') || header.classList.contains('c-col-3') ||
+            header.classList.contains('c-col-4') || header.classList.contains('c-col-5')) && typeof window.saveCustomerColumnWidths === 'function') {
+            window.saveCustomerColumnWidths();
+        }
+    };
+
+    const applyColumnWidth = (header, newWidth) => {
+        const width = Math.max(20, Math.ceil(newWidth));
+        const varName = getColumnVar(header);
+        header.style.width = `${width}px`;
+        header.style.minWidth = `${width}px`;
+        if (varName) {
+            document.documentElement.style.setProperty(varName, `${width}px`);
+            updateContainerForColumn(varName);
+        }
+        saveColumnWidthsForHeader(header);
+    };
+
+    const isVisibleForMeasure = (el) => {
+        if (!el || el.classList?.contains('hidden')) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    };
+
+    const getHorizontalSpace = (el) => {
+        const style = window.getComputedStyle(el);
+        return ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
+            .reduce((sum, prop) => sum + (parseFloat(style[prop]) || 0), 0);
+    };
+
+    const getCleanText = (el) => {
+        const controls = Array.from(el.querySelectorAll('input, textarea, select')).filter(isVisibleForMeasure);
+        if (controls.length > 0) return controls.map(control => control.value || control.textContent || '').join(' ');
+
+        const clone = el.cloneNode(true);
+        clone.querySelectorAll('.resizer, script, style').forEach(node => node.remove());
+        return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    };
+
+    const measureText = (text, sourceEl, tester) => {
+        const lines = String(text || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        if (lines.length === 0) return 0;
+
+        tester.style.font = window.getComputedStyle(sourceEl).font;
+        return Math.max(...lines.map(line => {
+            tester.textContent = line;
+            return tester.getBoundingClientRect().width;
+        }));
+    };
+
+    const measureVisualContent = (el) => {
+        const rects = Array.from(el.querySelectorAll('img, svg, button')).filter(isVisibleForMeasure)
+            .map(node => node.getBoundingClientRect())
+            .filter(rect => rect.width > 0 && rect.height > 0);
+        if (rects.length === 0) return 0;
+        const left = Math.min(...rects.map(rect => rect.left));
+        const right = Math.max(...rects.map(rect => rect.right));
+        return right - left;
+    };
+
+    const measureElementFitWidth = (el, tester) => {
+        if (!isVisibleForMeasure(el)) return 0;
+
+        const controls = Array.from(el.querySelectorAll('input, textarea, select')).filter(isVisibleForMeasure);
+        let textWidth = 0;
+        if (controls.length > 0) {
+            textWidth = Math.max(...controls.map(control => measureText(control.value || control.textContent || '', control, tester) + getHorizontalSpace(control)));
+        } else {
+            textWidth = measureText(getCleanText(el), el, tester);
+        }
+
+        const visualWidth = textWidth > 0 ? 0 : measureVisualContent(el);
+        return Math.ceil(Math.max(textWidth, visualWidth) + getHorizontalSpace(el) + 2);
+    };
+
+    const getTaskCellSelector = (header) => {
+        if (header.classList.contains('task-drag-handle-header')) return '.task-col-drag';
+        if (header.classList.contains('task-project-header')) return '.task-col-project';
+        if (header.classList.contains('task-date-header')) return '.task-col-date';
+        if (header.classList.contains('task-content-header')) return '.task-col-content';
+        if (header.classList.contains('task-actions-header')) return '.task-col-actions';
+        return null;
+    };
+
+    const getAutoFitTargets = (header) => {
+        if (header.classList.contains('task-header-btn')) {
+            const selector = getTaskCellSelector(header);
+            if (!selector) return [header];
+            return [header, ...document.querySelectorAll(`#taskList .task-item > ${selector}`)];
+        }
+
+        const colIndex = Array.from(header.parentNode.children).indexOf(header);
+        const table = header.closest('table');
+        if (!table || colIndex < 0) return [header];
+
+        return [header, ...Array.from(table.querySelectorAll('tr')).map(row => {
+            const cell = row.children[colIndex];
+            if (!cell || Number(cell.colSpan || 1) !== 1) return null;
+            return cell;
+        }).filter(Boolean)];
+    };
+
+    const autoFitColumn = (header) => {
+        const tester = document.createElement('span');
+        tester.style.visibility = 'hidden';
+        tester.style.position = 'absolute';
+        tester.style.whiteSpace = 'pre';
+        tester.style.left = '-9999px';
+        tester.style.top = '-9999px';
+        document.body.appendChild(tester);
+
+        const maxWidth = getAutoFitTargets(header).reduce((max, el) => {
+            return Math.max(max, measureElementFitWidth(el, tester));
+        }, 20);
+
+        document.body.removeChild(tester);
+        applyColumnWidth(header, maxWidth);
     };
 
     window.updateTaskContainerWidth = function () {
@@ -469,33 +634,10 @@ function initResizableTable() {
         }
 
         // Double Click to Auto-Fit
-        resizer.addEventListener('dblclick', () => {
-            if (header.tagName !== 'TH') return; // Auto-fit only for standard tables for now
-            
-            const colIndex = Array.from(header.parentNode.children).indexOf(header);
-            const table = header.closest('table');
-            if (!table) return;
-            const rows = table.querySelectorAll('tr');
-
-            const tester = document.createElement('span');
-            tester.style.visibility = 'hidden';
-            tester.style.position = 'absolute';
-            tester.style.whiteSpace = 'nowrap';
-            tester.style.font = window.getComputedStyle(header).font;
-            document.body.appendChild(tester);
-
-            let maxWidth = 100; // Start with requested minimum
-            rows.forEach(row => {
-                const cell = row.children[colIndex];
-                if (cell) {
-                    tester.innerText = cell.innerText;
-                    maxWidth = Math.max(maxWidth, tester.offsetWidth + 20);
-                }
-            });
-
-            header.style.width = `${maxWidth}px`;
-            header.style.minWidth = `${maxWidth}px`;
-            document.body.removeChild(tester);
+        resizer.addEventListener('dblclick', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            autoFitColumn(header);
         });
     });
 });

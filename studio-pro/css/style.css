@@ -2063,10 +2063,44 @@ td {
 }
 
 #projectsEditView .quote-body-table {
-    width: var(--total-quote-width, 100%);
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
+
+@media (min-width: 769px) {
+    #projectsEditView .quotation-card {
+        width: 100%;
+        min-width: 0;
+        max-width: var(--max-width-list);
+    }
+
+    #projectsEditView #quotationForm {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+#projectsEditView .quote-body-table col:nth-child(1),
+#projectsEditView .quote-body-table th.q-col-1 { width: var(--quote-col-1-width, 56px); }
+
+#projectsEditView .quote-body-table col:nth-child(2),
+#projectsEditView .quote-body-table th.q-col-2 { width: var(--quote-col-2-width, 180px); }
+
+#projectsEditView .quote-body-table col:nth-child(3),
+#projectsEditView .quote-body-table th.q-col-3 { width: var(--quote-col-3-width, 280px); }
+
+#projectsEditView .quote-body-table col:nth-child(4),
+#projectsEditView .quote-body-table th.q-col-4 { width: var(--quote-col-4-width, 160px); }
+
+#projectsEditView .quote-body-table col:nth-child(5),
+#projectsEditView .quote-body-table th.q-col-5 { width: var(--quote-col-5-width, 140px); }
+
+#projectsEditView .quote-body-table col:nth-child(6),
+#projectsEditView .quote-body-table th.q-col-6 { width: var(--quote-col-6-width, 180px); }
 
 th, td {
     position: relative; /* For resizers */
@@ -6376,17 +6410,24 @@ td:first-child,
 }
 
 #projectsEditView .quote-body-table {
-    width: var(--total-quote-width, 100%) !important;
-    min-width: var(--total-quote-width, 100%) !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
     table-layout: fixed !important;
 }
 
 @media (min-width: 769px) {
-    #projectsEditView .quotation-card,
+    #projectsEditView .quotation-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: var(--max-width-list) !important;
+        overflow: visible !important;
+    }
+
     #projectsEditView #quotationForm {
-        width: fit-content !important;
-        min-width: 100% !important;
-        max-width: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
         overflow: visible !important;
     }
 

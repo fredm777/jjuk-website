@@ -2084,22 +2084,16 @@ td {
     }
 }
 
-#projectsEditView .quote-body-table col:nth-child(1),
 #projectsEditView .quote-body-table th.q-col-1 { width: var(--quote-col-1-width, 56px); }
 
-#projectsEditView .quote-body-table col:nth-child(2),
 #projectsEditView .quote-body-table th.q-col-2 { width: var(--quote-col-2-width, 180px); }
 
-#projectsEditView .quote-body-table col:nth-child(3),
 #projectsEditView .quote-body-table th.q-col-3 { width: var(--quote-col-3-width, 280px); }
 
-#projectsEditView .quote-body-table col:nth-child(4),
 #projectsEditView .quote-body-table th.q-col-4 { width: var(--quote-col-4-width, 160px); }
 
-#projectsEditView .quote-body-table col:nth-child(5),
 #projectsEditView .quote-body-table th.q-col-5 { width: var(--quote-col-5-width, 140px); }
 
-#projectsEditView .quote-body-table col:nth-child(6),
 #projectsEditView .quote-body-table th.q-col-6 { width: var(--quote-col-6-width, 180px); }
 
 th, td {

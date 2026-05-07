@@ -83,12 +83,15 @@
             <form id="profileForm" style="margin-top: 24px;">
                 <div class="profile-form-grid-row">
                     <div class="compact-form-row"><label>帳號</label><input type="text" id="profUser" readonly></div>
-                    <div class="compact-form-row"><label>暱稱</label><input type="text" id="profNick" placeholder="您的稱呼"></div>
+                    <div class="compact-form-row"><label>暱稱</label><input type="text" id="profNick" placeholder="您的稱呼">
+                    </div>
                 </div>
 
                 <div class="profile-form-grid-row">
-                    <div class="compact-form-row"><label>電子郵件</label><input type="text" id="profEmail" placeholder="example@mail.com"></div>
-                    <div class="compact-form-row"><label>手機號碼</label><input type="text" id="profPhone" placeholder="09XX-XXXXXX"></div>
+                    <div class="compact-form-row"><label>電子郵件</label><input type="text" id="profEmail"
+                            placeholder="example@mail.com"></div>
+                    <div class="compact-form-row"><label>手機號碼</label><input type="text" id="profPhone"
+                            placeholder="09XX-XXXXXX"></div>
                 </div>
 
                 <div class="profile-form-grid-row">
@@ -169,7 +172,8 @@
                     </div>
                 </div>
                 <form id="loginForm">
-                    <div class="form-group"><label>帳號</label><input type="text" id="loginUser" placeholder="請輸入帳號" required></div>
+                    <div class="form-group"><label>帳號</label><input type="text" id="loginUser" placeholder="請輸入帳號"
+                            required></div>
                     <div class="form-group">
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
@@ -353,8 +357,7 @@
                                 <img src="assets/icons/plus.svg" alt="add">
                             </button>
                             <div class="card-search-wrapper">
-                                <input type="text" id="customerSearchInput" class="card-search-input"
-                                    placeholder="">
+                                <input type="text" id="customerSearchInput" class="card-search-input" placeholder="">
                                 <div class="card-search-icon">
                                     <img src="assets/icons/search.svg" alt="search">
                                 </div>
@@ -364,11 +367,16 @@
                             <table id="customerTable">
                                 <thead>
                                     <tr class="sortable-row">
-                                        <th onclick="toggleCustomerSort('companyName')" class="sortable-header c-col-1" id="th-cust-companyName">客戶名稱 <span class="sort-icon"></span></th>
-                                        <th onclick="toggleCustomerSort('taxId')" class="sortable-header c-col-2" id="th-cust-taxId">統編 <span class="sort-icon"></span></th>
-                                        <th onclick="toggleCustomerSort('contact')" class="sortable-header c-col-3" id="th-cust-contact">聯絡人 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('companyName')" class="sortable-header c-col-1"
+                                            id="th-cust-companyName">客戶名稱 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('taxId')" class="sortable-header c-col-2"
+                                            id="th-cust-taxId">統編 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('contact')" class="sortable-header c-col-3"
+                                            id="th-cust-contact">聯絡人 <span class="sort-icon"></span></th>
                                         <th class="c-col-4">聯絡電話</th>
-                                         <th onclick="toggleCustomerSort('invoiceInfo')" class="sortable-header c-col-5" id="th-cust-invoiceInfo" style="text-align:center;">電子發票 <span class="sort-icon"></span></th>
+                                        <th onclick="toggleCustomerSort('invoiceInfo')" class="sortable-header c-col-5"
+                                            id="th-cust-invoiceInfo" style="text-align:center;">電子發票 <span
+                                                class="sort-icon"></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="customerTableBody"></tbody>
@@ -500,7 +508,8 @@
                                 </div>
                                 <div class="card-search-wrapper">
                                     <input type="text" id="taskSearchInput" class="card-search-input"
-                                        placeholder="搜尋客戶、日期或任務..." oninput="window.filterTasks()" list="taskSearchSuggestions">
+                                        placeholder="搜尋客戶、日期或任務..." oninput="window.filterTasks()"
+                                        list="taskSearchSuggestions">
                                     <div class="card-search-icon">
                                         <img src="assets/icons/search.svg" alt="search">
                                     </div>
@@ -510,19 +519,25 @@
                         </div>
                         <div class="tasks-container">
                             <div class="task-header-row">
-                                <div class="task-header-btn task-drag-handle-header task-col-drag" id="sort-drag" onclick="window.setTaskSort('drag')" title="原始排序">
-                                    <img src="assets/icons/drag.svg" style="width: 14px; height: 14px; filter: invert(1) brightness(0.7);">
+                                <div class="task-header-btn task-drag-handle-header task-col-drag" id="sort-drag"
+                                    onclick="window.setTaskSort('drag')" title="原始排序">
+                                    <img src="assets/icons/drag.svg"
+                                        style="width: 14px; height: 14px; filter: invert(1) brightness(0.7);">
                                 </div>
-                                <div class="task-header-btn task-project-header task-col-project" id="sort-project" onclick="window.setTaskSort('project')">
+                                <div class="task-header-btn task-project-header task-col-project" id="sort-project"
+                                    onclick="window.setTaskSort('project')">
                                     專案 <span class="sort-arrow"></span>
                                 </div>
-                                <div class="task-header-btn task-date-header task-col-date" id="sort-date" onclick="window.setTaskSort('date')">
+                                <div class="task-header-btn task-date-header task-col-date" id="sort-date"
+                                    onclick="window.setTaskSort('date')">
                                     時間 <span class="sort-arrow"></span>
                                 </div>
-                                <div class="task-header-btn task-content-header task-col-content" id="sort-content" onclick="window.setTaskSort('content')">
+                                <div class="task-header-btn task-content-header task-col-content" id="sort-content"
+                                    onclick="window.setTaskSort('content')">
                                     任務 <span class="sort-arrow"></span>
                                 </div>
-                                <div class="task-header-btn task-actions-header task-col-actions" id="sort-status" onclick="window.setTaskSort('status')">
+                                <div class="task-header-btn task-actions-header task-col-actions" id="sort-status"
+                                    onclick="window.setTaskSort('status')">
                                     <span class="sort-arrow"></span>
                                 </div>
                             </div>
@@ -641,8 +656,8 @@
                                     <tr>
                                         <th style="text-align: left; background: #f8fafc;"></th>
                                         <th style="text-align: center; color: var(--primary);">管理者</th>
-                                        <th style="text-align: center; color: #6366f1;">操作人員</th>
-                                        <th style="text-align: center; color: #64748b;">客戶</th>
+                                        <th style="text-align: center; color: #6366f1;">主帳號</th>
+                                        <th style="text-align: center; color: #64748b;">副帳號</th>
                                     </tr>
                                 </thead>
                                 <tbody id="permissionMatrixBody">
@@ -809,8 +824,7 @@
                                 </button>
                             </div>
                             <div class="card-search-wrapper">
-                                <input type="text" id="projectSearchInput" class="card-search-input"
-                                    placeholder="">
+                                <input type="text" id="projectSearchInput" class="card-search-input" placeholder="">
                                 <div class="card-search-icon">
                                     <img src="assets/icons/search.svg" alt="search">
                                 </div>
@@ -822,19 +836,24 @@
                                     <tr class="sortable-row">
                                         <th onclick="toggleProjectSort('customer')" class="sortable-header p-col-1"
                                             id="th-customer">客戶名稱 <span class="sort-icon"></span></th>
-                                        <th onclick="toggleProjectSort('date')" class="sortable-header p-col-2" id="th-date">日期
-                                            <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('date')" class="sortable-header p-col-2"
+                                            id="th-date">日期
+                                            <span class="sort-icon"></span>
+                                        </th>
                                         <th onclick="toggleProjectSort('projectName')" class="sortable-header p-col-3"
                                             id="th-projectName">專案名稱 <span class="sort-icon"></span></th>
-                                        <th onclick="toggleProjectSort('pic')" class="sortable-header p-col-4" id="th-pic">承辦人員
-                                            <span class="sort-icon"></span></th>
+                                        <th onclick="toggleProjectSort('pic')" class="sortable-header p-col-4"
+                                            id="th-pic">承辦人員
+                                            <span class="sort-icon"></span>
+                                        </th>
                                         <th onclick="toggleProjectSort('depositPaid')" class="sortable-header p-col-5"
                                             id="th-depositPaid" style="min-width: 100px;">已收款項 <span
                                                 class="sort-icon"></span></th>
                                         <th onclick="toggleProjectSort('balanceDue')" class="sortable-header p-col-6"
                                             id="th-balanceDue" style="min-width: 100px;">應收尾款 <span
                                                 class="sort-icon"></span></th>
-                                        <th onclick="toggleProjectSort('total')" class="sortable-header p-col-7" id="th-total">
+                                        <th onclick="toggleProjectSort('total')" class="sortable-header p-col-7"
+                                            id="th-total">
                                             總計 (含稅) <span class="sort-icon"></span></th>
                                     </tr>
                                 </thead>
@@ -931,7 +950,8 @@
                                 .quote-sheet-table th,
                                 .quote-sheet-table td {
                                     border: 1px solid var(--text-dark);
-                                    padding: 6px 8px; /* Increased padding slightly */
+                                    padding: 6px 8px;
+                                    /* Increased padding slightly */
                                     vertical-align: middle !important;
                                     text-align: center !important;
                                 }
@@ -939,7 +959,8 @@
                                 .quote-sheet-table th {
                                     background-color: #f3f3f3;
                                     font-weight: 700;
-                                    text-align: center !important; /* Headers stay centered */
+                                    text-align: center !important;
+                                    /* Headers stay centered */
                                 }
 
                                 .quote-sheet-table input,
@@ -953,7 +974,8 @@
                                     font-family: inherit;
                                     color: inherit;
                                     outline: none;
-                                    text-align: inherit; /* Inherit from parent td */
+                                    text-align: inherit;
+                                    /* Inherit from parent td */
                                 }
 
                                 .quote-sheet-table .text-center,
@@ -1012,303 +1034,319 @@
                                 }
                             </style>
 
-                                                 <!-- Top Header Grid (Split into two separate boxes) -->
-                                <div class="quotation-header-grid">
-                                    <!-- Left: Customer Info -->
-                                    <table class="quote-sheet-table quote-header-info thick-border" style="margin-bottom: 0;">
+                            <!-- Top Header Grid (Split into two separate boxes) -->
+                            <div class="quotation-header-grid">
+                                <!-- Left: Customer Info -->
+                                <table class="quote-sheet-table quote-header-info thick-border"
+                                    style="margin-bottom: 0;">
 
-                                        <colgroup>
-                                            <col width="30%">
-                                            <col width="70%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td class="bg-light text-center">客戶名稱</td>
-                                                <td style="position:relative;">
-                                                    <input id="qCustSearch" placeholder="選擇或輸入客戶..." autocomplete="off"
-                                                        onclick="event.stopPropagation()">
-                                                    <div id="autocompleteSuggestions" class="suggestions-list"></div>
-                                                    <input type="hidden" id="qCustName">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">統一編號</td>
-                                                <td><input id="qTaxId" class="text-center" placeholder="客戶統編"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">聯絡人</td>
-                                                <td><input id="qContact" class="text-center" placeholder="客戶窗口"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">聯絡電話</td>
-                                                <td><input id="qPhone" class="text-center" placeholder="客戶電話"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">電子信箱</td>
-                                                <td><input id="qEmail" class="text-center" placeholder="客戶信箱"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">專案名稱</td>
-                                                <td><input id="qProjName" required placeholder="專案名稱"
-                                                        style="font-weight:bold;"></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                    <!-- Right: Studio Info -->
-                                    <table class="quote-sheet-table quote-header-info thick-border" style="margin-bottom: 0;">
-
-                                        <colgroup>
-                                            <col width="30%">
-                                            <col width="70%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td class="bg-light text-center">公司名稱</td>
-                                                <td class="text-center fw-bold">日日有桔設計工作室</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">統一編號</td>
-                                                <td class="text-center fw-bold">80076603</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">承辦人員</td>
-                                                <td><input id="qPic" class="text-center fw-bold"></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">聯絡電話</td>
-                                                <td id="qStudioPhone" class="text-center">0911-773-181</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">電子信箱</td>
-                                                <td id="qStudioEmail" class="text-center">jjukvs@gmail.com</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center">報價日期</td>
-                                                <td><input id="qDate" type="date" class="text-center fw-bold"></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <table class="quote-sheet-table quote-body-table thick-border">
                                     <colgroup>
-                                        <col><col><col><col><col><col>
+                                        <col width="30%">
+                                        <col width="70%">
                                     </colgroup>
-                                    <thead>
+                                    <tbody>
                                         <tr>
-                                            <th class="q-col-1">#</th>
-                                            <th class="q-col-2">項目</th>
-                                            <th class="q-col-3">內容</th>
-                                            <th class="q-col-4">單價</th>
-                                            <th class="q-col-5">數量</th>
-                                            <th class="q-col-6">金額</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="quotationItemsBody">
-                                        <!-- JS Injected Row Example -->
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="6" style="padding: 0; background: #fafafa;">
-                                                <button type="button" onclick="addQuotationRow()"
-                                                    style="width:100%; border:none; background:transparent; padding: 8px; cursor:pointer; color: #2563eb; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                                                    <img src="assets/icons/plus.svg" alt="add"
-                                                        style="width:16px;height:16px; margin-right: 4px;"> 新增
-                                                </button>
+                                            <td class="bg-light text-center">客戶名稱</td>
+                                            <td style="position:relative;">
+                                                <input id="qCustSearch" placeholder="選擇或輸入客戶..." autocomplete="off"
+                                                    onclick="event.stopPropagation()">
+                                                <div id="autocompleteSuggestions" class="suggestions-list"></div>
+                                                <input type="hidden" id="qCustName">
                                             </td>
                                         </tr>
-                                    </tfoot>
+                                        <tr>
+                                            <td class="bg-light text-center">統一編號</td>
+                                            <td><input id="qTaxId" class="text-center" placeholder="客戶統編"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">聯絡人</td>
+                                            <td><input id="qContact" class="text-center" placeholder="客戶窗口"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">聯絡電話</td>
+                                            <td><input id="qPhone" class="text-center" placeholder="客戶電話"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">電子信箱</td>
+                                            <td><input id="qEmail" class="text-center" placeholder="客戶信箱"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">專案名稱</td>
+                                            <td><input id="qProjName" required placeholder="專案名稱"
+                                                    style="font-weight:bold;"></td>
+                                        </tr>
+                                    </tbody>
                                 </table>
 
-                                <!-- Summary Footer (Split) -->
-                                <div class="quotation-summary-grid">
-                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
-                                        <colgroup>
+                                <!-- Right: Studio Info -->
+                                <table class="quote-sheet-table quote-header-info thick-border"
+                                    style="margin-bottom: 0;">
 
-                                            <col width="20%">
-                                            <col width="80%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td colspan="2" class="bg-light text-center fw-bold">備註說明</td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfOrderLbl" class="bg-light text-center">訂購單</td>
-                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfOrder"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        rows="1" placeholder="報價單承蒙認可簽署後..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfDepositLbl" class="bg-light text-center">訂金</td>
-                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDeposit"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        rows="1" placeholder="總額50%..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center" style="vertical-align: middle;">匯款帳號
-                                                </td>
-                                                <td style="padding: 0; vertical-align: middle;">
-                                                    <textarea id="qBankData" rows="1"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        placeholder="銀行：...\n戶名：...\n帳號：..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfDraftLbl" class="bg-light text-center">初稿</td>
-                                                <td style="padding: 0; vertical-align: middle;"><input id="qWfDraft"
-                                                        style="border:none; background:transparent; outline:none; width:100%; padding:4px 8px; font-family:inherit; font-size:inherit; text-align: left;"
-                                                        placeholder="3 至 5 個工作天..."
-                                                        oninput="triggerQuotationAutoSave()"></td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfEditLbl" class="bg-light text-center">修改次數</td>
-                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfEdit"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        rows="1" placeholder="2次免費整體調整..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfDeliveryLbl" class="bg-light text-center">交付內容</td>
-                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDelivery"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        rows="1" placeholder="定稿後，支付尾款..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
-                                            </tr>
-                                            <tr>
-                                                <td id="qWfRemarkLbl" class="bg-light text-center">其他</td>
-                                                <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
-                                                        style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
-                                                        rows="1" placeholder="其他補充說明..."
-                                                        oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <colgroup>
+                                        <col width="30%">
+                                        <col width="70%">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td class="bg-light text-center">公司名稱</td>
+                                            <td class="text-center fw-bold">日日有桔設計工作室</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">統一編號</td>
+                                            <td class="text-center fw-bold">80076603</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">承辦人員</td>
+                                            <td><input id="qPic" class="text-center fw-bold"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">聯絡電話</td>
+                                            <td id="qStudioPhone" class="text-center">0911-773-181</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">電子信箱</td>
+                                            <td id="qStudioEmail" class="text-center">jjukvs@gmail.com</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center">報價日期</td>
+                                            <td><input id="qDate" type="date" class="text-center fw-bold"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+                            <table class="quote-sheet-table quote-body-table thick-border">
+                                <colgroup>
+                                    <col>
+                                    <col>
+                                    <col>
+                                    <col>
+                                    <col>
+                                    <col>
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th class="q-col-1">#</th>
+                                        <th class="q-col-2">項目</th>
+                                        <th class="q-col-3">內容</th>
+                                        <th class="q-col-4">單價</th>
+                                        <th class="q-col-5">數量</th>
+                                        <th class="q-col-6">金額</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quotationItemsBody">
+                                    <!-- JS Injected Row Example -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6" style="padding: 0; background: #fafafa;">
+                                            <button type="button" onclick="addQuotationRow()"
+                                                style="width:100%; border:none; background:transparent; padding: 8px; cursor:pointer; color: #2563eb; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                                <img src="assets/icons/plus.svg" alt="add"
+                                                    style="width:16px;height:16px; margin-right: 4px;"> 新增
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
 
-                                        <colgroup>
+                            <!-- Summary Footer (Split) -->
+                            <div class="quotation-summary-grid">
+                                <table class="quote-sheet-table quote-footer-grid thick-border"
+                                    style="margin-bottom: 0;">
+                                    <colgroup>
 
-                                            <col width="60%">
-                                            <col width="40%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td class="bg-light text-center fw-bold">稅前合計</td>
-                                                <td class="text-right"><span id="qSubtotal">0</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center fw-bold">5%營業稅</td>
-                                                <td class="text-right"><span id="qTax">0</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center fw-bold">總額</td>
-                                                <td class="text-right fw-bold" style="font-size: 1.1em;"><span
-                                                        id="qTotal">0</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center fw-bold">已收款項</td>
-                                                <td class="text-right">
-                                                    <input type="number" id="qDepositPaid" class="text-right" value="0"
-                                                        style="font-weight:bold; color:var(--primary); width:100%;"
-                                                        oninput="calcQuotation(); triggerQuotationAutoSave();">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bg-light text-center fw-bold">尾款</td>
-                                                <td class="text-right fw-bold" style="color: #ef4444;"><span
-                                                        id="qBalanceDue">0</span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        <col width="20%">
+                                        <col width="80%">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="2" class="bg-light text-center fw-bold">備註說明</td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfOrderLbl" class="bg-light text-center">訂購單</td>
+                                            <td style="padding: 0; vertical-align: middle;"><textarea id="qWfOrder"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    rows="1" placeholder="報價單承蒙認可簽署後..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfDepositLbl" class="bg-light text-center">訂金</td>
+                                            <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDeposit"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    rows="1" placeholder="總額50%..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center" style="vertical-align: middle;">匯款帳號
+                                            </td>
+                                            <td style="padding: 0; vertical-align: middle;">
+                                                <textarea id="qBankData" rows="1"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    placeholder="銀行：...\n戶名：...\n帳號：..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfDraftLbl" class="bg-light text-center">初稿</td>
+                                            <td style="padding: 0; vertical-align: middle;"><input id="qWfDraft"
+                                                    style="border:none; background:transparent; outline:none; width:100%; padding:4px 8px; font-family:inherit; font-size:inherit; text-align: left;"
+                                                    placeholder="3 至 5 個工作天..." oninput="triggerQuotationAutoSave()">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfEditLbl" class="bg-light text-center">修改次數</td>
+                                            <td style="padding: 0; vertical-align: middle;"><textarea id="qWfEdit"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    rows="1" placeholder="2次免費整體調整..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfDeliveryLbl" class="bg-light text-center">交付內容</td>
+                                            <td style="padding: 0; vertical-align: middle;"><textarea id="qWfDelivery"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    rows="1" placeholder="定稿後，支付尾款..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="qWfRemarkLbl" class="bg-light text-center">其他</td>
+                                            <td style="padding: 0; vertical-align: middle;"><textarea id="qWfRemark"
+                                                    style="border:none; background:transparent; outline:none; width:100%; resize:none; padding:4px 8px; font-family:inherit; font-size:inherit; display: block; text-align: left; overflow:hidden;"
+                                                    rows="1" placeholder="其他補充說明..."
+                                                    oninput="autoExpandTextarea(this); triggerQuotationAutoSave()"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
 
-                                <!-- Stamp / Signature block (Split) -->
-                                <div class="quotation-stamp-grid">
-                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+                                <table class="quote-sheet-table quote-footer-grid thick-border"
+                                    style="margin-bottom: 0;">
+
+                                    <colgroup>
+
+                                        <col width="60%">
+                                        <col width="40%">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td class="bg-light text-center fw-bold">稅前合計</td>
+                                            <td class="text-right"><span id="qSubtotal">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center fw-bold">5%營業稅</td>
+                                            <td class="text-right"><span id="qTax">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center fw-bold">總額</td>
+                                            <td class="text-right fw-bold" style="font-size: 1.1em;"><span
+                                                    id="qTotal">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center fw-bold">已收款項</td>
+                                            <td class="text-right">
+                                                <input type="number" id="qDepositPaid" class="text-right" value="0"
+                                                    style="font-weight:bold; color:var(--primary); width:100%;"
+                                                    oninput="calcQuotation(); triggerQuotationAutoSave();">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-light text-center fw-bold">尾款</td>
+                                            <td class="text-right fw-bold" style="color: #ef4444;"><span
+                                                    id="qBalanceDue">0</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Stamp / Signature block (Split) -->
+                            <div class="quotation-stamp-grid">
+                                <table class="quote-sheet-table quote-footer-grid thick-border"
+                                    style="margin-bottom: 0;">
 
 
-                                        <colgroup>
-                                            <col width="20%">
-                                            <col width="80%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td class="bg-light text-center"
-                                                    style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
-                                                    客戶代表簽章</td>
-                                                <td></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <colgroup>
+                                        <col width="20%">
+                                        <col width="80%">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td class="bg-light text-center"
+                                                style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
+                                                客戶代表簽章</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
 
-                                    <table class="quote-sheet-table quote-footer-grid thick-border" style="margin-bottom: 0;">
+                                <table class="quote-sheet-table quote-footer-grid thick-border"
+                                    style="margin-bottom: 0;">
 
-                                        <colgroup>
+                                    <colgroup>
 
-                                            <col width="20%">
-                                            <col width="80%">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <td class="bg-light text-center"
-                                                    style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
-                                                    報價簽章</td>
-                                                <td style="text-align: center; vertical-align: middle;">
-                                                    <img src="assets/invoice_stamp.svg" alt="Company Stamp"
-                                                        class="stamp-image" style="max-height: 140px;">
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        <col width="20%">
+                                        <col width="80%">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td class="bg-light text-center"
+                                                style="writing-mode: vertical-rl; text-orientation: upright; height: 160px; letter-spacing: 5px;">
+                                                報價簽章</td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <img src="assets/invoice_stamp.svg" alt="Company Stamp"
+                                                    class="stamp-image" style="max-height: 140px;">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                                <div id="quotationError" class="auth-error-inline"></div>
-                                <div class="form-actions flex-row mt-2"
-                                    style="max-width: 1000px; margin: 2rem auto 0; gap: 12px; justify-content: space-between;">
+                            <div id="quotationError" class="auth-error-inline"></div>
+                            <div class="form-actions flex-row mt-2"
+                                style="max-width: 1000px; margin: 2rem auto 0; gap: 12px; justify-content: space-between;">
 
-                                    <div style="display: flex; gap: 12px; flex: 1;">
-                                        <div class="action-btn btn-outline"
-                                            style="flex: 1; position: relative; cursor: pointer;">
-                                            <img id="quoteStatusIcon" src="assets/icons/TBD.svg" alt="status">
-                                            <span id="quoteStatusText" style="font-size: 0.875rem;">待確認</span>
-                                            <img src="assets/icons/chevron-down.svg" alt="chevron"
-                                                style="width: 14px; height: 14px; margin-left: auto;">
-                                            <select id="projStatusSelect" onchange="handleStatusChange(this.value)"
-                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-                                                <option value="1">待確認</option>
-                                                <option value="2">進行中</option>
-                                                <option value="3">已完成</option>
-                                            </select>
-                                        </div>
-                                        <button type="button" class="action-btn btn-outline no-print" onclick="preparePrint()"
-                                            title="列印或轉存 PDF" style="flex: 1;">
-                                            <img src="assets/icons/printer.svg" alt="print"><span>另存PDF</span>
-                                        </button>
-                                        <button type="button" class="action-btn btn-outline"
-                                            onclick="handleAddProjectTask()" style="flex: 1;">
-                                            <img src="assets/icons/tasks.svg" alt="add"><span>新增任務</span>
-                                        </button>
+                                <div style="display: flex; gap: 12px; flex: 1;">
+                                    <div class="action-btn btn-outline"
+                                        style="flex: 1; position: relative; cursor: pointer;">
+                                        <img id="quoteStatusIcon" src="assets/icons/TBD.svg" alt="status">
+                                        <span id="quoteStatusText" style="font-size: 0.875rem;">待確認</span>
+                                        <img src="assets/icons/chevron-down.svg" alt="chevron"
+                                            style="width: 14px; height: 14px; margin-left: auto;">
+                                        <select id="projStatusSelect" onchange="handleStatusChange(this.value)"
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                                            <option value="1">待確認</option>
+                                            <option value="2">進行中</option>
+                                            <option value="3">已完成</option>
+                                        </select>
                                     </div>
-
-                                    <div class="form-actions-row" style="flex: 1; justify-content: flex-end;">
-                                        <button type="button" class="action-btn save-btn"
-                                            onclick="handleQuotationSubmit(event)">
-                                            <img src="assets/icons/bound.svg" alt="save"><span>儲存專案</span>
-                                        </button>
-                                        <button type="button" id="duplicateProjectBtn" class="action-btn btn-outline"
-                                            onclick="duplicateProject()" style="display: none;">
-                                            <img src="assets/icons/duplicate.svg" alt="duplicate"><span>複製專案</span>
-                                        </button>
-                                        <button type="button" id="deleteProjectBtn" class="action-btn delete-btn"
-                                            onclick="deleteProject()" style="display: none;">
-                                            <img src="assets/icons/trash.svg" alt="delete"><span>刪除專案</span>
-                                        </button>
-                                    </div>
+                                    <button type="button" class="action-btn btn-outline no-print"
+                                        onclick="preparePrint()" title="列印或轉存 PDF" style="flex: 1;">
+                                        <img src="assets/icons/printer.svg" alt="print"><span>另存PDF</span>
+                                    </button>
+                                    <button type="button" class="action-btn btn-outline"
+                                        onclick="handleAddProjectTask()" style="flex: 1;">
+                                        <img src="assets/icons/tasks.svg" alt="add"><span>新增任務</span>
+                                    </button>
                                 </div>
+
+                                <div class="form-actions-row" style="flex: 1; justify-content: flex-end;">
+                                    <button type="button" class="action-btn save-btn"
+                                        onclick="handleQuotationSubmit(event)">
+                                        <img src="assets/icons/bound.svg" alt="save"><span>儲存專案</span>
+                                    </button>
+                                    <button type="button" id="duplicateProjectBtn" class="action-btn btn-outline"
+                                        onclick="duplicateProject()" style="display: none;">
+                                        <img src="assets/icons/duplicate.svg" alt="duplicate"><span>複製專案</span>
+                                    </button>
+                                    <button type="button" id="deleteProjectBtn" class="action-btn delete-btn"
+                                        onclick="deleteProject()" style="display: none;">
+                                        <img src="assets/icons/trash.svg" alt="delete"><span>刪除專案</span>
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div> <!-- end projectsEditView -->
             </section> <!-- end projects section -->

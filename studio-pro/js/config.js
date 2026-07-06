@@ -1,6 +1,6 @@
 // Studio Pro Dashboard Logic v1.9 (RELEASE)
 // ==========================================
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxun68eTFPymMqN5wq6NaXQDmGye5fO-U-PF8KKtZCuH6lJihyXgAl3oa76-_MtDunk/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwKHMtsuNDg0pxyu0DfuXJ7y_cJg5wbGw-7hbMRJXFWWpktBd1-S8tUXf0nDYuMUM-s/exec';
 const LIFF_ID = '2009659478-RZ3Q85ZU'; 
 const GOOGLE_CLIENT_ID = '577878473391-6iemk2lgh8ah2kc0j3m22mdspu2lvhco.apps.googleusercontent.com';
 
